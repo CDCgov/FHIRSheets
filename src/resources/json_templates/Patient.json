@@ -1,0 +1,127 @@
+{
+    "fullUrl": "urn:uuid:${patient_id}",
+    "resource": {
+        "resourceType": "Patient",
+        "id": "${patient_id}",
+        "meta": {
+            "profile": [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|3.1.1"
+            ]
+        },
+        "extension": [
+            {
+                "extension": [
+                    {
+                        "url": "ombCategory",
+                        "valueCoding": {
+                            "system": "urn:oid:2.16.840.1.113883.6.238",
+                            "code": "${US Core Code (Race)}",
+                            "display": "${Race}"
+                        }
+                    },
+                    {
+                        "url": "text",
+                        "valueString": "${Race}"
+                    }
+                ],
+                "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+            },
+            {
+                "extension": [
+                    {
+                        "url": "ombCategory",
+                        "valueCoding": {
+                            "system": "urn:oid:2.16.840.1.113883.6.238",
+                            "code": "2135-2",
+                            "display": "${Ethnicity}"
+                        }
+                    },
+                    {
+                        "url": "text",
+                        "valueString": "${Hispanic or Latino}"
+                    }
+                ],
+                "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity"
+            }
+        ],
+        "identifier": [
+            {
+                "use": "usual",
+                "type": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                            "code": "MR",
+                            "display": "Medical Record Number"
+                        }
+                    ],
+                    "text": "Medical Record Number"
+                },
+                "system": "http://hospital.smarthealthit.org",
+                "value": "966139"
+            }
+        ],
+        "name": [
+            {
+                "use": "official",
+                "family": "${Patient Last Name}",
+                "given": [
+                    "${Patient First Name}",
+                    "${Patient Middle Initial}"
+                ]
+            }
+        ],
+        "gender": "${Administrative Gender Code}",
+        "birthDate": "${Date of Birth}",
+        "deceasedBoolean": ${Deceased Indicator},
+        "address": [
+            {
+                "use": "home",
+                "line": [
+                    "${Patient Street Address}"
+                ],
+                "city": "${Patient City}",
+                "state": "${Patient State}",
+                "country": "${Patient Country}"
+            }
+        ],
+        "contact": [
+            {
+              "relationship": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/v2-0131",
+                      "code": "${Relationship to Patient (Code)}",
+                      "display": "${Relationship to Patient (Display)}"
+                    }
+                  ]
+                }
+              ],
+              "name": {
+                "family": "${Guardian Last Name}",
+                "given": [
+                  "${Guardian First Name}",
+                  "${Guardian Middle Initial}"
+                ]
+              },
+              "gender": "${Guardian Administrative Gender Code}",
+              "address": [
+                {
+                    "use": "home",
+                    "line": [
+                        "${Guardian Street Address}"
+                    ],
+                    "city": "${Guardian City}",
+                    "state": "${Guardian State}",
+                    "country": "${Guardian Country}"
+                }
+              ]
+            }
+        ]
+    },
+    "request": {
+        "method": "PUT",
+        "url": "Patient/a8c11ae2-5060-43b5-89a4-f7bb532a54f4"
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "resourceType": "Bundle",
+    "id": "${bundle_id}",
+    "type": "batch",
+    "entry": []
+}

@@ -1,49 +1,37 @@
-import openpyxl
+import argparse
+import read_input
+import conversion
+from pathlib import Path
 
-# Function to process each row and convert to a new format
-def process_row(headers, row):
-    # Create a dictionary where headers are keys and row values are values
-    return {header: value for header, value in zip(headers, row)}
+def main(input_file, output_folder):
+    # Step 1: Read the input file using read_input module
+    Path(output_folder).mkdir(parents=True, exist_ok=True)
+    data = read_input.read_xlsx_and_process(input_file)
+    resource_definition_entities = data['resource_definition_entities']
+    
+    #For each index of patients
+    for i in range(0,data['num_entries']):
+        # Construct the file path for each JSON file
+        file_path = Path(output_folder) / f"{i}.json"
+        #Create a bundle
+        fhir_bundle = conversion.create_transaction_bundle(data['resource_definition_entities'],
+                                                        data['resource_link_entites'], data['patient_data'], i)
+        # Step 3: Write the processed data to the output file
+        with open(file_path, 'w') as json_file:
+            json.dump(fhir_bundle, json_file, indent=4)
 
-# Read the xlsx file with custom row and column ranges
-def read_and_convert_xlsx(file_path):
-    # Load the workbook and select the active sheet
-    workbook = openpyxl.load_workbook(file_path)
-    sheet = workbook.active
+if __name__ == "__main__":
+    # Create the argparse CLI
+    parser = argparse.ArgumentParser(description="Process input, convert data, and write output.")
+    
+    # Define the input file argument
+    parser.add_argument('input_file', type=str, help="Path to the input xlsx ", default="resources/Synthetic_Input_Baseline.xlsx")
+    
+    # Define the output file argument
+    parser.add_argument('output_folder', type=str, help="Path to save the output files", default="output/")
+    
+    # Parse the arguments
+    args = parser.parse_args()
 
-    # Extract headers from row 5, starting from column 2
-    headers = [cell.value for cell in sheet[5][1:]]
-
-    converted_rows = []
-
-    # Extract data from rows 6-15 (inclusive), starting from column 2
-    for row in sheet.iter_rows(min_row=6, max_row=15, min_col=2, values_only=True):
-        converted = process_row(headers, row)
-        converted_rows.append(converted)
-    return converted_rows
-
-# Replace placeholders in the template
-def replace_placeholders(template_text, row_data):
-    for key, value in row_data.items():
-        placeholder = f"${{{key}}}"
-        template_text = template_text.replace(placeholder, str(value))
-    return template_text
-
-# Read the JSON template
-def read_json_template(file_path):
-    with open(file_path, 'r') as file:
-        return file.read()
-
-# Read input file and convert to local format
-input_xlsx_file_path = '.\\src\\resources\\Synthetic_Input.xlsx'
-patient_json_template_path = '.\\src\\resources\\json_templates\\Patient.json'
-converted_data = read_and_convert_xlsx(input_xlsx_file_path)
-
-# Read the JSON template
-patient_template_text = read_json_template(patient_json_template_path)
-
-
-# Iterate over the rows and replace placeholders
-for row_data in converted_data:
-    filled_template = replace_placeholders(patient_template_text, row_data)
-    print(filled_template)  # Or save it to a file if needed
+    # Call the main function with the provided arguments
+    main(args.input_file, args.output_folder)

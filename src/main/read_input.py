@@ -16,12 +16,13 @@ def read_xlsx_and_process(file_path):
 
     if 'PatientData' in workbook.sheetnames:
         sheet = workbook['PatientData']
-        patient_data_entities = process_sheet_patient_data(sheet)
+        patient_data_entities, num_entries = process_sheet_patient_data(sheet)
     
     return {
         "resource_definition_entities": resource_definition_entities,
         "resource_link_entities": resource_link_entities,
-        "patient_data_entities": patient_data_entities
+        "patient_data_entities": patient_data_entities,
+        "num_entries": num_entries
     }
 
 
@@ -75,12 +76,13 @@ def process_sheet_patient_data(sheet):
             }
     
     # Now process the rows starting from the 6th row (the actual data entries)
+    num_entries = 0
     for row in sheet.iter_rows(min_row=6, values_only=True):  # Start from row 6 for actual data
+        num_entries = num_entries + 1
         entity_name = row[0]  # The entity name comes from the first column of each row
         for i, value in enumerate(row[1:], start=1):  # Iterate through the values in the columns
             data_element = sheet.cell(row=5, column=i + 1).value  # Get the Data Element for this column
             if entity_name in patient_data and data_element in patient_data[entity_name]:
                 # Append the actual data values to the 'values' array
                 patient_data[entity_name][data_element]["values"].append(value)
-
-    return patient_data
+    return patient_data, num_entries

@@ -79,7 +79,7 @@ def add_resource_to_transaction_bundle(root_bundle, fhir_resource):
 # json_path: dotnotation path to    
 def create_structure_from_jsonpath(root_struct, json_path, resource_definition, value):
     #Get all dot notation components as seperate 
-    parts = json_path.replace('$.','').replace(resource_definition['ResourceType'] + '.','').split('.')
+    parts = json_path.split('.')
     #Recursive function to drill into 
     def _build_structure(current_struct, parts, value, previous_parts):
         if len(parts) == 0:
@@ -87,7 +87,7 @@ def create_structure_from_jsonpath(root_struct, json_path, resource_definition, 
         #Grab current part
         part = parts[0]
         #Ignore dollar sign ($) and drill farther down
-        if part == '$':
+        if part == '$' or part == resource_definition['ResourceType']:
             _build_structure(current_struct, parts[1:], value, previous_parts.append(part))
             return current_struct
         
@@ -102,14 +102,21 @@ def create_structure_from_jsonpath(root_struct, json_path, resource_definition, 
             key_part = part[:part.index('[')]
             qualifier = part[part.index('[')+1:part.index(']')]
             qualifier_condition = qualifier.split('=')
-            #If there is no keye part, aka '[0]', '[1]' etc
+            #If there is no key part, aka '[0]', '[1]' etc, then it's a simple accessor
             if key_part is None or key_part is '':
                 if current_struct is None:
                     current_struct = []
-                if not isinstance(current_struct, list):
-                    raise TypeError(f"Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + parts[0])} - Expected a list, but got {type(current_struct).__name__} instead.")
                 if not qualifier.isdigit():
                     raise TypeError(f"Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + parts[0])} - qualifier - {qualifier} - standalone qualifier expected to be a single index numeric ([0], [1], etc)")
+                if not isinstance(current_struct, list):
+                    raise TypeError(f"Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + parts[0])} - Expected a list, but got {type(current_struct).__name__} instead.")
+                qualifier_as_number = int(qualifier)
+                if qualifier_as_number > len(current_struct):
+                    current_struct.extend({} for x in range (qualifier_as_number - len(current_struct)))
+                inner_struct = current_struct[qualifier_as_number]
+                _build_structure(inner_struct, parts[1:], value, previous_parts.append(part))
+                return current_struct
+            
             #If the qualifier condition is defined
             # Re-assign the current struct key to an array if it was a dictionary
             if current_struct[key_part] is None or current_struct[key_part] == {}:
@@ -117,20 +124,26 @@ def create_structure_from_jsonpath(root_struct, json_path, resource_definition, 
             if len(qualifier_condition) == 2:
                 qualifier_key, qualifier_value = qualifier_condition
                 # Retrieve an inner structure if it exists allready that matches the criteria
-                innerStruct = next((innerElement for innerElement in current_struct if innerElement.get(qualifier_key) == qualifier_value))
+                inner_struct = next((innerElement for innerElement in current_struct if innerElement.get(qualifier_key) == qualifier_value))
                 #If no inner structure exists, create one instead
-                if innerStruct is None:
-                    innerStruct = {qualifier_key: qualifier_value}
-                    current_struct[key_part].append(innerStruct)
+                if inner_struct is None:
+                    inner_struct = {qualifier_key: qualifier_value}
+                    current_struct[key_part].append(inner_struct)
                 #Recurse into that innerstructure where the qualifier matched to continue the part traversal
-                _build_structure(innerStruct, parts[1:], value, previous_parts.append(part))
+                _build_structure(inner_struct, parts[1:], value, previous_parts.append(part))
                 return current_struct
-            #Assuming a default of [0] for many cases where arrays will be used. TODO: Add better indexing in the future
-            if qualifier == '0':
-                innerStruct = {}
-                current_struct[key_part].append(innerStruct)
-                _build_structure(innerStruct, parts[1:], value, previous_parts.append(part))
-                return current_struct        
+            #If there's no qualifier condition, but an index aka '[0]', '[1]' etc, then it's a simple accessor
+            elif qualifier.isdigit():
+                if current_struct is None:
+                    current_struct = []
+                if not isinstance(current_struct, list):
+                    raise TypeError(f"Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + parts[0])} - Expected a list, but got {type(current_struct).__name__} instead.")
+                qualifier_as_number = int(qualifier)
+                if qualifier_as_number > len(current_struct):
+                    current_struct.extend({} for x in range (qualifier_as_number - len(current_struct)))
+                inner_struct = current_struct[qualifier_as_number]
+                _build_structure(inner_struct, parts[1:], value, previous_parts.append(part))
+                return current_struct
         #If this is simply a drill down to a lower key level
         else:
             current_struct[part] = {}

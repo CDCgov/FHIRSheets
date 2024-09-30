@@ -33,7 +33,8 @@ def process_sheet_resource_definitions(sheet):
 
     for row in sheet.iter_rows(min_row=3, values_only=True):
         row_data = dict(zip(headers, row))  # Create a dictionary for each row
-
+        if all(cell is None or cell == "" for cell in row_data.values()):
+            continue
         # Split 'Profile(s)' column into a list of URLs
         if row_data.get("Profile(s)"):
             row_data["Profile(s)"] = [url.strip() for url in row_data["Profile(s)"].split(",")]
@@ -49,6 +50,8 @@ def process_sheet_resource_links(sheet):
 
     for row in sheet.iter_rows(min_row=3, values_only=True):
         row_data = dict(zip(headers, row))  # Create a dictionary for each row
+        if all(cell is None or cell == "" for cell in row_data):
+            continue
         resource_links.append(row_data)
 
     return resource_links
@@ -57,19 +60,18 @@ def process_sheet_resource_links(sheet):
 def process_sheet_patient_data(sheet):
     # Initialize the dictionary to store the processed data
     patient_data = {}
-
     # Extract the data from the first 5 rows (Entity To Query, JsonPath, etc.)
     for col in sheet.iter_cols(min_row=1, max_row=5, min_col=3, values_only=True):  # Start from 3rd column
         entity_name = col[0]  # The entity name comes from the first row (Entity To Query)
-        data_element = col[4]  # The "Data Element" comes from the fifth row
+        field_name = col[4]  # The "Data Element" comes from the fifth row
 
         # Create structure for this entity if not already present
         if entity_name not in patient_data:
             patient_data[entity_name] = {}
 
         # Add jsonpath, valuesets, and initialize an empty list for 'values'
-        if data_element not in patient_data[entity_name]:
-            patient_data[entity_name][data_element] = {
+        if field_name not in patient_data[entity_name]:
+            patient_data[entity_name][field_name] = {
                 "jsonpath": col[1],  # JsonPath from the second row
                 "valuesets": col[3],  # Value Set from the fourth row
                 "values": []          # Initialize empty list for actual values
@@ -78,11 +80,14 @@ def process_sheet_patient_data(sheet):
     # Now process the rows starting from the 6th row (the actual data entries)
     num_entries = 0
     for row in sheet.iter_rows(min_row=6, values_only=True):  # Start from row 6 for actual data
+        if all(cell is None for cell in row):
+            continue
         num_entries = num_entries + 1
         entity_name = row[0]  # The entity name comes from the first column of each row
-        for i, value in enumerate(row[1:], start=1):  # Iterate through the values in the columns
-            data_element = sheet.cell(row=5, column=i + 1).value  # Get the Data Element for this column
-            if entity_name in patient_data and data_element in patient_data[entity_name]:
+        for i, value in enumerate(row[2:], start=1):  # Iterate through the values in the columns
+            entity_name = sheet.cell(row=1, column=i + 2).value
+            field_name = sheet.cell(row=5, column=i + 2).value  # Get the Data Element for this column
+            if entity_name in patient_data and field_name in patient_data[entity_name]:
                 # Append the actual data values to the 'values' array
-                patient_data[entity_name][data_element]["values"].append(value)
+                patient_data[entity_name][field_name]["values"].append(value)
     return patient_data, num_entries

@@ -14,7 +14,7 @@ def create_transaction_bundle(resource_definition_entities, resource_link_entiti
     #Link resources after creation
     create_resource_links(created_resources, resource_link_entities)
     #Construct into fhir bundle
-    for fhir_resource in created_resources:
+    for fhir_resource in created_resources.values():
         add_resource_to_transaction_bundle(root_bundle, fhir_resource)
     return root_bundle
 
@@ -22,7 +22,7 @@ def create_transaction_bundle(resource_definition_entities, resource_link_entiti
 def initialize_bundle():
     root_bundle = {}
     root_bundle['resourceType'] = 'Bundle'
-    root_bundle['id'] = uuid.uuid4()
+    root_bundle['id'] = str(uuid.uuid4())
     root_bundle['type'] = 'transaction'
     root_bundle['entry'] = []
     return root_bundle
@@ -30,14 +30,24 @@ def initialize_bundle():
 # Creates a fhir-json structure from a resource definition entity and the patient_data_sheet
 def create_fhir_resource(resource_definition, patient_data, index = 0):
     resource_dict = initialize_resource(resource_definition)
-    for field_entry in patient_data:
-        create_structure_from_jsonpath(resource_dict, field_entry['jsonpath'],field_entry['value'][index])
+    #Get field entries for this entitiy
+    try:
+        all_field_entries = patient_data[resource_definition['Entity Name']]
+    except KeyError:
+        print(f"Patient index {index} - Create Fhir Resource Error - {resource_definition['Entity Name']} - No columns found for resource in 'PatientData' sheet")
+        return resource_dict
+    #For each field within the entity
+    for field_entry in all_field_entries.values():
+        #Create a jsonpath from each provided json path and value for this resource
+        if field_entry['values'] and len(field_entry['values']) > index:
+            create_structure_from_jsonpath(resource_dict, field_entry['jsonpath'], resource_definition, field_entry['values'][index])
+    return resource_dict
         
 #Initialize a resource from a resource definition. Adding basic 
 def initialize_resource(resource_definition):
     initial_resource = {}
     initial_resource['resourceType'] = resource_definition['ResourceType']
-    resource_definition['id'] = uuid.uuid4()
+    resource_definition['id'] = str(uuid.uuid4())
     initial_resource['id'] = resource_definition['id']
     if resource_definition['Profile(s)']:
         initial_resource['meta'] = {
@@ -52,11 +62,11 @@ def create_resource_links(created_resources, resource_link_entites):
     
 def add_resource_to_transaction_bundle(root_bundle, fhir_resource):
     entry = {}
-    entry['fullUrl'] = "urn:uuid"+id
-    entry['resource'] = fhir_resource['id']
+    entry['fullUrl'] = "urn:uuid"+fhir_resource['id']
+    entry['resource'] = fhir_resource
     entry['request'] = {
       "method": "PUT",
-      "url": fhir_resourec['resourceType'] + "/" + fhir_resource['id']
+      "url": fhir_resource['resourceType'] + "/" + fhir_resource['id']
     }
     root_bundle['entry'].append(entry)
     return root_bundle
@@ -67,10 +77,9 @@ def add_resource_to_transaction_bundle(root_bundle, fhir_resource):
 # 2) simple qualifiers such as $.name[use=official].family = Dickerson
 # rootStruct: top level structure to drill into
 # json_path: dotnotation path to    
-def create_structure_from_jsonpath(root_struct, json_path, value):
+def create_structure_from_jsonpath(root_struct, json_path, resource_definition, value):
     #Get all dot notation components as seperate 
-    parts = json_path.strip('$').split('.')
-    
+    parts = json_path.replace('$.','').replace(resource_definition['ResourceType'] + '.','').split('.')
     #Recursive function to drill into 
     def _build_structure(current_struct, parts, value, previous_parts):
         if len(parts) == 0:
@@ -93,6 +102,14 @@ def create_structure_from_jsonpath(root_struct, json_path, value):
             key_part = part[:part.index('[')]
             qualifier = part[part.index('[')+1:part.index(']')]
             qualifier_condition = qualifier.split('=')
+            #If there is no keye part, aka '[0]', '[1]' etc
+            if key_part is None or key_part is '':
+                if current_struct is None:
+                    current_struct = []
+                if not isinstance(current_struct, list):
+                    raise TypeError(f"Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + parts[0])} - Expected a list, but got {type(current_struct).__name__} instead.")
+                if not qualifier.isdigit():
+                    raise TypeError(f"Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + parts[0])} - qualifier - {qualifier} - standalone qualifier expected to be a single index numeric ([0], [1], etc)")
             #If the qualifier condition is defined
             # Re-assign the current struct key to an array if it was a dictionary
             if current_struct[key_part] is None or current_struct[key_part] == {}:

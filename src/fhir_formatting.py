@@ -79,19 +79,35 @@ def parse_iso8601_date(input_string):
 
 def parse_iso8601_datetime(input_string):
     # Regular expression to match ISO 8601 format with optional timezone 'Z'
-    pattern = r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(Z)?)'
+    pattern = r'(\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(Z)?)?)'
     match = re.search(pattern, input_string)
     # Check if the input string matches the pattern
     if match:
         # Convert to datetime object
         if input_string.endswith('Z'):
             # If it has 'Z', convert to UTC
-            return datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S').replace(tzinfo=timezone.utc)
+            try:
+                return datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S').replace(tzinfo=timezone.utc)
+            except ValueError: # If it fails (because the time part is missing), parse the date-only format and set time to midnight
+                try:
+                    parsed_date = datetime.strptime(match.group(1), '%Y-%m-%d')
+                    parsed_datetime = parsed_date.replace(hour=0, minute=0, second=0)
+                    return parsed_datetime
+                except ValueError: # Neither format worked so catch an entire error
+                    raise ValueError("Input string is not in the valid ISO 8601 format date or datetime format")
         else:
             # Otherwise, just convert without timezone
-            return datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S')
+            try:
+                return datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S').replace(tzinfo=timezone.utc)
+            except ValueError: # If it fails (because the time part is missing), parse the date-only format and set time to midnight
+                try:
+                    parsed_date = datetime.strptime(match.group(1), '%Y-%m-%d')
+                    parsed_datetime = parsed_date.replace(hour=0, minute=0, second=0)
+                    return parsed_datetime
+                except ValueError: # Neither format worked so catch an entire error
+                    raise ValueError("Input string is not in the valid ISO 8601 format date or datetime format")
     else:
-        raise ValueError("Input string is not in the valid ISO 8601 format")
+        raise ValueError("Input string is not in the valid ISO 8601 format date or datetime format")
     
 def parse_iso8601_instant(input_string):
     # Regular expression to match ISO 8601 instant format with optional milliseconds and 'Z'

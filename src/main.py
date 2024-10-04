@@ -1,7 +1,7 @@
 import argparse
 import read_input
 import conversion
-import json
+import orjson
 from pathlib import Path
 
 def main(input_file, output_folder):
@@ -25,8 +25,9 @@ def main(input_file, output_folder):
         fhir_bundle = conversion.create_transaction_bundle(data['resource_definition_entities'],
                                                         data['resource_link_entities'], data['patient_data_entities'], i)
         # Step 3: Write the processed data to the output file
-        with open(file_path, 'w') as json_file:
-            json.dump(fhir_bundle, json_file, indent=4)
+        json_string = orjson.dumps(fhir_bundle)
+        with open(file_path, 'wb') as json_file:
+            json_file.write(json_string)
 
 if __name__ == "__main__":
     # Create the argparse CLI

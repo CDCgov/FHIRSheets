@@ -73,8 +73,9 @@ def process_sheet_patient_data(sheet):
         if field_name not in patient_data[entity_name]:
             patient_data[entity_name][field_name] = {
                 "jsonpath": col[1],  # JsonPath from the second row
-                "valuesets": col[3],  # Value Set from the fourth row
-                "values": []          # Initialize empty list for actual values
+                "valueType": col[2], # Value Type from the third row
+                "valuesets": col[3], # Value Set from the fourth row
+                "values": []         # Initialize empty list for actual values
             }
     
     # Now process the rows starting from the 6th row (the actual data entries)

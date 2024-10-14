@@ -16,7 +16,7 @@ def read_xlsx_and_process(file_path):
 
     if 'PatientData' in workbook.sheetnames:
         sheet = workbook['PatientData']
-        patient_data_entities, num_entries = process_sheet_patient_data(sheet)
+        patient_data_entities, num_entries = process_sheet_patient_data(sheet, resource_definition_entities)
     
     return {
         "resource_definition_entities": resource_definition_entities,
@@ -57,14 +57,20 @@ def process_sheet_resource_links(sheet):
     return resource_links
 
 # Function to process the "PatientData" sheet
-def process_sheet_patient_data(sheet):
+def process_sheet_patient_data(sheet, resource_definition_entities):
     # Initialize the dictionary to store the processed data
     patient_data = {}
-    # Extract the data from the first 5 rows (Entity To Query, JsonPath, etc.)
-    for col in sheet.iter_cols(min_row=1, max_row=5, min_col=3, values_only=True):  # Start from 3rd column
+    # Extract the data from the first 6 rows (Entity To Query, JsonPath, etc.)
+    for col in sheet.iter_cols(min_row=1, max_row=6, min_col=3, values_only=True):  # Start from 3rd column
+        if all(entry is None for entry in col):
+            continue
         entity_name = col[0]  # The entity name comes from the first row (Entity To Query)
-        field_name = col[4]  # The "Data Element" comes from the fifth row
+        field_name = col[5]  #The "Data Element" comes from the fifth row
+        if (entity_name is None or entity_name == "") and (field_name is not None and field_name != ""):
+            print(f"WARNING: - Reading Patient Data Issue - {field_name} - 'Entity To Query' cell missing for column labelled '{field_name}', please provide entity name from the ResourceDefinitions tab.")
 
+        if entity_name not in [entry['Entity Name'] for entry in resource_definition_entities]:
+            print(f"WARNING: - Reading Patient Data Issue - {field_name} - 'Entity To Query' cell has entity named '{entity_name}', however, the ResourceDefinition tab has no matching resource. Please provide a corresponding entry in the ResourceDefinition tab.")
         # Create structure for this entity if not already present
         if entity_name not in patient_data:
             patient_data[entity_name] = {}
@@ -80,14 +86,14 @@ def process_sheet_patient_data(sheet):
     
     # Now process the rows starting from the 6th row (the actual data entries)
     num_entries = 0
-    for row in sheet.iter_rows(min_row=6, values_only=True):  # Start from row 6 for actual data
+    for row in sheet.iter_rows(min_row=7, values_only=True):  # Start from row 6 for actual data
         if all(cell is None for cell in row):
             continue
         num_entries = num_entries + 1
         entity_name = row[0]  # The entity name comes from the first column of each row
         for i, value in enumerate(row[2:], start=1):  # Iterate through the values in the columns
             entity_name = sheet.cell(row=1, column=i + 2).value
-            field_name = sheet.cell(row=5, column=i + 2).value  # Get the Data Element for this column
+            field_name = sheet.cell(row=6, column=i + 2).value  # Get the Data Element for this column
             if entity_name in patient_data and field_name in patient_data[entity_name]:
                 # Append the actual data values to the 'values' array
                 patient_data[entity_name][field_name]["values"].append(value)

@@ -65,6 +65,10 @@ def assign_value(final_struct, key, value, valueType):
     elif valueType.lower() == 'uuid':
         match = re.search(value, type_regexes['uuid'])
         final_struct[key] = match.group(0) if match else ''
+    elif valueType.lower() == 'coding':
+        if not isinstance(final_struct, list):
+            final_struct = []
+        final_struct.append(value)
     return final_struct
         
 def parse_iso8601_date(input_string):

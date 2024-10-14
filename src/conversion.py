@@ -2,6 +2,7 @@ import uuid
 from jsonpath_ng.jsonpath import Fields, Slice, Where
 from jsonpath_ng.ext import parse as parse_ext
 import fhir_formatting
+import special_values
 
 #Creates a full transaction bundle for a patient at index
 def create_transaction_bundle(resource_definition_entities, resource_link_entities, patient_data, index = 0):
@@ -84,16 +85,18 @@ def create_structure_from_jsonpath(root_struct, json_path, resource_definition, 
     #Local Helper function to quickly recurse and return the next level of structure. Used by main recursive function
     def _build_structure_recurse(current_struct, parts, value, previous_parts, part):
         previous_parts.append(part)
-        _build_structure(current_struct, parts[1:], value, previous_parts)
-        return current_struct
+        return_struct = _build_structure(current_struct, parts[1:], value, previous_parts)
+        return return_struct
         
     #Local main recursive function to drill into the json structure, assign paths, and create structure where needed
-    #TODO: Add special handlers for specific json paths.
     def _build_structure(current_struct, parts, value, previous_parts):
         if len(parts) == 0:
             return current_struct
         #Grab current part
         part = parts[0]
+        #SPECIAL HANDLING CLAUSE 
+        if json_path in special_values.custom_handlers:
+            return special_values.custom_handlers[json_path].assign_value(current_struct,part,value)
         #Ignore dollar sign ($) and drill farther down
         if part == '$' or part == resource_definition['ResourceType']:
             #Ignore the dollar sign and the resourcetype
@@ -124,7 +127,9 @@ def create_structure_from_jsonpath(root_struct, json_path, resource_definition, 
                 if qualifier_as_number + 1 > len(current_struct):
                     current_struct.extend({} for x in range (qualifier_as_number + 1 - len(current_struct)))
                 inner_struct = current_struct[qualifier_as_number]
-                return _build_structure_recurse(inner_struct, parts, value, previous_parts, part)
+                inner_struct = _build_structure_recurse(inner_struct, parts, value, previous_parts, part)
+                current_struct[qualifier_as_number] = inner_struct
+                return current_struct
             # Create the key part in the structure
             if (not key_part in current_struct) or (isinstance(current_struct[key_part], dict)):
                 current_struct[key_part] == []
@@ -138,7 +143,9 @@ def create_structure_from_jsonpath(root_struct, json_path, resource_definition, 
                     inner_struct = {qualifier_key: qualifier_value}
                     current_struct[key_part].append(inner_struct)
                 #Recurse into that innerstructure where the qualifier matched to continue the part traversal
-                return _build_structure_recurse(inner_struct, parts, value, previous_parts, part)
+                inner_struct = _build_structure_recurse(inner_struct, parts, value, previous_parts, part)
+                current_struct[key_part] = inner_struct
+                return current_struct
             #If there's no qualifier condition, but an index aka '[0]', '[1]' etc, then it's a simple accessor
             elif qualifier.isdigit():
                 if not isinstance(current_struct[key_part], list):
@@ -147,11 +154,16 @@ def create_structure_from_jsonpath(root_struct, json_path, resource_definition, 
                 if qualifier_as_number > len(current_struct):
                     current_struct[key_part].extend({} for x in range (qualifier_as_number - len(current_struct)))
                 inner_struct = current_struct[key_part][qualifier_as_number]
-                return _build_structure_recurse(inner_struct, parts, value, previous_parts, part)
+                inner_struct = _build_structure_recurse(inner_struct, parts, value, previous_parts, part)
+                current_struct[key_part][qualifier_as_number] = inner_struct
+                return current_struct
         #None qualifier accessor
         else:
-            current_struct[part] = {}
-            return _build_structure_recurse(current_struct[part], parts, value, previous_parts, part)
+            if(part not in current_struct):
+                current_struct[part] = {}
+            inner_struct = _build_structure_recurse(current_struct[part], parts, value, previous_parts, part)
+            current_struct[part] = inner_struct
+            return current_struct
             
     #Start of top-level function which calls the enclosed recursive function
     parts = json_path.split('.')

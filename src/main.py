@@ -2,8 +2,20 @@ import argparse
 import read_input
 import conversion
 import orjson
+import json
 from pathlib import Path
 
+def find_sets(d, path=""):
+    if isinstance(d, dict):
+        for key, value in d.items():
+            new_path = f"{path}.{key}" if path else str(key)
+            find_sets(value, new_path)
+    elif isinstance(d, list):  # Handle lists of dictionaries
+        for idx, item in enumerate(d):
+            find_sets(item, f"{path}[{idx}]")
+    elif isinstance(d, set):
+        print(f"Set found at path: {path}")
+        
 def main(input_file, output_folder):
     # Step 1: Read the input file using read_input module
     
@@ -25,9 +37,14 @@ def main(input_file, output_folder):
         fhir_bundle = conversion.create_transaction_bundle(data['resource_definition_entities'],
                                                         data['resource_link_entities'], data['patient_data_entities'], i)
         # Step 3: Write the processed data to the output file
+        find_sets(fhir_bundle)
         json_string = orjson.dumps(fhir_bundle)
         with open(file_path, 'wb') as json_file:
             json_file.write(json_string)
+        with open(file_path, 'r') as json_file:
+            json_string = json.load(json_file)
+        with open(file_path, 'w') as json_file:
+            json.dump(json_string, json_file, indent = 4)
 
 if __name__ == "__main__":
     # Create the argparse CLI

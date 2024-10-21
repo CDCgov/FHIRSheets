@@ -18,7 +18,7 @@ class PatientRaceExtensionValueHandler(AbstractCustomValueHandler):
           "display" : "American Indian or Alaska Native"
           }
       },
-      "asain" : {
+      "asian" : {
         "url" : "ombCategory",
         "valueCoding" : {
           "system" : "urn:oid:2.16.840.1.113883.6.238",
@@ -26,7 +26,7 @@ class PatientRaceExtensionValueHandler(AbstractCustomValueHandler):
           "display" : "Asian"
           }
       },
-      "Black or African American" : {
+      "black or african american" : {
         "url" : "ombCategory",
         "valueCoding" : {
           "system" : "urn:oid:2.16.840.1.113883.6.238",
@@ -74,7 +74,7 @@ class PatientRaceExtensionValueHandler(AbstractCustomValueHandler):
             race_block = self.initial_race_json
             final_struct['extension'].append(race_block)
         for race_key, race_structure in self.omb_categories.items():
-            if value.lower() == race_key:
+            if value.strip().lower() == race_key:
                 # Replace $ombCategory in the extension list
                 for i, item in enumerate(race_block["extension"]):
                     if isinstance(item, set) and "$ombCategory" in item:
@@ -127,7 +127,7 @@ class PatientEthnicityExtensionValueHandler(AbstractCustomValueHandler):
             ethnicity_block = self.initial_ethnicity_json
             final_struct['extension'].append(ethnicity_block)
         for race_key, race_structure in self.omb_categories.items():
-            if value.lower() == race_key:
+            if value.strip().lower() == race_key:
                 # Replace $ombCategory in the extension list
                 for i, item in enumerate(ethnicity_block["extension"]):
                     if isinstance(item, set) and "$ombCategory" in item:
@@ -150,9 +150,60 @@ class PatientBirthSexExtensionValueHandler(AbstractCustomValueHandler):
             final_struct['extension'] = []
         birthsex_block = utilFindExtensionWithURL(final_struct['extension'], 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity')
         if birthsex_block is None:
-            birthsex_block = self.initial_ethnicity_json
+            birthsex_block = self.birth_sex_block
             birthsex_block['valueCode'] = value
             final_struct['extension'].append(birthsex_block)
+        pass
+      
+class OrganizationIdentiferNPIValueHandler(AbstractCustomValueHandler):
+    npi_identifier_block = {
+      "system" : "http://hl7.org.fhir/sid/us-npi",
+      "value" : "$value"
+    }
+    #Assigna birthsex extension
+    def assign_value(self, final_struct, key, value):
+        #Retrieve the birthsex extension if it exists; make it if it does not.
+        if 'identifier' not in final_struct:
+            final_struct['identifier'] = []
+        identifier_block = next((entry for entry in final_struct['identifier'] if entry['system'] == "http://hl7.org.fhir/sid/us-npi"), None)
+        if identifier_block is None:
+          identifier_block = self.npi_identifier_block
+          final_struct['identifier'].append(identifier_block)
+        identifier_block['value'] = value
+        pass
+      
+class OrganizationIdentiferCLIAValueHandler(AbstractCustomValueHandler):
+    clia_identifier_block = {
+      "system" : "urn:oid:2.16.840.1.113883.4.7",
+      "value" : "$value"
+    }
+    #Assigna birthsex extension
+    def assign_value(self, final_struct, key, value):
+        #Retrieve the birthsex extension if it exists; make it if it does not.
+        if 'identifier' not in final_struct:
+            final_struct['identifier'] = []
+        identifier_block = next((entry for entry in final_struct['identifier'] if entry['system'] == "urn:oid:2.16.840.1.113883.4.7"), None)
+        if identifier_block is None:
+          identifier_block = self.clia_identifier_block
+          final_struct['identifier'].append(identifier_block)
+        identifier_block['value'] = value
+        pass
+      
+class PractitionerIdentiferNPIValueHandler(AbstractCustomValueHandler):
+    npi_identifier_block = {
+      "system" : "http://hl7.org.fhir/sid/us-npi",
+      "value" : "$value"
+    }
+    #Assigna birthsex extension
+    def assign_value(self, final_struct, key, value):
+        #Retrieve the birthsex extension if it exists; make it if it does not.
+        if 'identifier' not in final_struct:
+            final_struct['identifier'] = []
+        identifier_block = next((entry for entry in final_struct['identifier'] if entry['system'] == "http://hl7.org.fhir/sid/us-npi"), None)
+        if identifier_block is None:
+          identifier_block = self.npi_identifier_block
+          final_struct['identifier'].append(identifier_block)
+        identifier_block['value'] = value
         pass
       
 def utilFindExtensionWithURL(extension_block, url):
@@ -164,5 +215,8 @@ def utilFindExtensionWithURL(extension_block, url):
 custom_handlers = {
     "Patient.extension[Race].ombCategory": PatientRaceExtensionValueHandler(),
     "Patient.extension[Ethnicity].ombCategory": PatientEthnicityExtensionValueHandler(),
-    "Patient.extension[Birthsex].value": PatientBirthSexExtensionValueHandler()
+    "Patient.extension[Birthsex].value": PatientBirthSexExtensionValueHandler(),
+    "Organization.identifier[system=NPI].value": OrganizationIdentiferNPIValueHandler(),
+    "Organization.identifier[system=CLIA].value": OrganizationIdentiferCLIAValueHandler(),
+    "Practitioner.identifier[system=NPI].value": PractitionerIdentiferNPIValueHandler()
 }

@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import datetime, time
 
 #Dictionary of regexes
 type_regexes = {
@@ -17,58 +17,81 @@ def assign_value(final_struct, key, value, valueType):
     #TODO: Handle cases with no valuetype.
     if valueType is None:
         return final_struct
-    if valueType.lower() == 'boolean':
-        if 'true' in value:
-            final_struct[key] = True
+    try:
+        if valueType.lower() == 'address':
+            final_struct[key] == parse_flexible_address(value)
+        elif valueType.lower() == 'base64binary':
+            final_struct[key] = value
+        elif valueType.lower() == 'boolean':
+            final_struct[key] = value
+        elif valueType.lower() == 'codeableconcept':
+            final_struct[key] = caret_delimited_string_to_codeableconcept(value)
+        elif valueType.lower() == 'code':
+            match = re.search(type_regexes['code'], value)
+            final_struct[key] = match.group(0) if match else ''
+        elif valueType.lower() == 'coding':
+            final_struct[key] = caret_delimited_string_to_coding(value)
+        elif valueType.lower() == 'date':
+            if isinstance(value, datetime):
+                final_struct[key] = value
+            else:
+                final_struct[key] = parse_iso8601_date(value)
+        elif valueType.lower() == 'datetime':
+            if isinstance(value, datetime):
+                final_struct[key] = value
+            else:
+                final_struct[key] = parse_iso8601_datetime(value)
+        elif valueType.lower() == 'decimal':
+            final_struct[key] = value
+        elif valueType.lower() == 'id':
+            match = re.search(value, type_regexes['id'])
+            final_struct[key] = match.group(0) if match else ''
+        elif valueType.lower() == 'instant':
+            if isinstance(value, datetime):
+                final_struct[key] = value
+            else:
+                final_struct[key] = final_struct[key] = parse_iso8601_instant(value)
+        elif valueType.lower() == 'integer':
+            match = re.search(value, type_regexes['integer'])
+            final_struct[key] = int(match.group(0)) if match else 0
+        elif valueType.lower() == 'oid':
+            match = re.search(value, type_regexes['oid'])
+            final_struct[key] = match.group(0) if match else ''
+        elif valueType.lower() == 'positiveInt':
+            match = re.search(value, type_regexes['positiveInt'])
+            final_struct[key] = int(match.group(0)) if match else 0
+        elif valueType.lower() == 'quantity':
+            final_struct[key] = string_to_quantity(value)
+        elif valueType.lower() == 'string':
+            final_struct[key] = value
+        elif valueType.lower() == 'string[]':
+            if not key in final_struct:
+                final_struct[key] = [value]
+            else:
+                final_struct[key].append(value)
+        elif valueType.lower() == 'time':
+            if isinstance(time):
+                final_struct[key] = value
+            else:
+                final_struct[key] = parse_iso8601_time(value)
+        elif valueType.lower() == 'unsignedInt':
+            match = re.search(value, type_regexes['unsignedInt'])
+            final_struct[key] = int(match.group(0)) if match else 0
+        elif valueType.lower() == 'uri':
+            final_struct[key] = value
+        elif valueType.lower() == 'url':
+            final_struct[key] = value
+        elif valueType.lower() == 'uuid':
+            match = re.search(value, type_regexes['uuid'])
+            final_struct[key] = match.group(0) if match else ''
+        elif valueType.lower() == 'coding':
+            if not isinstance(final_struct, list):
+                final_struct = []
+            final_struct.append(value)
         else:
-            final_struct[key] = False
-    elif valueType.lower() == 'code':
-        match = re.search(value, type_regexes['code'])
-        final_struct[key] = match.group(0) if match else ''
-    elif valueType.lower() == 'date':
-        final_struct[key] = parse_iso8601_date(value)
-    elif valueType.lower() == 'datetime':
-        final_struct[key] = parse_iso8601_datetime(value)
-    elif valueType.lower() == 'decimal':
-        match = re.search(value, type_regexes['decimal'])
-        final_struct[key] = match.group(0) if match else ''
-    elif valueType.lower() == 'id':
-        match = re.search(value, type_regexes['id'])
-        final_struct[key] = match.group(0) if match else ''
-    elif valueType.lower() == 'instant':
-        final_struct[key] = final_struct[key] = parse_iso8601_instant(value)
-    elif valueType.lower() == 'integer':
-        match = re.search(value, type_regexes['integer'])
-        final_struct[key] = int(match.group(0)) if match else 0
-    elif valueType.lower() == 'oid':
-        match = re.search(value, type_regexes['oid'])
-        final_struct[key] = match.group(0) if match else ''
-    elif valueType.lower() == 'positiveInt':
-        match = re.search(value, type_regexes['positiveInt'])
-        final_struct[key] = int(match.group(0)) if match else 0
-    elif valueType.lower() == 'string':
-        final_struct[key] = value
-    elif valueType.lower() == 'string[]':
-        if not key in final_struct:
-            final_struct[key] = [value]
-        else:
-            final_struct[key].append(value)
-    elif valueType.lower() == 'time':
-        final_struct[key] = parse_iso8601_time(value)
-    elif valueType.lower() == 'unsignedInt':
-        match = re.search(value, type_regexes['unsignedInt'])
-        final_struct[key] = int(match.group(0)) if match else 0
-    elif valueType.lower() == 'uri':
-        final_struct[key] = value
-    elif valueType.lower() == 'url':
-        final_struct[key] = value
-    elif valueType.lower() == 'uuid':
-        match = re.search(value, type_regexes['uuid'])
-        final_struct[key] = match.group(0) if match else ''
-    elif valueType.lower() == 'coding':
-        if not isinstance(final_struct, list):
-            final_struct = []
-        final_struct.append(value)
+            print(f"ERROR: - Rending Value - {key} - {value} - {valueType} - Saw a valueType of '{valueType}' unsupported in current formatting")
+    except ValueError as e:
+        print(e)
     return final_struct
         
 def parse_iso8601_date(input_string):
@@ -79,7 +102,7 @@ def parse_iso8601_date(input_string):
     if match:
         return datetime.strptime(match.group(1), '%Y-%m-%d')
     else:
-        raise ValueError("Input string is not in the valid ISO 8601 date format")
+        raise ValueError(f"Input string '{input_string}' is not in the valid ISO 8601 date format")
 
 def parse_iso8601_datetime(input_string):
     # Regular expression to match ISO 8601 format with optional timezone 'Z'
@@ -98,7 +121,7 @@ def parse_iso8601_datetime(input_string):
                     parsed_datetime = parsed_date.replace(hour=0, minute=0, second=0)
                     return parsed_datetime
                 except ValueError: # Neither format worked so catch an entire error
-                    raise ValueError("Input string is not in the valid ISO 8601 format date or datetime format")
+                    raise ValueError(f"Input string '{input_string}' is not in the valid ISO 8601 format date or datetime format")
         else:
             # Otherwise, just convert without timezone
             try:
@@ -109,9 +132,9 @@ def parse_iso8601_datetime(input_string):
                     parsed_datetime = parsed_date.replace(hour=0, minute=0, second=0)
                     return parsed_datetime
                 except ValueError: # Neither format worked so catch an entire error
-                    raise ValueError("Input string is not in the valid ISO 8601 format date or datetime format")
+                    raise ValueError(f"Input string '{input_string}' is not in the valid ISO 8601 format date or datetime format")
     else:
-        raise ValueError("Input string is not in the valid ISO 8601 format date or datetime format")
+        raise ValueError(f"Input string '{input_string}' is not in the valid ISO 8601 format date or datetime format")
     
 def parse_iso8601_instant(input_string):
     # Regular expression to match ISO 8601 instant format with optional milliseconds and 'Z'
@@ -135,7 +158,7 @@ def parse_iso8601_instant(input_string):
                 # Without milliseconds
                 return datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S')
     else:
-        raise ValueError("Input string is not in the valid ISO 8601 instant format")
+        raise ValueError(f"Input string '{input_string}' is not in the valid ISO 8601 instant format")
     
 def parse_iso8601_time(input_string):
     # Regular expression to match the time format HH:MM:SS or HH:MM:SS.ssssss
@@ -149,6 +172,106 @@ def parse_iso8601_time(input_string):
         minutes = int(time_parts[1])
         seconds = float(time_parts[2])  # This can handle the fractional part
         
-        return time(hour=hours, minute=minutes, second=int(seconds), microsecond=int((seconds % 1) * 1_000_000))
+        return datetime.time(hour=hours, minute=minutes, second=int(seconds), microsecond=int((seconds % 1) * 1_000_000))
     else:
-        raise ValueError("Input string is not in the valid time format")
+        raise ValueError(f"Input string '{input_string}' is not in the valid time format")
+    
+def parse_flexible_address(address):
+    # Attempt to capture postal code, which is often at the end and typically numeric (though it may vary internationally)
+    postal_code_pattern = r'(?P<postalCode>\d{5}(?:-\d{4})?)'
+    
+    # State is typically a two-letter code (though this may vary internationally as well)
+    state_pattern = r'(?P<state>[A-Za-z]{2})'
+    
+    # This captures a country after a comma (or space-separated) if it's present
+    country_pattern = r'(?:,\s*(?P<country>[\w\s]+))?$'
+    
+    # Compile the full pattern to match the postal code, state, and country
+    full_pattern = rf'^(?P<line>.*?)\s+{postal_code_pattern}\s+{state_pattern}{country_pattern}'
+    
+    match = re.search(full_pattern, address)
+    
+    if match:
+        # Extract the components found in the regex
+        result = match.groupdict()
+        
+        # If the country wasn't captured, default to an empty string
+        result['country'] = result.get('country', '').strip()
+        
+        # Try to infer the city and district (split remaining 'line' based on context clues)
+        line_parts = result['line'].split(',')
+        if len(line_parts) > 1:
+            result['city'] = line_parts[-2].strip()
+            result['district'] = line_parts[-1].strip()
+            result['line'] = ', '.join(line_parts[:-2]).strip()  # Remaining part of the address
+        else:
+            result['city'] = ''
+            result['district'] = line_parts[-1].strip() if line_parts else ''
+            result['line'] = line_parts[0].strip() if line_parts else ''
+        
+        return result
+    else:
+        return None  # Return None if the format doesn't match
+    
+def caret_delimited_string_to_codeableconcept(caret_delimited_str):
+    # Split the string by '~' to separate multiple codings
+    codings = caret_delimited_str.split('~')
+    
+    # Initialize the CodeableConcept dictionary
+    codeable_concept = {"coding": []}
+    
+    # Loop over each coding section
+    for coding_str in codings:
+        # Split each part by '^' to get system, code, and display (optionally text at the end)
+        parts = coding_str.split('^')
+        
+        # Create a coding dictionary from the components
+        coding_dict = {}
+        if len(parts) > 0:
+            coding_dict['system'] = parts[0] if parts[0] else ''
+        if len(parts) > 1:
+            coding_dict['code'] = parts[1] if parts[1] else ''
+        if len(parts) > 2:
+            coding_dict['display'] = parts[2] if parts[2] else ''
+        
+        # Add coding to the 'coding' list in CodeableConcept
+        codeable_concept['coding'].append(coding_dict)
+    
+    # Check if the last element contains 'text' (for the entire CodeableConcept)
+    if len(parts) == 4:
+        codeable_concept['text'] = parts[3]
+    return codeable_concept
+
+def caret_delimited_string_to_coding(caret_delimited_str):
+    # Split the string by '~' to separate multiple codings
+    
+    # Initialize the CodeableConcept dictionary
+    coding = {}
+    
+    parts = caret_delimited_str.split('^')
+    
+    # Create a coding dictionary from the components
+    if len(parts) > 0:
+        coding['system'] = parts[0] if parts[0] else ''
+    if len(parts) > 1:
+        coding['code'] = parts[1] if parts[1] else ''
+    if len(parts) > 2:
+        coding['display'] = parts[2] if parts[2] else ''
+    return coding
+
+def string_to_quantity(quantity_str):
+    # Split the string into value and unit by whitespace
+    parts = quantity_str.split(maxsplit=1)
+    
+    # Initialize the Quantity dictionary
+    quantity = {}
+    
+    # First part is the value (convert to float)
+    if len(parts) > 0:
+        quantity['value'] = float(parts[0])
+    
+    # Second part is the unit (if present)
+    if len(parts) > 1:
+        quantity['unit'] = parts[1]
+    
+    return quantity

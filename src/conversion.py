@@ -59,7 +59,26 @@ def initialize_resource(resource_definition):
 
 #Create resource references/links with created entities
 def create_resource_links(created_resources, resource_link_entites):
+    reference_json_block = {
+        "reference" : "$value"
+    }
     #TODO: Build resource links
+    print("Building resource links")
+    for resource_link_entity in resource_link_entites:
+        try:
+            origin_resource = created_resources[resource_link_entity['OriginResource']]
+        except KeyError:
+            print(f"WARNING: In ResourceLinks tab, found a Origin Resource of : {resource_link_entity['OriginResource']}  but no such entity found in PatientData")
+            continue
+        try:
+            destination_resource = created_resources[resource_link_entity['DestinationResource']]
+        except KeyError:
+            print(f"WARNING: In ResourceLinks tab, found a Destination Resource of : {resource_link_entity['OriginResource']}  but no such entity found in PatientData")
+            continue
+        destination_resource_type = created_resources[resource_link_entity['DestinationResource']]['resourceType']
+        destination_resource_id = created_resources[resource_link_entity['DestinationResource']]['id']
+        origin_resource[resource_link_entity['ReferencePath'].strip().lower()] = reference_json_block
+        origin_resource[resource_link_entity['ReferencePath'].strip().lower()]["reference"] = destination_resource_type + "/" + destination_resource_id
     return
     
 def add_resource_to_transaction_bundle(root_bundle, fhir_resource):
@@ -104,6 +123,24 @@ def create_structure_from_jsonpath(root_struct, json_path, resource_definition, 
         
         # If parts length is one then this is the final key to access and pair
         if len(parts) == 1:
+            #Check for numeic qualifier '[0]' and '[1]'
+            if '[' in part and ']' in part:
+            #Seperate the key from the qualifier
+                key_part = part[:part.index('[')]
+                qualifier = part[part.index('[')+1:part.index(']')]
+                qualifier_condition = qualifier.split('=')
+                
+                #If there is no key part, aka '[0]', '[1]' etc, then it's a simple accessor
+                if key_part is None or key_part == '':
+                    if not qualifier.isdigit():
+                        raise TypeError(f"ERROR: Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + parts[:1])} - qualifier - {qualifier} - standalone qualifier expected to be a single index numeric ([0], [1], etc)")
+                    if current_struct == {}:
+                        current_struct = []
+                    if not isinstance(current_struct, list):
+                        raise TypeError(f"ERROR: Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + parts[:1])} - Expected a list, but got {type(current_struct).__name__} instead.")
+                    part = int(qualifier)
+                    if part + 1 > len(current_struct):
+                        current_struct.extend({} for x in range (part + 1 - len(current_struct)))
             #Actual assigning to the path
             fhir_formatting.assign_value(current_struct, part, value, entity_definition['valueType'])
             return current_struct
@@ -132,12 +169,12 @@ def create_structure_from_jsonpath(root_struct, json_path, resource_definition, 
                 return current_struct
             # Create the key part in the structure
             if (not key_part in current_struct) or (isinstance(current_struct[key_part], dict)):
-                current_struct[key_part] == []
+                current_struct[key_part] = []
             #If there is a key_part and the If the qualifier condition is defined
             elif len(qualifier_condition) == 2:
                 qualifier_key, qualifier_value = qualifier_condition
                 # Retrieve an inner structure if it exists allready that matches the criteria
-                inner_struct = next((innerElement for innerElement in current_struct if innerElement.get(qualifier_key) == qualifier_value))
+                inner_struct = next((innerElement for innerElement in current_struct if isinstance(innerElement, dict) and innerElement.get(qualifier_key) == qualifier_value), None)
                 #If no inner structure exists, create one instead
                 if inner_struct is None:
                     inner_struct = {qualifier_key: qualifier_value}
@@ -164,7 +201,10 @@ def create_structure_from_jsonpath(root_struct, json_path, resource_definition, 
             inner_struct = _build_structure_recurse(current_struct[part], parts, value, previous_parts, part)
             current_struct[part] = inner_struct
             return current_struct
-            
+    
+    if value == None:
+        print(f"WARNING: Full jsonpath: {json_path} - Expected to find a value but found None instead")
+        return root_struct
     #Start of top-level function which calls the enclosed recursive function
     parts = json_path.split('.')
     return _build_structure(root_struct, parts, value, [])

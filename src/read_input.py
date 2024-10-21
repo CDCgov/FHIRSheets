@@ -47,7 +47,6 @@ def process_sheet_resource_definitions(sheet):
 def process_sheet_resource_links(sheet):
     resource_links = []
     headers = [cell.value for cell in next(sheet.iter_rows(min_row=1, max_row=1))]  # Get headers
-
     for row in sheet.iter_rows(min_row=3, values_only=True):
         row_data = dict(zip(headers, row))  # Create a dictionary for each row
         if all(cell is None or cell == "" for cell in row_data):

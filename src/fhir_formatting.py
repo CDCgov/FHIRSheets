@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, time
+from datetime import datetime, time, timezone
 
 #Dictionary of regexes
 type_regexes = {
@@ -14,12 +14,13 @@ type_regexes = {
 }
 # Assign final_struct[key] to value; with formatting given the valueType
 def assign_value(final_struct, key, value, valueType):
-    #TODO: Handle cases with no valuetype.
+    if isinstance(value, str):
+        value = value.strip()
     if valueType is None:
         return final_struct
     try:
         if valueType.lower() == 'address':
-            final_struct[key] == parse_flexible_address(value)
+            final_struct[key] = parse_flexible_address(value)
         elif valueType.lower() == 'base64binary':
             final_struct[key] = value
         elif valueType.lower() == 'boolean':
@@ -33,14 +34,14 @@ def assign_value(final_struct, key, value, valueType):
             final_struct[key] = caret_delimited_string_to_coding(value)
         elif valueType.lower() == 'date':
             if isinstance(value, datetime):
-                final_struct[key] = value
+                final_struct[key] = value.replace(tzinfo=timezone.utc)
             else:
-                final_struct[key] = parse_iso8601_date(value)
+                final_struct[key] = parse_iso8601_date(value).replace(tzinfo=timezone.utc)
         elif valueType.lower() == 'datetime':
             if isinstance(value, datetime):
-                final_struct[key] = value
+                final_struct[key] = value.replace(tzinfo=timezone.utc)
             else:
-                final_struct[key] = parse_iso8601_datetime(value)
+                final_struct[key] = parse_iso8601_datetime(value).replace(tzinfo=timezone.utc)
         elif valueType.lower() == 'decimal':
             final_struct[key] = value
         elif valueType.lower() == 'id':
@@ -50,7 +51,7 @@ def assign_value(final_struct, key, value, valueType):
             if isinstance(value, datetime):
                 final_struct[key] = value
             else:
-                final_struct[key] = final_struct[key] = parse_iso8601_instant(value)
+                final_struct[key] = final_struct[key] = parse_iso8601_instant(value).replace(tzinfo=timezone.utc)
         elif valueType.lower() == 'integer':
             match = re.search(value, type_regexes['integer'])
             final_struct[key] = int(match.group(0)) if match else 0
@@ -184,10 +185,10 @@ def parse_flexible_address(address):
     state_pattern = r'(?P<state>[A-Za-z]{2})'
     
     # This captures a country after a comma (or space-separated) if it's present
-    country_pattern = r'(?:,\s*(?P<country>[\w\s]+))?$'
+    country_pattern = r'(?:\s*(?P<country>[\w\s]+))?$'
     
     # Compile the full pattern to match the postal code, state, and country
-    full_pattern = rf'^(?P<line>.*?)\s+{postal_code_pattern}\s+{state_pattern}{country_pattern}'
+    full_pattern = rf'^(?P<line>.*?)\^{state_pattern}\^{postal_code_pattern}\^{country_pattern}'
     
     match = re.search(full_pattern, address)
     
@@ -200,11 +201,11 @@ def parse_flexible_address(address):
         
         # Try to infer the city and district (split remaining 'line' based on context clues)
         line_parts = result['line'].split(',')
-        if len(line_parts) > 1:
+        if len(line_parts) == 3:
             result['city'] = line_parts[-2].strip()
             result['district'] = line_parts[-1].strip()
             result['line'] = ', '.join(line_parts[:-2]).strip()  # Remaining part of the address
-        else:
+        elif len(line_parts) == 2:
             result['city'] = ''
             result['district'] = line_parts[-1].strip() if line_parts else ''
             result['line'] = line_parts[0].strip() if line_parts else ''

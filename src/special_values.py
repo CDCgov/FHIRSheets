@@ -169,7 +169,7 @@ class OrganizationIdentiferNPIValueHandler(AbstractCustomValueHandler):
         if identifier_block is None:
           identifier_block = self.npi_identifier_block
           final_struct['identifier'].append(identifier_block)
-        identifier_block['value'] = value
+        identifier_block['value'] = str(value)
         pass
       
 class OrganizationIdentiferCLIAValueHandler(AbstractCustomValueHandler):
@@ -186,7 +186,7 @@ class OrganizationIdentiferCLIAValueHandler(AbstractCustomValueHandler):
         if identifier_block is None:
           identifier_block = self.clia_identifier_block
           final_struct['identifier'].append(identifier_block)
-        identifier_block['value'] = value
+        identifier_block['value'] = str(value)
         pass
       
 class PractitionerIdentiferNPIValueHandler(AbstractCustomValueHandler):

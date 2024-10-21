@@ -42,15 +42,15 @@ def create_fhir_resource(resource_definition, patient_data, index = 0):
     for field_entry in all_field_entries.values():
         #Create a jsonpath from each provided json path and value for this resource
         if field_entry['values'] and len(field_entry['values']) > index:
-            create_structure_from_jsonpath(resource_dict, field_entry['jsonpath'], resource_definition, field_entry, field_entry['values'][index])
+            create_structure_from_jsonpath(resource_dict, field_entry['jsonpath'], resource_definition, field_entry, field_entry['valueType'], field_entry['values'][index])
     return resource_dict
         
 #Initialize a resource from a resource definition. Adding basic 
 def initialize_resource(resource_definition):
     initial_resource = {}
-    initial_resource['resourceType'] = resource_definition['ResourceType']
+    initial_resource['resourceType'] = resource_definition['ResourceType'].strip()
     resource_definition['id'] = str(uuid.uuid4())
-    initial_resource['id'] = resource_definition['id']
+    initial_resource['id'] = resource_definition['id'].strip()
     if resource_definition['Profile(s)']:
         initial_resource['meta'] = {
             'profile': resource_definition['Profile(s)']
@@ -98,9 +98,10 @@ def add_resource_to_transaction_bundle(root_bundle, fhir_resource):
 # 2) simple qualifiers such as $.name[use=official].family = Dickerson
 # rootStruct: top level structure to drill into
 # json_path: dotnotation path to    
-def create_structure_from_jsonpath(root_struct, json_path, resource_definition, entity_definition, value):
+def create_structure_from_jsonpath(root_struct, json_path, resource_definition, entity_definition, dataType, value):
     #Get all dot notation components as seperate 
-    
+    if dataType is not None and dataType.strip().lower() == 'string':
+        value = str(value)
     #Local Helper function to quickly recurse and return the next level of structure. Used by main recursive function
     def _build_structure_recurse(current_struct, parts, value, previous_parts, part):
         previous_parts.append(part)
@@ -174,14 +175,13 @@ def create_structure_from_jsonpath(root_struct, json_path, resource_definition, 
             elif len(qualifier_condition) == 2:
                 qualifier_key, qualifier_value = qualifier_condition
                 # Retrieve an inner structure if it exists allready that matches the criteria
-                inner_struct = next((innerElement for innerElement in current_struct if isinstance(innerElement, dict) and innerElement.get(qualifier_key) == qualifier_value), None)
+                inner_struct = next((innerElement for innerElement in current_struct[key_part] if isinstance(innerElement, dict) and innerElement.get(qualifier_key) == qualifier_value), None)
                 #If no inner structure exists, create one instead
                 if inner_struct is None:
                     inner_struct = {qualifier_key: qualifier_value}
                     current_struct[key_part].append(inner_struct)
                 #Recurse into that innerstructure where the qualifier matched to continue the part traversal
                 inner_struct = _build_structure_recurse(inner_struct, parts, value, previous_parts, part)
-                current_struct[key_part] = inner_struct
                 return current_struct
             #If there's no qualifier condition, but an index aka '[0]', '[1]' etc, then it's a simple accessor
             elif qualifier.isdigit():

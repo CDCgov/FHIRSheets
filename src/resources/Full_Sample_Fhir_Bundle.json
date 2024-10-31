@@ -1,0 +1,877 @@
+{
+    "resourceType": "Bundle",
+    "id": "69ef663a-eb3e-4318-8437-926bda67bcd7",
+    "type": "transaction",
+    "entry": [
+        {
+            "fullUrl": "urn:uuid:73e5f84f-9ac6-4e63-a2e8-b703f0c0e8ef",
+            "resource": {
+                "resourceType": "Organization",
+                "id": "73e5f84f-9ac6-4e63-a2e8-b703f0c0e8ef",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+                    ]
+                },
+                "active": true,
+                "name": "Acme Lab",
+                "telecom": [
+                    {
+                        "system": "phone",
+                        "value": "(+1) 734-677-7777",
+                        "use": "work"
+                    }
+                ],
+                "address": [
+                    {
+                        "line": [
+                            "3300 Washtenaw Avenue Suite 227"
+                        ],
+                        "state": "MA",
+                        "postalCode": "01002",
+                        "country": "USA",
+                        "district": "Amherst"
+                    }
+                ],
+                "identifier": [
+                    {
+                        "system": "http://hl7.org.fhir/sid/us-npi",
+                        "value": "1234567890"
+                    },
+                    {
+                        "system": "urn:oid:2.16.840.1.113883.4.7",
+                        "value": "12D3456789"
+                    }
+                ]
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Organization/73e5f84f-9ac6-4e63-a2e8-b703f0c0e8ef"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:b8f15f00-3d7d-4a92-980b-5ced918391dc",
+            "resource": {
+                "resourceType": "Encounter",
+                "id": "b8f15f00-3d7d-4a92-980b-5ced918391dc",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+                    ]
+                },
+                "identifier": [
+                    {
+                        "system": "urn:example:healthcare:system",
+                        "value": "1234"
+                    }
+                ],
+                "status": "finished",
+                "class": {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+                    "code": "AMB",
+                    "display": "Ambulatory"
+                },
+                "type": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://snomed.info/sct",
+                                "code": "866149003",
+                                "display": "Annual visit (procedure)"
+                            }
+                        ]
+                    }
+                ],
+                "period": {
+                    "start": "2015-02-11T09:00:14+00:00",
+                    "end": "2015-02-11T10:00:14+00:00"
+                },
+                "reasonCode": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://snomed.info/sct",
+                                "code": "168000",
+                                "display": "Typhlolithiasis"
+                            }
+                        ]
+                    }
+                ],
+                "hospitalization": {
+                    "dischargeDisposition": {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/discharge-disposition",
+                                "code": "home",
+                                "display": "Home"
+                            }
+                        ]
+                    }
+                },
+                "subject": {
+                    "reference": "Patient/64b62a7e-ed2d-4fe3-bd63-0fd9492281b1"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Encounter/b8f15f00-3d7d-4a92-980b-5ced918391dc"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:64b62a7e-ed2d-4fe3-bd63-0fd9492281b1",
+            "resource": {
+                "resourceType": "Patient",
+                "id": "64b62a7e-ed2d-4fe3-bd63-0fd9492281b1",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+                    ]
+                },
+                "extension": [
+                    {
+                        "extension": [
+                            {
+                                "url": "ombCategory",
+                                "valueCoding": {
+                                    "system": "urn:oid:2.16.840.1.113883.6.238",
+                                    "code": "2028-9",
+                                    "display": "Asian"
+                                }
+                            },
+                            {
+                                "url": "text",
+                                "valueString": "asian"
+                            }
+                        ],
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+                    },
+                    {
+                        "extension": [
+                            {
+                                "url": "ombCategory",
+                                "valueCoding": {
+                                    "system": "urn:oid:2.16.840.1.113883.6.238",
+                                    "code": "2186-5",
+                                    "display": "Not Hispanic or Latino"
+                                }
+                            },
+                            {
+                                "url": "text",
+                                "valueString": "Not Hispanic or Latino"
+                            }
+                        ],
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity"
+                    },
+                    {
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+                        "valueCode": "M"
+                    }
+                ],
+                "identifier": [
+                    {
+                        "value": "1032704",
+                        "system": "http://hospital.smarthealthit.org"
+                    },
+                    {
+                        "use": "usual",
+                        "type": {
+                            "coding": [
+                                {
+                                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                                    "code": "MR",
+                                    "display": "Medical Record Number"
+                                }
+                            ],
+                            "text": "Medical Record Number"
+                        },
+                        "system": "urn:mrn:http://hl7.org/fhir/sid/us-mrn",
+                        "value": "1032704"
+                    },
+                    {
+                        "use": "usual",
+                        "type": {
+                            "coding": [
+                                {
+                                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                                    "code": "SS"
+                                }
+                            ],
+                            "text": "Social Security Number"
+                        },
+                        "system": "http://hl7.org/fhir/sid/us-ssn",
+                        "value": "123-456-7890"
+                    }
+                ],
+                "name": [
+                    {
+                        "given": [
+                            "Child"
+                        ],
+                        "family": "Example",
+                        "use": "usual"
+                    }
+                ],
+                "telecom": [
+                    {
+                        "system": "phone",
+                        "value": "555-555-5555",
+                        "use": "home"
+                    }
+                ],
+                "gender": "male",
+                "birthDate": "2016-01-15",
+                "address": [
+                    {
+                        "line": [
+                            "49 Meadow St"
+                        ],
+                        "state": "OK",
+                        "postalCode": "74047",
+                        "country": "US",
+                        "district": "Mounds"
+                    }
+                ],
+                "communication": [
+                    {
+                        "language": {
+                            "coding": [
+                                {
+                                    "system": "urn:ietf:bcp:47",
+                                    "code": "en",
+                                    "display": "English"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Patient/64b62a7e-ed2d-4fe3-bd63-0fd9492281b1"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:25ae9272-dd1f-497e-8433-86d2642b3f71",
+            "resource": {
+                "resourceType": "Practitioner",
+                "id": "25ae9272-dd1f-497e-8433-86d2642b3f71",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+                    ]
+                },
+                "identifier": [
+                    {
+                        "system": "http://hl7.org.fhir/sid/us-npi",
+                        "value": "9941339108"
+                    }
+                ],
+                "name": [
+                    {
+                        "given": [
+                            "Ronald"
+                        ],
+                        "family": "Bone"
+                    }
+                ]
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Practitioner/25ae9272-dd1f-497e-8433-86d2642b3f71"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:0efc9f4e-60af-4b2f-b0e2-c1a3616ce3bf",
+            "resource": {
+                "resourceType": "Location",
+                "id": "0efc9f4e-60af-4b2f-b0e2-c1a3616ce3bf",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-location"
+                    ]
+                },
+                "status": "active",
+                "name": "Health Level Seven International - Amherst",
+                "telecom": [
+                    {
+                        "system": "phone",
+                        "value": "(+1) 734-677-7777"
+                    }
+                ],
+                "address": {
+                    "line": [
+                        "3300 Washtenaw Avenue Suite 227"
+                    ],
+                    "state": "MA",
+                    "postalCode": "01002",
+                    "country": "USA",
+                    "district": "Amherst"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Location/0efc9f4e-60af-4b2f-b0e2-c1a3616ce3bf"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:27186b25-5eec-412c-97fe-ee40aa68eece",
+            "resource": {
+                "resourceType": "Immunization",
+                "id": "27186b25-5eec-412c-97fe-ee40aa68eece",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization"
+                    ]
+                },
+                "status": "completed",
+                "reasonCode": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                                "code": "IMMUNE",
+                                "display": "Immunity"
+                            }
+                        ]
+                    }
+                ],
+                "vaccineCode": {
+                    "coding": [
+                        {
+                            "system": "http://hl7.org/fhir/sid/cvx",
+                            "code": "135",
+                            "display": "influenza, high dose seasonal, preservative-free"
+                        }
+                    ]
+                },
+                "occurrenceDateTime": "2016-01-08T00:00:00+00:00",
+                "primarySource": true,
+                "patient": {
+                    "reference": "Patient/64b62a7e-ed2d-4fe3-bd63-0fd9492281b1"
+                },
+                "encounter": {
+                    "reference": "Encounter/b8f15f00-3d7d-4a92-980b-5ced918391dc"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Immunization/27186b25-5eec-412c-97fe-ee40aa68eece"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:4cc1f0c1-dc12-4dc2-b97b-315d85a48f95",
+            "resource": {
+                "resourceType": "AllergyIntolerance",
+                "id": "4cc1f0c1-dc12-4dc2-b97b-315d85a48f95",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance"
+                    ]
+                },
+                "clinicalStatus": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+                            "code": "active",
+                            "display": "Active"
+                        }
+                    ]
+                },
+                "verificationStatus": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+                            "code": "confirmed",
+                            "display": "Confirmed"
+                        }
+                    ]
+                },
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                            "code": "10109",
+                            "display": "Streptomycin"
+                        }
+                    ]
+                },
+                "reaction": [
+                    {
+                        "manifestation": [
+                            {
+                                "coding": [
+                                    {
+                                        "system": "http://snomed.info/sct",
+                                        "code": "271807003",
+                                        "display": "Eruption of skin (disorder)"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "patient": {
+                    "reference": "Patient/64b62a7e-ed2d-4fe3-bd63-0fd9492281b1"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "AllergyIntolerance/4cc1f0c1-dc12-4dc2-b97b-315d85a48f95"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:6d7f5ce5-e807-4e93-b954-f584e603dc0a",
+            "resource": {
+                "resourceType": "Procedure",
+                "id": "6d7f5ce5-e807-4e93-b954-f584e603dc0a",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+                    ]
+                },
+                "status": "completed",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://snomed.info/sct",
+                            "code": "128004",
+                            "display": "Hand microscope examination of skin"
+                        }
+                    ]
+                },
+                "performedDateTime": "2002-05-23T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/64b62a7e-ed2d-4fe3-bd63-0fd9492281b1"
+                },
+                "encounter": {
+                    "reference": "Encounter/b8f15f00-3d7d-4a92-980b-5ced918391dc"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Procedure/6d7f5ce5-e807-4e93-b954-f584e603dc0a"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:83134ff8-441d-494e-a470-bbc13334f686",
+            "resource": {
+                "resourceType": "Observation",
+                "id": "83134ff8-441d-494e-a470-bbc13334f686",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry"
+                    ]
+                },
+                "status": "final",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "59408-5",
+                            "display": "Oxygen saturation in Arterial blood by Pulse oximetry"
+                        },
+                        {
+                            "system": "http://loinc.org",
+                            "code": "2708-6",
+                            "display": "Oxygen saturation in Arterial blood"
+                        }
+                    ]
+                },
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                                "code": "vital-signs",
+                                "display": "Vital Signs"
+                            }
+                        ]
+                    }
+                ],
+                "effectiveDateTime": "2005-07-05T00:00:00+00:00",
+                "component": [
+                    {
+                        "code": {
+                            "coding": [
+                                {
+                                    "system": "http://loinc.org",
+                                    "code": "3151-8",
+                                    "display": "Inhaled oxygen flow rate"
+                                }
+                            ],
+                            "text": "Inhaled oxygen flow rate"
+                        },
+                        "valueQuantity": {
+                            "value": 6.0,
+                            "unit": "L/min",
+                            "system": "http://unitsofmeasure.org",
+                            "code": "L/min"
+                        }
+                    },
+                    {
+                        "code": {
+                            "coding": [
+                                {
+                                    "system": "http://loinc.org",
+                                    "code": "3150-0",
+                                    "display": "Inhaled oxygen concentration"
+                                }
+                            ],
+                            "text": "Inhaled oxygen concentration"
+                        },
+                        "valueQuantity": {
+                            "value": 90.0,
+                            "unit": "%",
+                            "system": "http://unitsofmeasure.org",
+                            "code": "%"
+                        }
+                    }
+                ],
+                "subject": {
+                    "reference": "Patient/64b62a7e-ed2d-4fe3-bd63-0fd9492281b1"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Observation/83134ff8-441d-494e-a470-bbc13334f686"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:c49225c7-0466-404c-b46a-cda47489ef51",
+            "resource": {
+                "resourceType": "Observation",
+                "id": "c49225c7-0466-404c-b46a-cda47489ef51",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-smokingstatus"
+                    ]
+                },
+                "status": "final",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "72166-2",
+                            "display": "Tobacco smoking status"
+                        }
+                    ]
+                },
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                                "code": "social-history",
+                                "display": "Social History"
+                            }
+                        ]
+                    }
+                ],
+                "issued": "2002-05-23T00:00:00+00:00",
+                "effectiveDateTime": "2005-07-05T00:00:00+00:00",
+                "valueCodeableConcept": {
+                    "coding": [
+                        {
+                            "system": "http://snomed.info/sct",
+                            "code": "8517006",
+                            "display": "Former Smoker"
+                        }
+                    ]
+                },
+                "subject": {
+                    "reference": "Patient/64b62a7e-ed2d-4fe3-bd63-0fd9492281b1"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Observation/c49225c7-0466-404c-b46a-cda47489ef51"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:abcde2a7-3a5d-42bb-bec8-1efd3802b8ad",
+            "resource": {
+                "resourceType": "Observation",
+                "id": "abcde2a7-3a5d-42bb-bec8-1efd3802b8ad",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab"
+                    ]
+                },
+                "status": "Final",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "8839-3",
+                            "display": "Oxygen Saturation"
+                        }
+                    ]
+                },
+                "category,[0]": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                            "code": "laboratory",
+                            "display": "Laboratory"
+                        }
+                    ]
+                },
+                "effectiveDateTime": "2005-07-05T00:00:00+00:00",
+                "valueQuantity": {
+                    "value": 90.0,
+                    "unit": "%",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "%"
+                },
+                "subject": {
+                    "reference": "Patient/64b62a7e-ed2d-4fe3-bd63-0fd9492281b1"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Observation/abcde2a7-3a5d-42bb-bec8-1efd3802b8ad"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:e070aea9-f8b4-4679-af6a-73bdb3a7af2e",
+            "resource": {
+                "resourceType": "DiagnosticReport",
+                "id": "e070aea9-f8b4-4679-af6a-73bdb3a7af2e",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab"
+                    ]
+                },
+                "status": "Final",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "10232-7",
+                            "display": "Oxygen content in Aorta root"
+                        }
+                    ]
+                },
+                "effectiveDateTime": "2011-02-01T08:39:30+00:00",
+                "issued": "2011-01-01T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/64b62a7e-ed2d-4fe3-bd63-0fd9492281b1"
+                },
+                "encounter": {
+                    "reference": "Encounter/b8f15f00-3d7d-4a92-980b-5ced918391dc"
+                },
+                "performer": {
+                    "reference": "Practitioner/25ae9272-dd1f-497e-8433-86d2642b3f71"
+                },
+                "result": {
+                    "reference": "Observation/83134ff8-441d-494e-a470-bbc13334f686"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "DiagnosticReport/e070aea9-f8b4-4679-af6a-73bdb3a7af2e"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:20bd9d12-f086-42c6-a718-3e731873bb13",
+            "resource": {
+                "resourceType": "Condition",
+                "id": "20bd9d12-f086-42c6-a718-3e731873bb13",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/head-occipital-frontal-circumference-percentile"
+                    ]
+                },
+                "clinicalStatus": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                            "code": "active",
+                            "display": "Active"
+                        }
+                    ]
+                },
+                "verificationStatus": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                            "code": "confirmed",
+                            "display": "Confirmed"
+                        }
+                    ]
+                },
+                "category": {
+                    "coding": [
+                        {
+                            "system": "http://hl7.org/fhir/us/core/CodeSystem/condition-category",
+                            "code": "health-concern",
+                            "display": "Health Concerns"
+                        }
+                    ]
+                },
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://snomed.info/sct",
+                            "code": "129007",
+                            "display": "Homoiothermia"
+                        }
+                    ]
+                },
+                "onsetDateTime": "2007-12-14T00:00:00+00:00"
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Condition/20bd9d12-f086-42c6-a718-3e731873bb13"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:d64c1def-0d16-471c-b7f3-d03b1a061f60",
+            "resource": {
+                "resourceType": "MedicationRequest",
+                "id": "d64c1def-0d16-471c-b7f3-d03b1a061f60",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest"
+                    ]
+                },
+                "status": "active",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                            "code": "91990",
+                            "display": "Betaxolol Ophthalmic Suspension [Betoptic S]"
+                        }
+                    ]
+                },
+                "authoredOn": "2019-06-24T00:00:00+00:00",
+                "dosageInstruction": [
+                    {
+                        "text": "Takes 1-2 tablets once daily at bedtime as needed for restless legs"
+                    }
+                ],
+                "subject": {
+                    "reference": "Patient/64b62a7e-ed2d-4fe3-bd63-0fd9492281b1"
+                },
+                "encounter": {
+                    "reference": "Encounter/b8f15f00-3d7d-4a92-980b-5ced918391dc"
+                },
+                "requester": {
+                    "reference": "Practitioner/25ae9272-dd1f-497e-8433-86d2642b3f71"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "MedicationRequest/d64c1def-0d16-471c-b7f3-d03b1a061f60"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:f024d8b8-d114-4f9b-987b-947e17655cab",
+            "resource": {
+                "resourceType": "Observation",
+                "id": "f024d8b8-d114-4f9b-987b-947e17655cab",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/pediatric-bmi-for-age"
+                    ]
+                },
+                "status": "final",
+                "category,[0]": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                            "code": "laboratory",
+                            "display": "Laboratory"
+                        }
+                    ]
+                },
+                "valueQuantity": {
+                    "value": 65.0,
+                    "unit": "%",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "%"
+                },
+                "subject": {
+                    "reference": "Patient/64b62a7e-ed2d-4fe3-bd63-0fd9492281b1"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Observation/f024d8b8-d114-4f9b-987b-947e17655cab"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:3dc9d535-9daf-4189-8d3e-40bcf5a30a16",
+            "resource": {
+                "resourceType": "Device",
+                "id": "3dc9d535-9daf-4189-8d3e-40bcf5a30a16",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-implantable-device"
+                    ]
+                },
+                "udiCarrier": {
+                    "deviceIdentifier": "99863313444316",
+                    "carrierAIDC": "(01)99863313444316(17)220101(10)M320(21)AC221",
+                    "carrierHRF": "(01)99863313444316(17)220101(10)M320(21)AC221"
+                },
+                "distinctIdentifier": "99863313444316",
+                "manufactureDate": "1983-01-01T00:00:00+00:00",
+                "expirationDate": "2022-01-01T00:00:00+00:00",
+                "lotNumber": "M320",
+                "serialNumber": "AC221",
+                "type": {
+                    "coding": [
+                        {
+                            "system": "http://snomed.info/sct",
+                            "code": "994005",
+                            "display": "Brush, device"
+                        }
+                    ]
+                },
+                "patient": {
+                    "reference": "Patient/64b62a7e-ed2d-4fe3-bd63-0fd9492281b1"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Device/3dc9d535-9daf-4189-8d3e-40bcf5a30a16"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:2044b780-0bed-4c05-9dc2-36801615d8d5",
+            "resource": {
+                "resourceType": "Observation",
+                "id": "2044b780-0bed-4c05-9dc2-36801615d8d5",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/StructureDefinition/vitalsigns"
+                    ]
+                },
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "29463-7",
+                            "display": "Body weight"
+                        }
+                    ]
+                },
+                "valueQuantity": {
+                    "value": 35.0,
+                    "unit": "mg",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mg"
+                },
+                "subject": {
+                    "reference": "Patient/64b62a7e-ed2d-4fe3-bd63-0fd9492281b1"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Observation/2044b780-0bed-4c05-9dc2-36801615d8d5"
+            }
+        }
+    ]
+}

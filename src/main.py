@@ -1,6 +1,7 @@
-import argparse
 import read_input
 import conversion
+
+import argparse
 import orjson
 import json
 from pathlib import Path

@@ -24,7 +24,7 @@ def assign_value(final_struct, key, value, valueType):
         elif valueType.lower() == 'base64binary':
             final_struct[key] = value
         elif valueType.lower() == 'boolean':
-            final_struct[key] = value
+            final_struct[key] = bool(value)
         elif valueType.lower() == 'codeableconcept':
             final_struct[key] = caret_delimited_string_to_codeableconcept(value)
         elif valueType.lower() == 'code':
@@ -34,8 +34,8 @@ def assign_value(final_struct, key, value, valueType):
             final_struct[key] = caret_delimited_string_to_coding(value)
         elif valueType.lower() == 'date':
             if isinstance(value, datetime):
-                final_struct[key] = value.replace(tzinfo=timezone.utc)
-            else:
+                final_struct[key] = value.date()
+            elif isinstance(value, str):
                 final_struct[key] = parse_iso8601_date(value).replace(tzinfo=timezone.utc)
         elif valueType.lower() == 'datetime':
             if isinstance(value, datetime):
@@ -49,7 +49,7 @@ def assign_value(final_struct, key, value, valueType):
             final_struct[key] = match.group(0) if match else ''
         elif valueType.lower() == 'instant':
             if isinstance(value, datetime):
-                final_struct[key] = value
+                final_struct[key] = value.replace(tzinfo=timezone.utc)
             else:
                 final_struct[key] = final_struct[key] = parse_iso8601_instant(value).replace(tzinfo=timezone.utc)
         elif valueType.lower() == 'integer':
@@ -206,10 +206,11 @@ def parse_flexible_address(address):
             result['district'] = line_parts[-1].strip()
             result['line'] = ', '.join(line_parts[:-2]).strip()  # Remaining part of the address
         elif len(line_parts) == 2:
-            result['city'] = ''
             result['district'] = line_parts[-1].strip() if line_parts else ''
             result['line'] = line_parts[0].strip() if line_parts else ''
         
+        if isinstance(result['line'], str):
+            result['line'] = [result['line']]
         return result
     else:
         return None  # Return None if the format doesn't match
@@ -262,7 +263,7 @@ def caret_delimited_string_to_coding(caret_delimited_str):
 
 def string_to_quantity(quantity_str):
     # Split the string into value and unit by whitespace
-    parts = quantity_str.split(maxsplit=1)
+    parts = quantity_str.split('^',maxsplit=1)
     
     # Initialize the Quantity dictionary
     quantity = {}
@@ -274,5 +275,8 @@ def string_to_quantity(quantity_str):
     # Second part is the unit (if present)
     if len(parts) > 1:
         quantity['unit'] = parts[1]
+        quantity['system'] = 'http://unitsofmeasure.org'
+        quantity['code'] = parts[1]
+    
     
     return quantity

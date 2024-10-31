@@ -5,17 +5,45 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Current File with Arguments",
+            "name": "Python Debugger: simple input file",
             "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "program": "src\\main.py",
             "console": "integratedTerminal",
             "args": [
-                "--input_file"
-                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Python_Generation\\src\\resources\\simple_input.xlsx"
-                "--output_folder" 
-                "\\output"
+                "--input_file",
+                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\src\\resources\\simple_input.xlsx",
+                "--output_folder" ,
+                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\output"
+            ]
+        },
+        {
+            "name": "Python Debugger: race only file",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "src\\main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\src\\resources\\Example_Race_Only.xlsx",
+                "--output_folder" ,
+                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\output"
+            ]
+        },
+        {
+            "name": "Python Debugger: Full Sample",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "src\\main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\src\\resources\\Fhir_Cohort_Import_Template_Full_Sample.xlsx",
+                "--output_folder",
+                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\output"
             ]
         }
     ]

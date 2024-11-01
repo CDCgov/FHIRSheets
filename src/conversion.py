@@ -62,6 +62,15 @@ def create_resource_links(created_resources, resource_link_entites):
     reference_json_block = {
         "reference" : "$value"
     }
+    arrayType_references = [
+        ('diagnosticreport', 'specimen', 'specimen'),
+        ('diagnosticreport', 'practitioner', 'performer'),
+        ('diagnosticreport', 'practitionerrole', 'performer'),
+        ('diagnosticreport', 'organization', 'performer'),
+        ('diagnosticreport', 'careteam', 'performer'),
+        ('diagnosticreport', 'observation', 'result'),
+        ('diagnosticreport', 'imagingStudy', 'imagingStudy'),
+    ]
     #TODO: Build resource links
     print("Building resource links")
     for resource_link_entity in resource_link_entites:
@@ -77,8 +86,18 @@ def create_resource_links(created_resources, resource_link_entites):
             continue
         destination_resource_type = created_resources[resource_link_entity['DestinationResource']]['resourceType']
         destination_resource_id = created_resources[resource_link_entity['DestinationResource']]['id']
-        origin_resource[resource_link_entity['ReferencePath'].strip().lower()] = reference_json_block.copy()
-        origin_resource[resource_link_entity['ReferencePath'].strip().lower()]["reference"] = destination_resource_type + "/" + destination_resource_id
+        link_tuple = (created_resources[resource_link_entity['OriginResource']]['resourceType'].strip().lower(),
+                      created_resources[resource_link_entity['DestinationResource']]['resourceType'].strip().lower(),
+                      resource_link_entity['ReferencePath'].strip().lower())
+        if link_tuple in arrayType_references:
+            if resource_link_entity['ReferencePath'].strip().lower() not in origin_resource:
+                origin_resource[resource_link_entity['ReferencePath'].strip().lower()] = []
+            new_reference = reference_json_block.copy()
+            new_reference['reference'] = destination_resource_type + "/" + destination_resource_id
+            origin_resource[resource_link_entity['ReferencePath'].strip().lower()].append(new_reference)
+        else:
+            origin_resource[resource_link_entity['ReferencePath'].strip().lower()] = reference_json_block.copy()
+            origin_resource[resource_link_entity['ReferencePath'].strip().lower()]["reference"] = destination_resource_type + "/" + destination_resource_id
     return
     
 def add_resource_to_transaction_bundle(root_bundle, fhir_resource):

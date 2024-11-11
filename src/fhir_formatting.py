@@ -188,7 +188,7 @@ def parse_flexible_address(address):
     country_pattern = r'(?:\s*(?P<country>[\w\s]+))?$'
     
     # Compile the full pattern to match the postal code, state, and country
-    full_pattern = rf'^(?P<line>.*?)\^{state_pattern}\^{postal_code_pattern}\^{country_pattern}'
+    full_pattern = rf'^(?P<line>.*?)\^(?P<city>.*?)\^(?P<county>.*?)\^{postal_code_pattern}\^{state_pattern}\^{country_pattern}'
     
     match = re.search(full_pattern, address)
     
@@ -199,16 +199,7 @@ def parse_flexible_address(address):
         # If the country wasn't captured, default to an empty string
         result['country'] = result.get('country', '').strip()
         
-        # Try to infer the city and district (split remaining 'line' based on context clues)
-        line_parts = result['line'].split(',')
-        if len(line_parts) == 3:
-            result['city'] = line_parts[-2].strip()
-            result['district'] = line_parts[-1].strip()
-            result['line'] = ', '.join(line_parts[:-2]).strip()  # Remaining part of the address
-        elif len(line_parts) == 2:
-            result['district'] = line_parts[-1].strip() if line_parts else ''
-            result['line'] = line_parts[0].strip() if line_parts else ''
-        
+        #Assign the line as an array of 1
         if isinstance(result['line'], str):
             result['line'] = [result['line']]
         return result

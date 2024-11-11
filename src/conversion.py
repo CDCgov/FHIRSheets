@@ -4,6 +4,7 @@ from jsonpath_ng.ext import parse as parse_ext
 import fhir_formatting
 import special_values
 
+#Main top level function
 #Creates a full transaction bundle for a patient at index
 def create_transaction_bundle(resource_definition_entities, resource_link_entities, patient_data, index = 0):
     root_bundle = initialize_bundle()
@@ -14,6 +15,7 @@ def create_transaction_bundle(resource_definition_entities, resource_link_entiti
         fhir_resource = create_fhir_resource(resource_definition, patient_data, index)
         created_resources[entity_name] = fhir_resource
     #Link resources after creation
+    add_default_resource_links(created_resources, resource_link_entities)
     create_resource_links(created_resources, resource_link_entities)
     #Construct into fhir bundle
     for fhir_resource in created_resources.values():
@@ -57,11 +59,77 @@ def initialize_resource(resource_definition):
         }
     return initial_resource
 
+#Create a resource_link for default references in the cases where only 1 resourceType of the source and destination exist
+def add_default_resource_links(created_resources, resource_link_entities):
+    default_references = [
+        ('allergyintolerance', 'patient', 'patient'),
+        ('allergyintolerance', 'practitioner', 'asserter'),
+        ('careplan', 'goal', 'goal'),
+        ('careplan', 'patient', 'subject'),
+        ('careplan', 'practitioner', 'performer'),
+        ('diagnosticreport', 'careteam', 'performer'),
+        ('diagnosticreport', 'imagingStudy', 'imagingStudy'),
+        ('diagnosticreport', 'observation', 'result'),
+        ('diagnosticreport', 'organization', 'performer'),
+        ('diagnosticreport', 'practitioner', 'performer'),
+        ('diagnosticreport', 'practitionerrole', 'performer'),
+        ('diagnosticreport', 'specimen', 'specimen'),
+        ('encounter', 'location', 'location'),
+        ('encounter', 'organization', 'serviceProvider'),
+        ('encounter', 'patient', 'subject'),
+        ('encounter', 'practitioner', 'participant'),
+        ('goal', 'condition', 'addresses'),
+        ('goal', 'patient', 'subject'),
+        ('immunization', 'patient', 'patient'),
+        ('immunization', 'practitioner', 'performer'),
+        ('immunization', 'organization', 'manufacturer'),
+        ('medicationrequest', 'medication', 'medicationReference'),
+        ('medicationrequest', 'patient', 'subject'),
+        ('medicationrequest', 'practitioner', 'requester'),
+        ('observation', 'device', 'device'),
+        ('observation', 'patient', 'subject'),
+        ('observation', 'practitioner', 'performer'),
+        ('observation', 'specimen', 'specimen'),
+        ('procedure', 'device', 'usedReference'),
+        ('procedure', 'location', 'location'),
+        ('procedure', 'patient', 'subject'),
+        ('procedure', 'practitioner', 'performer'),
+    ]
+    
+    resource_counts = {}
+    for resourceName, resource in created_resources.items():
+        resourceType = resource['resourceType'].lower().strip()
+        if resourceType not in resource_counts:
+            resource_counts[resourceType]= {'count': 1, 'singletonEntityName': resourceName, 'singleResource': resource}
+        else:
+            resource_counts[resourceType]['count'] += 1
+            resource_counts[resourceType]['singletonResource'] = resource
+            resource_counts[resourceType]['singletonEntityName'] = resourceName
+            
+    for default_reference in default_references:
+        sourceType = default_reference[0]
+        destinationType = default_reference[1]
+        fieldName = default_reference[2]
+        if sourceType in resource_counts and destinationType in resource_counts and \
+        resource_counts[sourceType]['count'] == 1 and resource_counts[destinationType]['count'] == 1:
+            originResourceEntityName = resource_counts[sourceType]['singletonEntityName']
+            destinationResourceEntityName = resource_counts[destinationType]['singletonEntityName']
+            resource_link_entities.append(
+                {
+                    "OriginResource": originResourceEntityName,
+                    "DestinationResource": destinationResourceEntityName,
+                    "ReferencePath": fieldName
+                }
+            )
+    return
+        
+            
 #Create resource references/links with created entities
 def create_resource_links(created_resources, resource_link_entites):
     reference_json_block = {
         "reference" : "$value"
     }
+
     arrayType_references = [
         ('diagnosticreport', 'specimen', 'specimen'),
         ('diagnosticreport', 'practitioner', 'performer'),

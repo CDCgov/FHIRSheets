@@ -122,6 +122,6 @@
     },
     "request": {
         "method": "PUT",
-        "url": "Patient/a8c11ae2-5060-43b5-89a4-f7bb532a54f4"
+        "url": "Patient/${patient_id}"
     }
 }

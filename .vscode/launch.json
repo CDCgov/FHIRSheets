@@ -45,6 +45,20 @@
                 "--output_folder",
                 "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\output"
             ]
+        },
+        {
+            "name": "Python Debugger: ASD",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "src\\main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\src\\resources\\ASD_Fhir_Cohort_Import_Template.xlsx",
+                "--output_folder",
+                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\output"
+            ]
         }
     ]
 }

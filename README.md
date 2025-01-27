@@ -1,9 +1,9 @@
-# Fhir Python Cohort Generation
+# FhirSheets
 
-**Fhir Python Cohort Generation** is a command-line tool that reads an Excel file in FHIR cohort format and generates FHIR bundle JSON files from it. Each row in the template Excel file is used to create an individual JSON file, outputting them to a specified folder.
+FhirSheetsiIs a command-line tool that reads an Excel file in FHIR cohort format and generates FHIR bundle JSON files from it. Each row in the template Excel file is used to create an individual JSON file, outputting them to a specified folder.
 
 ## Table of Contents
-- [Fhir Python Cohort Generation](#fhir-python-cohort-generation)
+- [FhirSheets](#fhirsheets)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Requirements](#requirements)
@@ -22,7 +22,7 @@
 ## Installation
 1. Clone this repository:
    ```bash
-   git clone https://github.com/your-repo/fhir-python-cohort-generation.git
+   git clone https://github.com/CDCgov/synthetic-data.git
    cd fhir-python-cohort-generation
 2. Install the required packages:
    ```bash
@@ -33,12 +33,12 @@
    - Fill out each row with the relevant data.
 
 2. **Run the Tool:**
-   - Use the `main.py` script with the required arguments:
+   - Use the `fhirsheets.py` script with the required arguments:
      - `--input`: The path to the input Excel file.
      - `--output`: The path to the output folder where the JSON files will be saved.
 
    ```bash
-   python main.py --input src/resources/Fhir_Cohort_Import_Template.xlsx --output /path/to/output/folder
+   python fhirsheets.py --input src/resources/Fhir_Cohort_Import_Template.xlsx --output /path/to/output/folder
 3. The tool will generate one FHIR bundle JSON file for each row defined in the template.
 
 ## Example

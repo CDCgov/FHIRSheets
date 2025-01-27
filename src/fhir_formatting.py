@@ -14,13 +14,21 @@ type_regexes = {
 }
 # Assign final_struct[key] to value; with formatting given the valueType
 def assign_value(final_struct, key, value, valueType):
+    # Removing white space
     if isinstance(value, str):
         value = value.strip()
+    # Checking for null or empty string values. If so; we do not construct the value
+    if not value:
+        return final_struct
+    # If the valueType is not provide, do not construct the value.
     if valueType is None:
         return final_struct
+    # Swtich case for valueType to construct a value
     try:
         if valueType.lower() == 'address':
-            final_struct[key] = parse_flexible_address(value)
+            address_value = parse_flexible_address(value)
+            if address_value:
+                final_struct[key] = address_value
         elif valueType.lower() == 'base64binary':
             final_struct[key] = value
         elif valueType.lower() == 'boolean':
@@ -179,28 +187,26 @@ def parse_iso8601_time(input_string):
     
 def parse_flexible_address(address):
     # Attempt to capture postal code, which is often at the end and typically numeric (though it may vary internationally)
-    postal_code_pattern = r'(?P<postalCode>\d{5}(?:-\d{4})?)'
+    postal_code_pattern = r'(?P<postalCode>\d{5}(?:-\d{4})?|)'
     
     # State is typically a two-letter code (though this may vary internationally as well)
-    state_pattern = r'(?P<state>[A-Za-z]{2})'
+    state_pattern = r'(?P<state>[A-Za-z]{2}|)'
     
     # This captures a country after a comma (or space-separated) if it's present
-    country_pattern = r'(?:\s*(?P<country>[\w\s]+))?$'
+    country_pattern = r'(?:\s*(?P<country>[\w\s]+|))?$'
     
     # Compile the full pattern to match the postal code, state, and country
-    full_pattern = rf'^(?P<line>.*?)\^(?P<city>.*?)\^(?P<county>.*?)\^{postal_code_pattern}\^{state_pattern}\^{country_pattern}'
+    full_pattern = rf'^(?P<line>.*?)\^(?P<city>.*?)\^(?P<district>.*?)\^{state_pattern}\^{postal_code_pattern}\^{country_pattern}'
     
     match = re.search(full_pattern, address)
     
     if match:
         # Extract the components found in the regex
-        result = match.groupdict()
-        
-        # If the country wasn't captured, default to an empty string
-        result['country'] = result.get('country', '').strip()
-        
+        result = {k: v for k, v in match.groupdict().items() if v not in ("", None)}
+        if not result:
+            return None
         #Assign the line as an array of 1
-        if isinstance(result['line'], str):
+        if result['line'] and isinstance(result['line'], str):
             result['line'] = [result['line']]
         return result
     else:

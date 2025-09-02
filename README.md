@@ -33,9 +33,9 @@ FhirSheetsiIs a command-line tool that reads an Excel file in FHIR cohort format
    - Fill out each row with the relevant data.
 
 2. **Run the Tool:**
-   - Use the `fhirsheets.py` script with the required arguments:
-     - `--input`: The path to the input Excel file.
-     - `--output`: The path to the output folder where the JSON files will be saved.
+   - Use the `python -m src.cli.fhirsheets` module script with the required arguments:
+     - `--input-file`: The path to the input Excel file.
+     - `--output-folder`: The path to the output folder where the JSON files will be saved.
 
    ```bash
    python fhirsheets.py --input src/resources/Fhir_Cohort_Import_Template.xlsx --output /path/to/output/folder

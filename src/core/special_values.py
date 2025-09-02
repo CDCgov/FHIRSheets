@@ -1,5 +1,5 @@
 
-import conversion
+from . import conversion
 
 from abc import ABC, abstractmethod
 
@@ -254,7 +254,7 @@ class OrganizationIdentiferCLIAValueHandler(AbstractCustomValueHandler):
       "system" : "urn:oid:2.16.840.1.113883.4.7",
       "value" : "$value"
     }
-    #Assigna birthsex extension
+    #Assign a birthsex extension
     def assign_value(self, json_path, resource_definition, entity_definition, final_struct, key, value):
         #Retrieve the birthsex extension if it exists; make it if it does not.
         if 'identifier' not in final_struct:

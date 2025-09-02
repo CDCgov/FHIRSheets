@@ -1,8 +1,8 @@
 import uuid
 from jsonpath_ng.jsonpath import Fields, Slice, Where
 from jsonpath_ng.ext import parse as parse_ext
-import fhir_formatting
-import special_values
+from . import fhir_formatting
+from . import special_values
 
 #Main top level function
 #Creates a full transaction bundle for a patient at index
@@ -206,7 +206,7 @@ def build_structure(current_struct, json_path, resource_definition, entity_defin
         return current_struct
     #Grab current part
     part = parts[0]
-    #SPECIAL HANDLING CLAUSE 
+    #SPECIAL HANDLING CLAUSE
     matching_handler = next((handler for handler in special_values.custom_handlers if (json_path.startswith(handler) or json_path == handler)), None)
     if matching_handler is not None:
         return special_values.custom_handlers[matching_handler].assign_value(json_path, resource_definition, entity_definition, current_struct, parts[-1], value)

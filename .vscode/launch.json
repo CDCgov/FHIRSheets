@@ -5,59 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: simple input file",
+            "name": "Python Debugger: No Parameters",
             "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "program": "src\\main.py",
+            "module": "src.cli.fhirsheets",
             "console": "integratedTerminal",
             "args": [
-                "--input_file",
-                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\src\\resources\\simple_input.xlsx",
-                "--output_folder" ,
-                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\output"
             ]
-        },
+        }
         {
-            "name": "Python Debugger: race only file",
+            "name": "Python Debugger: Congenital Hyperthyrodism",
             "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "program": "src\\main.py",
+            "module": "src.cli.fhirsheets",
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\src\\resources\\Example_Race_Only.xlsx",
-                "--output_folder" ,
-                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\output"
-            ]
-        },
-        {
-            "name": "Python Debugger: Full Sample",
-            "type": "debugpy",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "program": "src\\main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "--input_file",
-                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\src\\resources\\Fhir_Cohort_Import_Template_Full_Sample.xlsx",
+                "/Users/mriley7/workspace/FHIRSheets/src/resources/Congenital_Hyperthyrodism_Fhir_Cohort_Import_Template.xlsx",
                 "--output_folder",
-                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\output"
-            ]
-        },
-        {
-            "name": "Python Debugger: ASD",
-            "type": "debugpy",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "program": "src\\main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "--input_file",
-                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\src\\resources\\ASD_Fhir_Cohort_Import_Template.xlsx",
-                "--output_folder",
-                "C:\\Users\\mriley7\\workspace\\T21_Connectathon_Sets\\Fhir_CohortPython_Generation\\output"
+                "/Users/mriley7/workspace/FHIRSheets/output"
             ]
         }
     ]

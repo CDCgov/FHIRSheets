@@ -1,5 +1,5 @@
-import read_input
-import conversion
+from ..core import read_input
+from ..core import conversion
 
 import argparse
 import orjson
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process input, convert data, and write output.")
     
     # Define the input file argument
-    parser.add_argument('--input_file', type=str, help="Path to the input xlsx ", default="resources/Synthetic_Input_Baseline.xlsx")
+    parser.add_argument('--input_file', type=str, help="Path to the input xlsx ", default="src/resources/Synthetic_Input_Baseline.xlsx")
     
     # Define the output file argument
     parser.add_argument('--output_folder', type=str, help="Path to save the output files", default="output/")

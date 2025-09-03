@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "fhir-sheets"
+version = "1.1.0"
+description = "FhirSheetsiIs a command-line tool that reads an Excel file in FHIR cohort format and generates FHIR bundle JSON files from it. Each row in the template Excel file is used to create an individual JSON file, outputting them to a specified folder."
+authors = ["Michael Riley <Michael.Riley@gtri.gatech.edu>"]
+packages = [{include = "fhir_sheets", from = "src"}]
+
+[tool.poetry.dependencies]
+python = ">=3.13"  # Specify the compatible Python version here
+et-xmlfile = "1.1.0"
+jsonpath-ng = "1.6.1"
+openpyxl = "3.1.5"
+orjson = "3.10.7"
+ply = "3.11"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

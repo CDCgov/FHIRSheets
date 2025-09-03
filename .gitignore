@@ -17,4 +17,4 @@ src/__pycache__
 dist/
 
 #Ignore pyc build files.
-~*.pyc*
+*.pyc

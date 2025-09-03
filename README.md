@@ -49,7 +49,7 @@ FhirSheets is a command-line tool that reads an Excel file in FHIR cohort format
 ## Example
 
 ```bash
-python fhirsheets.py --input src/resources/Fhir_Cohort_Import_Template.xlsx --output ./output_bundles
+python -m src.fhir_sheets.cli.fhirsheets --input_file src/resources/Fhir_Cohort_Import_Template.xlsx --output_folder ./output_bundles
 In this example, each row in the `Fhir_Cohort_Import_Template.xlsx` file will be processed, and a corresponding JSON file will be generated in the `output_bundles` folder.
 ```
 

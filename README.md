@@ -1,6 +1,6 @@
 # FHIRSheets
 
-FhirSheetsiIs a command-line tool that reads an Excel file in FHIR cohort format and generates FHIR bundle JSON files from it. Each row in the template Excel file is used to create an individual JSON file, outputting them to a specified folder.
+FhirSheets is a command-line tool that reads an Excel file in FHIR cohort format and generates FHIR bundle JSON files from it. Each row in the template Excel file is used to create an individual JSON file, outputting them to a specified folder.
 
 ## Table of Contents
 - [FHIRSheets](#fhirsheets)
@@ -27,10 +27,11 @@ FhirSheetsiIs a command-line tool that reads an Excel file in FHIR cohort format
 2. Install the required packages:
    ```bash
    pip install -r requirements.txt
+   ```
    Or use poetry
    ```bash
    poetry build
-
+   ```
 ## Usage
 1. **Fill Out the Template:**
    - Open the template file `src/resources/Fhir_Cohort_Import_Template.xlsx`.

@@ -8,7 +8,7 @@ FhirSheets is a command-line tool that reads an Excel file in FHIR cohort format
   - [Features](#features)
   - [Requirements](#requirements)
   - [Installation](#installation)
-  - [License](#license)
+  - [Usage](#Usage)
 
 ## Features
 - Reads an Excel file following the FHIR cohort import template.
@@ -43,13 +43,13 @@ FhirSheets is a command-line tool that reads an Excel file in FHIR cohort format
      - `--output-folder`: The path to the output folder where the JSON files will be saved.
 
    ```bash
-   python -m src.fhir_sheets.cli.fhirsheets --input_file src/resources/Fhir_Cohort_Import_Template.xlsx --output_folder /path/to/output/folder
+   python -m src.fhir_sheets.cli.main --input_file src/resources/Fhir_Cohort_Import_Template.xlsx --output_folder /path/to/output/folder
 3. The tool will generate one FHIR bundle JSON file for each row defined in the template.
 
 ## Example
 
 ```bash
-python -m src.fhir_sheets.cli.fhirsheets --input_file src/resources/Fhir_Cohort_Import_Template.xlsx --output_folder ./output_bundles
+python -m src.fhir_sheets.cli.main --input_file src/resources/Fhir_Cohort_Import_Template.xlsx --output_folder ./output_bundles
 In this example, each row in the `Fhir_Cohort_Import_Template.xlsx` file will be processed, and a corresponding JSON file will be generated in the `output_bundles` folder.
 ```
 

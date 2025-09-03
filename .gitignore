@@ -12,3 +12,9 @@ src/resources/json_templates
 venv/
 
 src/__pycache__
+
+# Ignore dist
+dist/
+
+#Ignore pyc build files.
+~*.pyc*

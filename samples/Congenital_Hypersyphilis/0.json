@@ -1,0 +1,446 @@
+{
+    "resourceType": "Bundle",
+    "id": "b30b573c-a870-4c5e-80f7-1387e13cc9a9",
+    "type": "transaction",
+    "entry": [
+        {
+            "fullUrl": "urn:uuid:a91ad419-173c-4653-b20b-26aea78b5af3",
+            "resource": {
+                "resourceType": "Encounter",
+                "id": "a91ad419-173c-4653-b20b-26aea78b5af3",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+                    ]
+                },
+                "identifier": [
+                    {
+                        "system": "urn:example:healthcare:system",
+                        "value": "3456"
+                    }
+                ],
+                "status": "finished",
+                "class": {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+                    "code": "IMP",
+                    "display": "inpatient encounter"
+                },
+                "type": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://hl7.org/fhir/sid/icd-10",
+                                "code": "O80",
+                                "display": "full-term uncomplicated delivery"
+                            }
+                        ]
+                    }
+                ],
+                "period": {
+                    "start": "2019-05-06T11:01:23+00:00",
+                    "end": "2019-05-06T16:06:37+00:00"
+                },
+                "hospitalization": {
+                    "dischargeDisposition": {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/discharge-disposition",
+                                "code": "home",
+                                "display": "Home"
+                            }
+                        ]
+                    }
+                },
+                "subject": {
+                    "reference": "Patient/745db2f5-38e3-41bf-8aa9-f520938782f5"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Encounter/a91ad419-173c-4653-b20b-26aea78b5af3"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:745db2f5-38e3-41bf-8aa9-f520938782f5",
+            "resource": {
+                "resourceType": "Patient",
+                "id": "745db2f5-38e3-41bf-8aa9-f520938782f5",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+                    ]
+                },
+                "extension": [
+                    {
+                        "extension": [
+                            {
+                                "url": "ombCategory",
+                                "valueCoding": {
+                                    "system": "urn:oid:2.16.840.1.113883.6.238",
+                                    "code": "2028-9",
+                                    "display": "Asian"
+                                }
+                            },
+                            {
+                                "url": "text",
+                                "valueString": "asian"
+                            }
+                        ],
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+                    },
+                    {
+                        "extension": [
+                            {
+                                "url": "ombCategory",
+                                "valueCoding": {
+                                    "system": "urn:oid:2.16.840.1.113883.6.238",
+                                    "code": "2186-5",
+                                    "display": "Not Hispanic or Latino"
+                                }
+                            },
+                            {
+                                "url": "text",
+                                "valueString": "Not Hispanic or Latino"
+                            }
+                        ],
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity"
+                    },
+                    {
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+                        "valueCode": "M"
+                    }
+                ],
+                "identifier": [
+                    {
+                        "value": "7890123",
+                        "system": "http://hospital.smarthealthit.org"
+                    },
+                    {
+                        "use": "usual",
+                        "type": {
+                            "coding": [
+                                {
+                                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                                    "code": "MR",
+                                    "display": "Medical Record Number"
+                                }
+                            ],
+                            "text": "Medical Record Number"
+                        },
+                        "system": "urn:mrn:http://hl7.org/fhir/sid/us-mrn",
+                        "value": "68392077"
+                    },
+                    {
+                        "use": "usual",
+                        "type": {
+                            "coding": [
+                                {
+                                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                                    "code": "SS"
+                                }
+                            ],
+                            "text": "Social Security Number"
+                        },
+                        "system": "http://hl7.org/fhir/sid/us-ssn",
+                        "value": "456-78-9012"
+                    }
+                ],
+                "name": [
+                    {
+                        "given": [
+                            "Ethan"
+                        ],
+                        "family": "Crosswell",
+                        "use": "usual"
+                    }
+                ],
+                "telecom": [
+                    {
+                        "system": "phone",
+                        "value": "777-777-7777",
+                        "use": "home"
+                    }
+                ],
+                "gender": "male",
+                "birthDate": "2019-05-06",
+                "address": [
+                    {}
+                ],
+                "communication": [
+                    {
+                        "language": {
+                            "coding": [
+                                {
+                                    "system": "urn:ietf:bcp:47",
+                                    "code": "en",
+                                    "display": "English"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Patient/745db2f5-38e3-41bf-8aa9-f520938782f5"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:1c6be900-1bd1-4232-9396-453b75138689",
+            "resource": {
+                "resourceType": "RelatedPerson",
+                "id": "1c6be900-1bd1-4232-9396-453b75138689",
+                "identifier": [
+                    {
+                        "system": "urn:example:healthcare:system",
+                        "value": "4567"
+                    }
+                ],
+                "relationship": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                                "code": "MTH",
+                                "display": "Mother"
+                            }
+                        ]
+                    }
+                ],
+                "name": [
+                    {
+                        "given": [
+                            "Lillian"
+                        ],
+                        "family": "Crosswell",
+                        "use": "usual"
+                    }
+                ],
+                "telecom": [
+                    {
+                        "system": "phone",
+                        "value": "888-888-8888",
+                        "use": "home"
+                    }
+                ],
+                "gender": "female",
+                "patient": {
+                    "reference": "Patient/745db2f5-38e3-41bf-8aa9-f520938782f5"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "RelatedPerson/1c6be900-1bd1-4232-9396-453b75138689"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:4ffc50c6-d22c-438c-a48b-80155339e4cd",
+            "resource": {
+                "resourceType": "Procedure",
+                "id": "4ffc50c6-d22c-438c-a48b-80155339e4cd",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+                    ]
+                },
+                "status": "completed",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://www.ama-assn.org/go/cpt",
+                            "code": "92558",
+                            "display": "Audiologic Function Tests"
+                        }
+                    ]
+                },
+                "performedDateTime": "2019-05-07T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/745db2f5-38e3-41bf-8aa9-f520938782f5"
+                },
+                "encounter": {
+                    "reference": "Encounter/a91ad419-173c-4653-b20b-26aea78b5af3"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Procedure/4ffc50c6-d22c-438c-a48b-80155339e4cd"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:116b7ef6-f0e9-4a4d-9d76-d90b9452c5ec",
+            "resource": {
+                "resourceType": "Procedure",
+                "id": "116b7ef6-f0e9-4a4d-9d76-d90b9452c5ec",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+                    ]
+                },
+                "status": "completed",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://www.ama-assn.org/go/cpt",
+                            "code": "87496",
+                            "display": "Infectious agent detection by nucleic acid (DNA or RNA)"
+                        }
+                    ]
+                },
+                "performedDateTime": "2019-05-08T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/745db2f5-38e3-41bf-8aa9-f520938782f5"
+                },
+                "encounter": {
+                    "reference": "Encounter/a91ad419-173c-4653-b20b-26aea78b5af3"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Procedure/116b7ef6-f0e9-4a4d-9d76-d90b9452c5ec"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:a9b27cbf-d102-4da9-9156-fcf68dd1215f",
+            "resource": {
+                "resourceType": "Procedure",
+                "id": "a9b27cbf-d102-4da9-9156-fcf68dd1215f",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+                    ]
+                },
+                "status": "completed",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://www.ama-assn.org/go/cpt",
+                            "code": "70551",
+                            "display": "Magnetic resonance (eg, proton) imaging, brain (including brain stem)"
+                        }
+                    ]
+                },
+                "performedDateTime": "2018-04-15T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/745db2f5-38e3-41bf-8aa9-f520938782f5"
+                },
+                "encounter": {
+                    "reference": "Encounter/a91ad419-173c-4653-b20b-26aea78b5af3"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Procedure/a9b27cbf-d102-4da9-9156-fcf68dd1215f"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:676408c9-accf-4d95-be93-d63e3fd2ff98",
+            "resource": {
+                "resourceType": "Condition",
+                "id": "676408c9-accf-4d95-be93-d63e3fd2ff98",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+                    ]
+                },
+                "clinicalStatus": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                            "code": "active",
+                            "display": "Active"
+                        }
+                    ]
+                },
+                "verificationStatus": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                            "code": "confirmed",
+                            "display": "Confirmed"
+                        }
+                    ]
+                },
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://hl7.org/fhir/us/core/CodeSystem/condition-category",
+                                "code": "health-concern",
+                                "display": "Health Concern"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://hl7.org/fhir/sid/icd-10",
+                            "code": "E03.1",
+                            "display": "congenital hypothyroidism without goiter."
+                        }
+                    ]
+                },
+                "onsetDateTime": "2019-05-06T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/745db2f5-38e3-41bf-8aa9-f520938782f5"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Condition/676408c9-accf-4d95-be93-d63e3fd2ff98"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:80eae88f-b0b8-4def-8fcb-05d8d6811ee9",
+            "resource": {
+                "resourceType": "MedicationRequest",
+                "id": "80eae88f-b0b8-4def-8fcb-05d8d6811ee9",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest"
+                    ]
+                },
+                "status": "active",
+                "intent": "order",
+                "medicationCodeableConcept": {
+                    "coding": [
+                        {
+                            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                            "code": "275891",
+                            "display": "valganciclovir"
+                        }
+                    ]
+                },
+                "authoredOn": "2019-05-06T00:00:00+00:00",
+                "dosageInstruction": [
+                    {
+                        "text": "0.2 mg/kg/dose, given twice daily"
+                    }
+                ],
+                "subject": {
+                    "reference": "Patient/745db2f5-38e3-41bf-8aa9-f520938782f5"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "MedicationRequest/80eae88f-b0b8-4def-8fcb-05d8d6811ee9"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:7c2c662a-c13c-4723-855c-c9fb02398ae9",
+            "resource": {
+                "resourceType": "Condition",
+                "id": "7c2c662a-c13c-4723-855c-c9fb02398ae9",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+                    ]
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Condition/7c2c662a-c13c-4723-855c-c9fb02398ae9"
+            }
+        }
+    ]
+}

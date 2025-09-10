@@ -9,7 +9,7 @@
             "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "module": "src.cli.fhirsheets",
+            "module": "src.fhir_sheets.cli.main",
             "console": "integratedTerminal",
             "args": [
             ]
@@ -19,7 +19,7 @@
             "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "module": "src.cli.fhirsheets",
+            "module": "src.fhir_sheets.cli.main",
             "console": "integratedTerminal",
             "args": [
                 "--input_file",

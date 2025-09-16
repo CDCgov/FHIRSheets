@@ -5,6 +5,7 @@ import argparse
 import orjson
 import json
 from pathlib import Path
+from pprint import pprint
 
 def find_sets(d, path=""):
     if isinstance(d, dict):

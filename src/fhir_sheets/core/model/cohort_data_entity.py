@@ -1,3 +1,4 @@
+import pprint
 from typing import Dict, Any, List, Optional
 
 class FieldEntry:
@@ -8,8 +9,8 @@ class FieldEntry:
         self.values: Optional[List[str]] = data.get('values')
         
     def __repr__(self) -> str:
-        return (f"FieldEntry(jsonpath='{self.jsonpath}', value_type='{self.value_type}', "
-                f"valuesets='{self.valuesets}', values={self.values})")
+        return (f"FieldEntry(\n\tjsonpath='{self.jsonpath}',\n\tvalue_type='{self.value_type}', "
+                f"\n\tvaluesets='{self.valuesets}', \n\tvalues={self.values})")
 
 class EntityData:
     def __init__(self, data: Dict[str, Dict[str, Any]]):
@@ -26,7 +27,7 @@ class EntityData:
             self.fields[name] = FieldEntry(field_data)
 
     def __repr__(self) -> str:
-        return f"EntityData(fields={self.fields})"
+        return f"EntityData(fields=\n{pprint.pformat(self.fields, indent=4)})"
     
     def insert(self, name: str, entry: FieldEntry):
         """
@@ -68,7 +69,7 @@ class CohortData:
             self.entities.update(data)
             
     def __repr__(self) -> str:
-        return f"CohortData(entities={list(self.entities.keys())})"
+        return f"CohortData(entities={self.entities})"
     
     def insert_entity(self, name: str, entity_data: EntityData):
         """

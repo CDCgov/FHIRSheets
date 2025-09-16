@@ -102,7 +102,6 @@ def process_sheet_patient_data(sheet, resource_definition_entities):
             field_name = sheet.cell(row=6, column=i + 2).value  # Get the Data Element for this column
             if entity_name in patient_data and field_name in patient_data[entity_name]:
                 # Append the actual data values to the 'values' array
-                patient_data[entity_name][field_name]["values"].append(value)
                 cohort_data.entities[entity_name].fields[field_name].values.append(value)
     cohort_data.num_entries = num_entries
     return cohort_data

@@ -1,341 +1,333 @@
 resource_definition_entities
 ===============================================================================================================================================================================
 FhirEntity(entity_name='PrimaryEncounter', resource_type='Encounter', profiles=['http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter']),
- FhirEntity(entity_name='PrimaryPatient', resource_type='Patient', profiles=['http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient']),
- FhirEntity(entity_name='Mother', resource_type='RelatedPerson', profiles=None),
- FhirEntity(entity_name='HearingScreening', resource_type='Procedure', profiles=['http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure']),
- FhirEntity(entity_name='CMVTest', resource_type='Procedure', profiles=['http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure']),
- FhirEntity(entity_name='Ultrasound', resource_type='Procedure', profiles=['http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure']),
- FhirEntity(entity_name='Diagnosis', resource_type='Condition', profiles=['http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition']),
- FhirEntity(entity_name='Valganciclovir', resource_type='MedicationRequest', profiles=['http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest']),
- FhirEntity(entity_name='FollowupDiagnosis', resource_type='Condition', profiles=['http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition'])]
- ===============================================================================================================================================================================
- resource_link_entities
- ===============================================================================================================================================================================
- [ResourceLink(origin_resource='PrimaryEncounter', reference_path='Subject', destination_resource='PrimaryPatient'),
- ResourceLink(origin_resource='Mother', reference_path='patient', destination_resource='PrimaryPatient'),
- ResourceLink(origin_resource='HearingScreening', reference_path='Subject', destination_resource='PrimaryPatient'),
- ResourceLink(origin_resource='HearingScreening', reference_path='Encounter', destination_resource='PrimaryEncounter'),
- ResourceLink(origin_resource='CMVTest', reference_path='Subject', destination_resource='PrimaryPatient'),
- ResourceLink(origin_resource='CMVTest', reference_path='Encounter', destination_resource='PrimaryEncounter'),
- ResourceLink(origin_resource='Ultrasound', reference_path='Subject', destination_resource='PrimaryPatient'),
- ResourceLink(origin_resource='Ultrasound', reference_path='Encounter', destination_resource='PrimaryEncounter'),
- ResourceLink(origin_resource='Diagnosis', reference_path='Subject', destination_resource='PrimaryPatient'),
- ResourceLink(origin_resource='Valganciclovir', reference_path='Subject', destination_resource='PrimaryPatient')]
- ===============================================================================================================================================================================
+FhirEntity(entity_name='PrimaryPatient', resource_type='Patient', profiles=['http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient']),
+FhirEntity(entity_name='Mother', resource_type='RelatedPerson', profiles=None),
+FhirEntity(entity_name='HearingScreening', resource_type='Procedure', profiles=['http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure']),
+FhirEntity(entity_name='CMVTest', resource_type='Procedure', profiles=['http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure']),
+FhirEntity(entity_name='Ultrasound', resource_type='Procedure', profiles=['http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure']),
+FhirEntity(entity_name='Diagnosis', resource_type='Condition', profiles=['http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition']),
+FhirEntity(entity_name='Valganciclovir', resource_type='MedicationRequest', profiles=['http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest']),
+FhirEntity(entity_name='FollowupDiagnosis', resource_type='Condition', profiles=['http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition'])]
+===============================================================================================================================================================================
+resource_link_entities
+===============================================================================================================================================================================
+[ResourceLink(origin_resource='PrimaryEncounter', reference_path='Subject', destination_resource='PrimaryPatient'),
+ResourceLink(origin_resource='Mother', reference_path='patient', destination_resource='PrimaryPatient'),
+ResourceLink(origin_resource='HearingScreening', reference_path='Subject', destination_resource='PrimaryPatient'),
+ResourceLink(origin_resource='HearingScreening', reference_path='Encounter', destination_resource='PrimaryEncounter'),
+ResourceLink(origin_resource='CMVTest', reference_path='Subject', destination_resource='PrimaryPatient'),
+ResourceLink(origin_resource='CMVTest', reference_path='Encounter', destination_resource='PrimaryEncounter'),
+ResourceLink(origin_resource='Ultrasound', reference_path='Subject', destination_resource='PrimaryPatient'),
+ResourceLink(origin_resource='Ultrasound', reference_path='Encounter', destination_resource='PrimaryEncounter'),
+ResourceLink(origin_resource='Diagnosis', reference_path='Subject', destination_resource='PrimaryPatient'),
+ResourceLink(origin_resource='Valganciclovir', reference_path='Subject', destination_resource='PrimaryPatient')]
+===============================================================================================================================================================================
  cohort_data
 ===============================================================================================================================================================================
- {'CMVTest': EntityData(fields=
-{   'Procedure Event Status': FieldEntry(
-        jsonpath='Procedure.status',
-        value_type='code', 
-        valuesets='https://hl7.org/fhir/R4/valueset-event-status.html', 
-        values=['completed', 'completed']),
-    'Procedure code': FieldEntry(
-        jsonpath='Procedure.code',
-        value_type='CodeableConcept', 
-        valuesets='https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-procedure-code.html', 
-        values=['http://www.ama-assn.org/go/cpt^87496^Infectious agent detection by nucleic acid (DNA or RNA)', 'http://www.ama-assn.org/go/cpt^87496^Infectious agent detection by nucleic acid (DNA or RNA)']),
-    "Procedure's Performed Datetime": FieldEntry(
-        jsonpath='Procedure.performedDateTime',
-        value_type='dateTime', 
-        valuesets='None', 
-        values=[datetime.datetime(2019, 5, 8, 0, 0), datetime.datetime(2019, 5, 8, 0, 0)])}),
- 'Diagnosis': EntityData(fields=
-{   'Condition Category': FieldEntry(
-        jsonpath='Condition.category.[0]',
-        value_type='CodeableConcept', 
-        valuesets='https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-condition-category.html', 
-        values=['http://hl7.org/fhir/us/core/CodeSystem/condition-category^health-concern^Health Concern', 'http://hl7.org/fhir/us/core/CodeSystem/condition-category^health-concern^Health Concern']),
-    'Condition Clinical Status': FieldEntry(
-        jsonpath='Condition.clinicalStatus',
-        value_type='CodeableConcept', 
-        valuesets='https://hl7.org/fhir/R4/valueset-condition-clinical.html', 
-        values=['http://terminology.hl7.org/CodeSystem/condition-clinical^active^Active', 'http://terminology.hl7.org/CodeSystem/condition-clinical^active^Active']),
-    'Condition Code': FieldEntry(
-        jsonpath='Condition.code',
-        value_type='CodeableConcept', 
-        valuesets='None', 
-        values=['http://hl7.org/fhir/sid/icd-10^E03.1^congenital hypothyroidism without goiter.', 'http://hl7.org/fhir/sid/icd-10^E03.1^congenital hypothyroidism without goiter.']),
-    'Condition Onset Date': FieldEntry(
-        jsonpath='Condition.onsetDateTime',
-        value_type='datetime', 
-        valuesets='None', 
-        values=[datetime.datetime(2019, 5, 6, 0, 0), datetime.datetime(2019, 5, 6, 0, 0)]),
-    'Condition Verification Status': FieldEntry(
-        jsonpath='Condition.verificationStatus',
-        value_type='CodeableConcept', 
-        valuesets='https://hl7.org/fhir/R4/valueset-condition-ver-status.html', 
-        values=['http://terminology.hl7.org/CodeSystem/condition-ver-status^confirmed^Confirmed', 'http://terminology.hl7.org/CodeSystem/condition-ver-status^confirmed^Confirmed'])}),
- 'FollowupDiagnosis': EntityData(fields=
-{   'Condition Category': FieldEntry(
-        jsonpath='Condition.category',
-        value_type='CodeableConcept', 
-        valuesets='https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-condition-category.html', 
-        values=[None, None]),
-    'Condition Clinical Status': FieldEntry(
-        jsonpath='Condition.clinicalStatus',
-        value_type='CodeableConcept', 
-        valuesets='https://hl7.org/fhir/R4/valueset-condition-clinical.html', 
-        values=[None, None]),
-    'Condition Code': FieldEntry(
-        jsonpath='Condition.code',
-        value_type='CodeableConcept', 
-        valuesets='None', 
-        values=[None, None]),
-    'Condition Onset Date': FieldEntry(
-        jsonpath='Condition.onsetDateTime',
-        value_type='datetime', 
-        valuesets='None', 
-        values=[None, None]),
-    'Condition Verification Status': FieldEntry(
-        jsonpath='Condition.verificationStatus',
-        value_type='CodeableConcept', 
-        valuesets='https://hl7.org/fhir/R4/valueset-condition-ver-status.html', 
-        values=[None, None])}),
- 'HearingScreening': EntityData(fields=
-{   'Procedure Event Status': FieldEntry(
-        jsonpath='Procedure.status',
-        value_type='code', 
-        valuesets='https://hl7.org/fhir/R4/valueset-event-status.html', 
-        values=['completed', 'completed']),
-    'Procedure code': FieldEntry(
-        jsonpath='Procedure.code',
-        value_type='CodeableConcept', 
-        valuesets='https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-procedure-code.html', 
-        values=['http://www.ama-assn.org/go/cpt^92558^Audiologic Function Tests', 'http://www.ama-assn.org/go/cpt^92558^Audiologic Function Tests']),
-    "Procedure's Performed Datetime": FieldEntry(
-        jsonpath='Procedure.performedDateTime',
-        value_type='dateTime', 
-        valuesets='None', 
-        values=[datetime.datetime(2019, 5, 7, 0, 0), datetime.datetime(2019, 5, 7, 0, 0)])}),
- 'Mother': EntityData(fields=
-{   'Mother Relationship Code': FieldEntry(
-        jsonpath='RelatedPerson.relationship.[0]',
-        value_type='CodeableConcept', 
-        valuesets='https://www.hl7.org/fhir/r4/valueset-relatedperson-relationshiptype.html', 
-        values=['http://terminology.hl7.org/CodeSystem/v3-RoleCode^MTH^Mother', 'http://terminology.hl7.org/CodeSystem/v3-RoleCode^MTH^Mother']),
-    'Mother identifier': FieldEntry(
-        jsonpath='RelatedPerson.identifier.[0].value',
-        value_type='string', 
-        valuesets='None', 
-        values=[4567, 4567]),
-    'Mother identifier namespace': FieldEntry(
-        jsonpath='RelatedPerson.identifier.[0].system',
-        value_type='string', 
-        valuesets='None', 
-        values=['urn:example:healthcare:system', 'urn:example:healthcare:system']),
-    "Mother's Family Name": FieldEntry(
-        jsonpath='RelatedPerson.name.[0].family',
-        value_type='string', 
-        valuesets='None', 
-        values=['Crosswell', 'Crosswell']),
-    "Mother's Gender": FieldEntry(
-        jsonpath='RelatedPerson.gender',
-        value_type='code', 
-        valuesets='https://hl7.org/fhir/R4/valueset-administrative-gender.html', 
-        values=['female', 'female']),
-    "Mother's Given Name": FieldEntry(
-        jsonpath='RelatedPerson.name.[0].given',
-        value_type='string[]', 
-        valuesets='None', 
-        values=['Lillian', 'Lillian']),
-    "Mother's Telecom Number": FieldEntry(
-        jsonpath='RelatedPerson.telecom.[0].value',
-        value_type='string', 
-        valuesets='None', 
-        values=['888-888-8888', '888-888-8888']),
-    "Mother's Telecom Purpose": FieldEntry(
-        jsonpath='RelatedPerson.telecom.[0].use',
-        value_type='string', 
-        valuesets='https://hl7.org/fhir/R4/valueset-contact-point-use.html', 
-        values=['home', 'home']),
-    "Mother's Telecom System (Type)": FieldEntry(
-        jsonpath='RelatedPerson.telecom.[0].system',
-        value_type='string', 
-        valuesets='https://hl7.org/fhir/R4/valueset-contact-point-system.html', 
-        values=['phone', 'phone']),
-    "Mother's name Use (Type)": FieldEntry(
-        jsonpath='RelatedPerson.name[0].use',
-        value_type='code', 
-        valuesets='None', 
-        values=['usual ', 'usual '])}),
- 'PrimaryEncounter': EntityData(fields=
-{   'Encounter End Date': FieldEntry(
-        jsonpath='Encounter.period.end',
-        value_type='dateTime', 
-        valuesets='None', 
-        values=[datetime.datetime(2019, 5, 6, 16, 6, 37), datetime.datetime(2019, 5, 6, 16, 6, 37)]),
-    'Encounter Identifier': FieldEntry(
-        jsonpath='Encounter.identifier.[0].value',
-        value_type='string', 
-        valuesets='None', 
-        values=[3456, 3456]),
-    'Encounter Start Date': FieldEntry(
-        jsonpath='Encounter.period.start',
-        value_type='dateTime', 
-        valuesets='None', 
-        values=[datetime.datetime(2019, 5, 6, 11, 1, 23), datetime.datetime(2019, 5, 6, 11, 1, 23)]),
-    'Encounter Status': FieldEntry(
-        jsonpath='Encounter.status',
-        value_type='code', 
-        valuesets='https://hl7.org/fhir/R4/valueset-encounter-status.html', 
-        values=['finished', 'finished']),
-    'Encounter identifier namespace': FieldEntry(
-        jsonpath='Encounter.identifier.[0].system',
-        value_type='string', 
-        valuesets='None', 
-        values=['urn:example:healthcare:system', 'urn:example:healthcare:system']),
-    'Encounter patient classification': FieldEntry(
-        jsonpath='Encounter.class',
-        value_type='Coding', 
-        valuesets='https://hl7.org/fhir/R4/v3/ActEncounterCode/vs.html', 
-        values=['http://terminology.hl7.org/CodeSystem/v3-ActCode^IMP^inpatient encounter', 'http://terminology.hl7.org/CodeSystem/v3-ActCode^IMP^inpatient encounter']),
-    'Specific Encounter Type': FieldEntry(
-        jsonpath='Encounter.type.[0]',
-        value_type='CodeableConcept', 
-        valuesets='https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-encounter-type.html', 
-        values=['http://hl7.org/fhir/sid/icd-10^O80^full-term uncomplicated delivery', 'http://hl7.org/fhir/sid/icd-10^O80^full-term uncomplicated delivery']),
-    'Type of Facility Patient Discharged To': FieldEntry(
-        jsonpath='Encounter.hospitalization.dischargeDisposition',
-        value_type='CodeableConcept', 
-        valuesets='https://hl7.org/fhir/R4/valueset-encounter-discharge-disposition.html', 
-        values=['http://terminology.hl7.org/CodeSystem/discharge-disposition^home^Home', 'http://terminology.hl7.org/CodeSystem/discharge-disposition^home^Home'])}),
- 'PrimaryPatient': EntityData(fields=
+CohortData(entities={'PrimaryPatient': EntityData(fields=
 {   'Patient Identifier System': FieldEntry(
         jsonpath='Patient.identifier.[0].system',
         value_type='string', 
         valuesets='None', 
-        values=['http://hospital.smarthealthit.org', 'http://hospital.smarthealthit.org']),
+        values=['http://hospital.smarthealthit.org']),
     'Patient Identifier Value': FieldEntry(
         jsonpath='Patient.identifier.[0].value',
         value_type='string', 
         valuesets='None', 
-        values=[7890123, 7890123]),
+        values=[7890123]),
     'Patient MRN Identifier System': FieldEntry(
         jsonpath='Patient.identifier[type=MRN].system',
         value_type='string', 
         valuesets='None', 
-        values=['urn:mrn:http://hl7.org/fhir/sid/us-mrn', 'urn:mrn:http://hl7.org/fhir/sid/us-mrn']),
+        values=['urn:mrn:http://hl7.org/fhir/sid/us-mrn']),
     'Patient MRN Identifier Value': FieldEntry(
         jsonpath='Patient.identifier[type=MRN].value',
         value_type='string', 
         valuesets='None', 
-        values=[68392077, 68392077]),
+        values=[68392077]),
     'Patient SSN Identifier System': FieldEntry(
         jsonpath='Patient.identifier[type=SSN].system',
         value_type='string', 
         valuesets='None', 
-        values=['http://hl7.org/fhir/sid/us-ssn', 'http://hl7.org/fhir/sid/us-ssn']),
+        values=['http://hl7.org/fhir/sid/us-ssn']),
     'Patient SSN Identifier Value': FieldEntry(
         jsonpath='Patient.identifier[type=SSN].value',
         value_type='string', 
         valuesets='None', 
-        values=['456-78-9012', '456-78-9012']),
+        values=['456-78-9012']),
     'Patient name Use (Type)': FieldEntry(
         jsonpath='Patient.name[0].use',
         value_type='code', 
         valuesets='None', 
-        values=['usual ', 'usual ']),
+        values=['usual ']),
     "Patient's Communication Language": FieldEntry(
         jsonpath='Patient.communication.[0].language',
         value_type='CodeableConcept', 
         valuesets='None', 
-        values=['urn:ietf:bcp:47^en^English', 'urn:ietf:bcp:47^en^English']),
+        values=['urn:ietf:bcp:47^en^English']),
     "Patient's Date of Birth": FieldEntry(
         jsonpath='Patient.birthDate',
         value_type='date', 
         valuesets='None', 
-        values=[datetime.datetime(2019, 5, 6, 0, 0), datetime.datetime(2019, 5, 6, 0, 0)]),
+        values=[datetime.datetime(2019, 5, 6, 0, 0)]),
     "Patient's Family Name": FieldEntry(
         jsonpath='Patient.name.[0].family',
         value_type='string', 
         valuesets='None', 
-        values=['Crosswell', 'Crosswell']),
+        values=['Crosswell']),
     "Patient's Gender": FieldEntry(
         jsonpath='Patient.gender',
         value_type='code', 
         valuesets='https://hl7.org/fhir/R4/valueset-administrative-gender.html', 
-        values=['male', 'male']),
+        values=['male']),
     "Patient's Given Name": FieldEntry(
         jsonpath='Patient.name.[0].given',
         value_type='string[]', 
         valuesets='None', 
-        values=['Ethan', 'Ethan']),
+        values=['Ethan']),
     "Patient's OMB Ethnicity Category": FieldEntry(
         jsonpath='Patient.extension[Ethnicity].ombCategory.value',
         value_type='code', 
         valuesets='https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-omb-ethnicity-category.html', 
-        values=['Not Hispanic or Latino ', 'Not Hispanic or Latino ']),
+        values=['Not Hispanic or Latino ']),
     "Patient's OMB Race Category": FieldEntry(
         jsonpath='Patient.extension[Race].ombCategory',
         value_type='None', 
         valuesets='https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-omb-race-category.html', 
-        values=['Asian ', 'Asian ']),
+        values=['Asian ']),
     "Patient's Primary Address": FieldEntry(
         jsonpath='Patient.address.[0]',
         value_type='Address', 
         valuesets='None', 
-        values=['42 Elmwood Drive^Boulder^Boulder^90302^CO^US', '42 Elmwood Drive^Boulder^Boulder^90302^CO^US']),
+        values=['42 Elmwood Drive^Boulder^Boulder^90302^CO^US']),
     "Patient's Sex at Birth": FieldEntry(
         jsonpath='Patient.extension[Birthsex].value',
         value_type='code', 
         valuesets='https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-birthsex.html', 
-        values=['M', 'M']),
+        values=['M']),
     "Patient's Telecom Number": FieldEntry(
         jsonpath='Patient.telecom.[0].value',
         value_type='string', 
         valuesets='None', 
-        values=['777-777-7777', '777-777-7777']),
+        values=['777-777-7777']),
     "Patient's Telecom Purpose": FieldEntry(
         jsonpath='Patient.telecom.[0].use',
         value_type='string', 
         valuesets='https://hl7.org/fhir/R4/valueset-contact-point-use.html', 
-        values=['home', 'home']),
+        values=['home']),
     "Patient's Telecom System (Type)": FieldEntry(
         jsonpath='Patient.telecom.[0].system',
         value_type='string', 
         valuesets='https://hl7.org/fhir/R4/valueset-contact-point-system.html', 
-        values=['phone', 'phone'])}),
- 'Ultrasound': EntityData(fields=
+        values=['phone'])}), 'PrimaryEncounter': EntityData(fields=
+{   'Encounter End Date': FieldEntry(
+        jsonpath='Encounter.period.end',
+        value_type='dateTime', 
+        valuesets='None', 
+        values=[datetime.datetime(2019, 5, 6, 16, 6, 37)]),
+    'Encounter Identifier': FieldEntry(
+        jsonpath='Encounter.identifier.[0].value',
+        value_type='string', 
+        valuesets='None', 
+        values=[3456]),
+    'Encounter Start Date': FieldEntry(
+        jsonpath='Encounter.period.start',
+        value_type='dateTime', 
+        valuesets='None', 
+        values=[datetime.datetime(2019, 5, 6, 11, 1, 23)]),
+    'Encounter Status': FieldEntry(
+        jsonpath='Encounter.status',
+        value_type='code', 
+        valuesets='https://hl7.org/fhir/R4/valueset-encounter-status.html', 
+        values=['finished']),
+    'Encounter identifier namespace': FieldEntry(
+        jsonpath='Encounter.identifier.[0].system',
+        value_type='string', 
+        valuesets='None', 
+        values=['urn:example:healthcare:system']),
+    'Encounter patient classification': FieldEntry(
+        jsonpath='Encounter.class',
+        value_type='Coding', 
+        valuesets='https://hl7.org/fhir/R4/v3/ActEncounterCode/vs.html', 
+        values=['http://terminology.hl7.org/CodeSystem/v3-ActCode^IMP^inpatient encounter']),
+    'Specific Encounter Type': FieldEntry(
+        jsonpath='Encounter.type.[0]',
+        value_type='CodeableConcept', 
+        valuesets='https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-encounter-type.html', 
+        values=['http://hl7.org/fhir/sid/icd-10^O80^full-term uncomplicated delivery']),
+    'Type of Facility Patient Discharged To': FieldEntry(
+        jsonpath='Encounter.hospitalization.dischargeDisposition',
+        value_type='CodeableConcept', 
+        valuesets='https://hl7.org/fhir/R4/valueset-encounter-discharge-disposition.html', 
+        values=['http://terminology.hl7.org/CodeSystem/discharge-disposition^home^Home'])}), 'Mother': EntityData(fields=
+{   'Mother Relationship Code': FieldEntry(
+        jsonpath='RelatedPerson.relationship.[0]',
+        value_type='CodeableConcept', 
+        valuesets='https://www.hl7.org/fhir/r4/valueset-relatedperson-relationshiptype.html', 
+        values=['http://terminology.hl7.org/CodeSystem/v3-RoleCode^MTH^Mother']),
+    'Mother identifier': FieldEntry(
+        jsonpath='RelatedPerson.identifier.[0].value',
+        value_type='string', 
+        valuesets='None', 
+        values=[4567]),
+    'Mother identifier namespace': FieldEntry(
+        jsonpath='RelatedPerson.identifier.[0].system',
+        value_type='string', 
+        valuesets='None', 
+        values=['urn:example:healthcare:system']),
+    "Mother's Family Name": FieldEntry(
+        jsonpath='RelatedPerson.name.[0].family',
+        value_type='string', 
+        valuesets='None', 
+        values=['Crosswell']),
+    "Mother's Gender": FieldEntry(
+        jsonpath='RelatedPerson.gender',
+        value_type='code', 
+        valuesets='https://hl7.org/fhir/R4/valueset-administrative-gender.html', 
+        values=['female']),
+    "Mother's Given Name": FieldEntry(
+        jsonpath='RelatedPerson.name.[0].given',
+        value_type='string[]', 
+        valuesets='None', 
+        values=['Lillian']),
+    "Mother's Telecom Number": FieldEntry(
+        jsonpath='RelatedPerson.telecom.[0].value',
+        value_type='string', 
+        valuesets='None', 
+        values=['888-888-8888']),
+    "Mother's Telecom Purpose": FieldEntry(
+        jsonpath='RelatedPerson.telecom.[0].use',
+        value_type='string', 
+        valuesets='https://hl7.org/fhir/R4/valueset-contact-point-use.html', 
+        values=['home']),
+    "Mother's Telecom System (Type)": FieldEntry(
+        jsonpath='RelatedPerson.telecom.[0].system',
+        value_type='string', 
+        valuesets='https://hl7.org/fhir/R4/valueset-contact-point-system.html', 
+        values=['phone']),
+    "Mother's name Use (Type)": FieldEntry(
+        jsonpath='RelatedPerson.name[0].use',
+        value_type='code', 
+        valuesets='None', 
+        values=['usual '])}), 'HearingScreening': EntityData(fields=
 {   'Procedure Event Status': FieldEntry(
         jsonpath='Procedure.status',
         value_type='code', 
         valuesets='https://hl7.org/fhir/R4/valueset-event-status.html', 
-        values=['completed', 'completed']),
+        values=['completed']),
     'Procedure code': FieldEntry(
         jsonpath='Procedure.code',
         value_type='CodeableConcept', 
         valuesets='https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-procedure-code.html', 
-        values=['http://www.ama-assn.org/go/cpt^70551^Magnetic resonance (eg, proton) imaging, brain (including brain stem)', 'http://www.ama-assn.org/go/cpt^70551^Magnetic resonance (eg, proton) imaging, brain (including brain stem)']),
+        values=['http://www.ama-assn.org/go/cpt^92558^Audiologic Function Tests']),
     "Procedure's Performed Datetime": FieldEntry(
         jsonpath='Procedure.performedDateTime',
         value_type='dateTime', 
         valuesets='None', 
-        values=[datetime.datetime(2018, 4, 15, 0, 0), datetime.datetime(2018, 4, 15, 0, 0)])}),
- 'Valganciclovir': EntityData(fields=
+        values=[datetime.datetime(2019, 5, 7, 0, 0)])}), 'CMVTest': EntityData(fields=
+{   'Procedure Event Status': FieldEntry(
+        jsonpath='Procedure.status',
+        value_type='code', 
+        valuesets='https://hl7.org/fhir/R4/valueset-event-status.html', 
+        values=['completed']),
+    'Procedure code': FieldEntry(
+        jsonpath='Procedure.code',
+        value_type='CodeableConcept', 
+        valuesets='https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-procedure-code.html', 
+        values=['http://www.ama-assn.org/go/cpt^87496^Infectious agent detection by nucleic acid (DNA or RNA)']),
+    "Procedure's Performed Datetime": FieldEntry(
+        jsonpath='Procedure.performedDateTime',
+        value_type='dateTime', 
+        valuesets='None', 
+        values=[datetime.datetime(2019, 5, 8, 0, 0)])}), 'Ultrasound': EntityData(fields=
+{   'Procedure Event Status': FieldEntry(
+        jsonpath='Procedure.status',
+        value_type='code', 
+        valuesets='https://hl7.org/fhir/R4/valueset-event-status.html', 
+        values=['completed']),
+    'Procedure code': FieldEntry(
+        jsonpath='Procedure.code',
+        value_type='CodeableConcept', 
+        valuesets='https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-procedure-code.html', 
+        values=['http://www.ama-assn.org/go/cpt^70551^Magnetic resonance (eg, proton) imaging, brain (including brain stem)']),
+    "Procedure's Performed Datetime": FieldEntry(
+        jsonpath='Procedure.performedDateTime',
+        value_type='dateTime', 
+        valuesets='None', 
+        values=[datetime.datetime(2018, 4, 15, 0, 0)])}), 'Diagnosis': EntityData(fields=
+{   'Condition Category': FieldEntry(
+        jsonpath='Condition.category.[0]',
+        value_type='CodeableConcept', 
+        valuesets='https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-condition-category.html', 
+        values=['http://hl7.org/fhir/us/core/CodeSystem/condition-category^health-concern^Health Concern']),
+    'Condition Clinical Status': FieldEntry(
+        jsonpath='Condition.clinicalStatus',
+        value_type='CodeableConcept', 
+        valuesets='https://hl7.org/fhir/R4/valueset-condition-clinical.html', 
+        values=['http://terminology.hl7.org/CodeSystem/condition-clinical^active^Active']),
+    'Condition Code': FieldEntry(
+        jsonpath='Condition.code',
+        value_type='CodeableConcept', 
+        valuesets='None', 
+        values=['http://hl7.org/fhir/sid/icd-10^E03.1^congenital hypothyroidism without goiter.']),
+    'Condition Onset Date': FieldEntry(
+        jsonpath='Condition.onsetDateTime',
+        value_type='datetime', 
+        valuesets='None', 
+        values=[datetime.datetime(2019, 5, 6, 0, 0)]),
+    'Condition Verification Status': FieldEntry(
+        jsonpath='Condition.verificationStatus',
+        value_type='CodeableConcept', 
+        valuesets='https://hl7.org/fhir/R4/valueset-condition-ver-status.html', 
+        values=['http://terminology.hl7.org/CodeSystem/condition-ver-status^confirmed^Confirmed'])}), 'Valganciclovir': EntityData(fields=
 {   'Medication Code': FieldEntry(
         jsonpath='MedicationRequest.medicationCodeableConcept',
         value_type='CodeableConcept', 
         valuesets='https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-medication-codes.html', 
-        values=['http://www.nlm.nih.gov/research/umls/rxnorm^275891^valganciclovir', 'http://www.nlm.nih.gov/research/umls/rxnorm^275891^valganciclovir']),
+        values=['http://www.nlm.nih.gov/research/umls/rxnorm^275891^valganciclovir']),
     'Medication Date': FieldEntry(
         jsonpath='MedicationRequest.authoredOn',
         value_type='dateTime', 
         valuesets='None', 
-        values=[datetime.datetime(2019, 5, 6, 0, 0), datetime.datetime(2019, 5, 6, 0, 0)]),
+        values=[datetime.datetime(2019, 5, 6, 0, 0)]),
     'Medication Dosage Instructions': FieldEntry(
         jsonpath='MedicationRequest.dosageInstruction.[0].text',
         value_type='string', 
         valuesets='None', 
-        values=['0.2 mg/kg/dose, given twice daily', '0.2 mg/kg/dose, given twice daily']),
+        values=['0.2 mg/kg/dose, given twice daily']),
     'Medication Request Intent': FieldEntry(
         jsonpath='MedicationRequest.intent',
         value_type='code', 
         valuesets='https://hl7.org/fhir/R4/valueset-medicationrequest-intent.html', 
-        values=['order', 'order']),
+        values=['order']),
     'Medication Request Status': FieldEntry(
         jsonpath='MedicationRequest.status',
         value_type='code', 
         valuesets='https://hl7.org/fhir/R4/valueset-medicationrequest-status.html', 
-        values=['active', 'active'])})}
+        values=['active'])}), 'FollowupDiagnosis': EntityData(fields=
+{   'Condition Category': FieldEntry(
+        jsonpath='Condition.category',
+        value_type='CodeableConcept', 
+        valuesets='https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-condition-category.html', 
+        values=[None]),
+    'Condition Clinical Status': FieldEntry(
+        jsonpath='Condition.clinicalStatus',
+        value_type='CodeableConcept', 
+        valuesets='https://hl7.org/fhir/R4/valueset-condition-clinical.html', 
+        values=[None]),
+    'Condition Code': FieldEntry(
+        jsonpath='Condition.code',
+        value_type='CodeableConcept', 
+        valuesets='None', 
+        values=[None]),
+    'Condition Onset Date': FieldEntry(
+        jsonpath='Condition.onsetDateTime',
+        value_type='datetime', 
+        valuesets='None', 
+        values=[None]),
+    'Condition Verification Status': FieldEntry(
+        jsonpath='Condition.verificationStatus',
+        value_type='CodeableConcept', 
+        valuesets='https://hl7.org/fhir/R4/valueset-condition-ver-status.html', 
+        values=[None])})})

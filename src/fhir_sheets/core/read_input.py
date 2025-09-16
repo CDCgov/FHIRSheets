@@ -1,5 +1,10 @@
 import openpyxl
 
+from .model.cohort_data_entity import CohortData, EntityData, FieldEntry
+
+from .model.resource_definition_entity import ResourceDefinition
+from .model.resource_link_entity import ResourceLink
+
 # Function to read the xlsx file and access specific sheets
 def read_xlsx_and_process(file_path):
     # Load the workbook
@@ -16,19 +21,15 @@ def read_xlsx_and_process(file_path):
 
     if 'PatientData' in workbook.sheetnames:
         sheet = workbook['PatientData']
-        patient_data_entities, num_entries = process_sheet_patient_data(sheet, resource_definition_entities)
+        cohort_data = process_sheet_patient_data(sheet, resource_definition_entities)
     
-    return {
-        "resource_definition_entities": resource_definition_entities,
-        "resource_link_entities": resource_link_entities,
-        "patient_data_entities": patient_data_entities,
-        "num_entries": num_entries
-    }
+    return resource_definition_entities, resource_link_entities, cohort_data
 
 
 # Function to process the specific sheet with 'Entity Name', 'ResourceType', and 'Profile(s)'
 def process_sheet_resource_definitions(sheet):
     resource_definitions = []
+    resource_definition_entities = []
     headers = [cell.value for cell in next(sheet.iter_rows(min_row=1, max_row=1))]  # Get headers
 
     for row in sheet.iter_rows(min_row=3, values_only=True):
@@ -38,27 +39,30 @@ def process_sheet_resource_definitions(sheet):
         # Split 'Profile(s)' column into a list of URLs
         if row_data.get("Profile(s)"):
             row_data["Profile(s)"] = [url.strip() for url in row_data["Profile(s)"].split(",")]
-
+        resource_definition_entities.append(ResourceDefinition(row_data))
         resource_definitions.append(row_data)
 
-    return resource_definitions
+    return resource_definition_entities
 
 # Function to process the specific sheet with 'OriginResource', 'ReferencePath', and 'DestinationResource'
 def process_sheet_resource_links(sheet):
     resource_links = []
+    resource_link_entities = []
     headers = [cell.value for cell in next(sheet.iter_rows(min_row=1, max_row=1))]  # Get headers
     for row in sheet.iter_rows(min_row=3, values_only=True):
         row_data = dict(zip(headers, row))  # Create a dictionary for each row
         if all(cell is None or cell == "" for cell in row_data):
             continue
         resource_links.append(row_data)
+        resource_link_entities.append(ResourceLink(row_data))
 
-    return resource_links
+    return resource_link_entities
 
 # Function to process the "PatientData" sheet
 def process_sheet_patient_data(sheet, resource_definition_entities):
     # Initialize the dictionary to store the processed data
     patient_data = {}
+    cohort_data = CohortData()
     # Extract the data from the first 6 rows (Entity To Query, JsonPath, etc.)
     for col in sheet.iter_cols(min_row=1, max_row=6, min_col=3, values_only=True):  # Start from 3rd column
         if all(entry is None for entry in col):
@@ -68,20 +72,23 @@ def process_sheet_patient_data(sheet, resource_definition_entities):
         if (entity_name is None or entity_name == "") and (field_name is not None and field_name != ""):
             print(f"WARNING: - Reading Patient Data Issue - {field_name} - 'Entity To Query' cell missing for column labelled '{field_name}', please provide entity name from the ResourceDefinitions tab.")
 
-        if entity_name not in [entry['Entity Name'] for entry in resource_definition_entities]:
+        if entity_name not in [entry.entity_name for entry in resource_definition_entities]:
             print(f"WARNING: - Reading Patient Data Issue - {field_name} - 'Entity To Query' cell has entity named '{entity_name}', however, the ResourceDefinition tab has no matching resource. Please provide a corresponding entry in the ResourceDefinition tab.")
         # Create structure for this entity if not already present
         if entity_name not in patient_data:
             patient_data[entity_name] = {}
+            cohort_data.insert_entity(entity_name, EntityData({}))
 
         # Add jsonpath, valuesets, and initialize an empty list for 'values'
         if field_name not in patient_data[entity_name]:
-            patient_data[entity_name][field_name] = {
+            field_data = {
                 "jsonpath": col[1],  # JsonPath from the second row
                 "valueType": col[2], # Value Type from the third row
                 "valuesets": col[3], # Value Set from the fourth row
                 "values": []         # Initialize empty list for actual values
             }
+            patient_data[entity_name][field_name] = field_data
+            cohort_data.entities[entity_name].insert(field_name, FieldEntry(field_data))
     
     # Now process the rows starting from the 6th row (the actual data entries)
     num_entries = 0
@@ -96,4 +103,6 @@ def process_sheet_patient_data(sheet, resource_definition_entities):
             if entity_name in patient_data and field_name in patient_data[entity_name]:
                 # Append the actual data values to the 'values' array
                 patient_data[entity_name][field_name]["values"].append(value)
-    return patient_data, num_entries
+                cohort_data.entities[entity_name].fields[field_name].values.append(value)
+    cohort_data.num_entries = num_entries
+    return cohort_data

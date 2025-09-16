@@ -27,16 +27,14 @@ def main(input_file, output_folder):
         output_folder_path = Path().cwd() / Path(output_folder)
     if not output_folder_path.exists():
         output_folder_path.mkdir(parents=True, exist_ok=True)  # Create the folder if it doesn't exist
-    data = read_input.read_xlsx_and_process(input_file)
-    resource_definition_entities = data['resource_definition_entities']
+    resource_definition_entities, resource_link_entities, cohort_data = read_input.read_xlsx_and_process(input_file)
     
     #For each index of patients
-    for i in range(0,data['num_entries']):
+    for i in range(0,cohort_data.num_entries):
         # Construct the file path for each JSON file
         file_path = output_folder_path / f"{i}.json"
         #Create a bundle
-        fhir_bundle = conversion.create_transaction_bundle(data['resource_definition_entities'],
-                                                        data['resource_link_entities'], data['patient_data_entities'], i)
+        fhir_bundle = conversion.create_transaction_bundle(resource_definition_entities, resource_link_entities, cohort_data, i)
         # Step 3: Write the processed data to the output file
         find_sets(fhir_bundle)
         json_string = orjson.dumps(fhir_bundle)

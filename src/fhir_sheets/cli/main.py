@@ -29,7 +29,7 @@ def main(input_file, output_folder):
     if not output_folder_path.exists():
         output_folder_path.mkdir(parents=True, exist_ok=True)  # Create the folder if it doesn't exist
     resource_definition_entities, resource_link_entities, cohort_data = read_input.read_xlsx_and_process(input_file)
-    
+    pprint(cohort_data)
     #For each index of patients
     for i in range(0,cohort_data.num_entries):
         # Construct the file path for each JSON file

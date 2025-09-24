@@ -196,7 +196,7 @@ def parse_flexible_address(address):
     country_pattern = r'(?:\s*(?P<country>[\w\s]+|))?$'
     
     # Compile the full pattern to match the postal code, state, and country
-    full_pattern = rf'^(?P<line>.*?)\^(?P<city>.*?)\^(?P<district>.*?)\^{state_pattern}\^{postal_code_pattern}\^{country_pattern}'
+    full_pattern = rf'^(?P<line>.*?)\^(?P<city>.*?)\^(?P<district>.*?)\^{postal_code_pattern}\^{state_pattern}\^{country_pattern}'
     
     match = re.search(full_pattern, address)
     

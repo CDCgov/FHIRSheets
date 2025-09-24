@@ -32,6 +32,13 @@ def initialize_bundle():
     root_bundle = {}
     root_bundle['resourceType'] = 'Bundle'
     root_bundle['id'] = str(uuid.uuid4())
+    root_bundle['meta'] = {
+        'security': [{
+            'system': 'http://terminology.hl7.org/CodeSystem/v3-ActReason',
+            'code': 'HTEST',
+            'display': 'test health data'
+        }]
+    }
     root_bundle['type'] = 'transaction'
     root_bundle['entry'] = []
     return root_bundle
@@ -43,7 +50,12 @@ def initialize_resource(resource_definition):
     initial_resource['id'] = str(uuid.uuid4()).strip()
     if resource_definition.profiles:
         initial_resource['meta'] = {
-            'profile': resource_definition.profiles
+            'profile': resource_definition.profiles,
+            'security': [{
+                'system': 'http://terminology.hl7.org/CodeSystem/v3-ActReason',
+                'code': 'HTEST',
+                'display': 'test health data'
+            }]
         }
     return initial_resource
 

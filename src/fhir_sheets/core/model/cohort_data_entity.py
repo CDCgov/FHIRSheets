@@ -1,4 +1,3 @@
-import pprint
 from typing import Dict, Any, List, Optional, Tuple
 
 class HeaderEntry:
@@ -15,14 +14,14 @@ class HeaderEntry:
     
 class PatientEntry:
 
-    def __init__(self, entries:Dict[str,str]):
+    def __init__(self, entries:Dict[Tuple[str,str],str]):
         self.entries = entries
 
     def __repr__(self) -> str:
         return (f"PatientEntry(\n\t'{self.entries}')")
     
 class CohortData:
-    def __init__(self, headers: List[Dict[str,Any]], patients: List[Dict[str,str]]):
+    def __init__(self, headers: List[Dict[str,Any]], patients: List[Dict[Tuple[str,str],str]]):
         self.headers = [HeaderEntry(header_data) for header_data in headers]
         self.patients = [PatientEntry(patient_data) for patient_data in patients]
 

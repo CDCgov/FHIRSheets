@@ -69,20 +69,20 @@ def create_fhir_resource(resource_definition: ResourceDefinition, cohort_data: C
         if headerEntry.entityName == resource_definition.entity_name
     ]
     dataelements_for_resourcename = {
-        key: value
-        for key, value in cohort_data.patients[index].entries.items()
-        if value['entity_name'] == resource_definition.entity_name
+        field_name: value
+        for (entity_name, field_name), value in cohort_data.patients[index].entries.items()
+        if entity_name == resource_definition.entity_name
     }
     if len(dataelements_for_resourcename.keys()) == 0:
         print(f"WARNING: Patient index {index} - Create Fhir Resource Error - {resource_definition.entity_name} - No columns for entity '{resource_definition.entity_name}' found for resource in 'PatientData' sheet")
         return resource_dict
         all_field_entries = cohort_data.entities[resource_definition.entity_name].fields
     #For each field within the entity
-    for fieldname, dataelement in dataelements_for_resourcename.items():
+    for fieldname, value in dataelements_for_resourcename.items():
         header_element = next((header for header in header_entries_for_resourcename if header.fieldName == fieldname), None)
         if header_element is None:
             print(f"WARNING: Field Name {fieldname} - No Header Entry found.")
-        create_structure_from_jsonpath(resource_dict, header_element.jsonpath, resource_definition, header_element.value_type, dataelement['value'])
+        create_structure_from_jsonpath(resource_dict, header_element.jsonpath, resource_definition, header_element.value_type, value)
     return resource_dict
 
 #Create a resource_link for default references in the cases where only 1 resourceType of the source and destination exist

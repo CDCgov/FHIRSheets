@@ -140,8 +140,6 @@ def process_sheet_patient_data_revised(sheet, resource_definition_entities):
             needed_count = len(values) - len(patients)
             patients.extend([{}] * needed_count)
         for patient_dict, value in zip(patients, values):
-            patient_dict[field_name] = {}
-            patient_dict[field_name]["entity_name"] = entity_name
-            patient_dict[field_name]["value"] = value
+            patient_dict[(entity_name, field_name)] = value
     cohort_data = CohortData(headers=headers, patients=patients)
     return cohort_data

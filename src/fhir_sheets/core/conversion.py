@@ -3,7 +3,7 @@ import uuid
 from jsonpath_ng.jsonpath import Fields, Slice, Where
 from jsonpath_ng.ext import parse as parse_ext
 
-from .model.cohort_data_entity import CohortData, FieldEntry
+from .model.cohort_data_entity import CohortData, CohortData
 from .model.resource_definition_entity import ResourceDefinition
 from .model.resource_link_entity import ResourceLink
 from . import fhir_formatting
@@ -62,17 +62,27 @@ def initialize_resource(resource_definition):
 # Creates a fhir-json structure from a resource definition entity and the patient_data_sheet
 def create_fhir_resource(resource_definition: ResourceDefinition, cohort_data: CohortData, index = 0):
     resource_dict = initialize_resource(resource_definition)
-    #Get field entries for this entitiy
-    try:
-        all_field_entries = cohort_data.entities[resource_definition.entity_name].fields
-    except KeyError:
+    #Get field entries for this entity
+    header_entries_for_resourcename = [
+        headerEntry
+        for headerEntry in cohort_data.headers
+        if headerEntry.entityName == resource_definition.entity_name
+    ]
+    dataelements_for_resourcename = {
+        key: value
+        for key, value in cohort_data.patients[index].entries.items()
+        if value['entity_name'] == resource_definition.entity_name
+    }
+    if len(dataelements_for_resourcename.keys()) == 0:
         print(f"WARNING: Patient index {index} - Create Fhir Resource Error - {resource_definition.entity_name} - No columns for entity '{resource_definition.entity_name}' found for resource in 'PatientData' sheet")
         return resource_dict
+        all_field_entries = cohort_data.entities[resource_definition.entity_name].fields
     #For each field within the entity
-    for field_entry_key, field_entry in all_field_entries.items():
-        #Create a jsonpath from each provided json path and value for this resource
-        if field_entry.values and len(field_entry.values) > index:
-            create_structure_from_jsonpath(resource_dict, field_entry.jsonpath, resource_definition, field_entry, field_entry.value_type, field_entry.values[index])
+    for fieldname, dataelement in dataelements_for_resourcename.items():
+        header_element = next((header for header in header_entries_for_resourcename if header.fieldName == fieldname), None)
+        if header_element is None:
+            print(f"WARNING: Field Name {fieldname} - No Header Entry found.")
+        create_structure_from_jsonpath(resource_dict, header_element.jsonpath, resource_definition, header_element.value_type, dataelement['value'])
     return resource_dict
 
 #Create a resource_link for default references in the cases where only 1 resourceType of the source and destination exist
@@ -204,7 +214,7 @@ def add_resource_to_transaction_bundle(root_bundle, fhir_resource):
 # resource_definition: resource description model from import
 # entity_definition: specific field entry information for this function
 # value: Actual value to assign
-def create_structure_from_jsonpath(root_struct: Dict, json_path: str, resource_definition: ResourceDefinition, field_entry: FieldEntry, dataType: str, value: Any):
+def create_structure_from_jsonpath(root_struct: Dict, json_path: str, resource_definition: ResourceDefinition,  dataType: str, value: Any):
     #Get all dot notation components as seperate 
     if dataType is not None and dataType.strip().lower() == 'string':
         value = str(value)
@@ -214,10 +224,10 @@ def create_structure_from_jsonpath(root_struct: Dict, json_path: str, resource_d
         return root_struct
     #Start of top-level function which calls the enclosed recursive function
     parts = json_path.split('.')
-    return build_structure(root_struct, json_path, resource_definition, field_entry, parts, value, [])
+    return build_structure(root_struct, json_path, resource_definition, dataType, parts, value, [])
 
 # main recursive function to drill into the json structure, assign paths, and create structure where needed
-def build_structure(current_struct, json_path, resource_definition, entity_definition, parts, value, previous_parts):
+def build_structure(current_struct: Dict, json_path: str, resource_definition: ResourceDefinition, dataType: str, parts: List[str], value: Any, previous_parts: List[str]):
     if len(parts) == 0:
         return current_struct
     #Grab current part
@@ -225,11 +235,11 @@ def build_structure(current_struct, json_path, resource_definition, entity_defin
     #SPECIAL HANDLING CLAUSE
     matching_handler = next((handler for handler in special_values.custom_handlers if (json_path.startswith(handler) or json_path == handler)), None)
     if matching_handler is not None:
-        return special_values.custom_handlers[matching_handler].assign_value(json_path, resource_definition, entity_definition, current_struct, parts[-1], value)
+        return special_values.custom_handlers[matching_handler].assign_value(json_path, resource_definition,  current_struct, parts[-1], value)
     #Ignore dollar sign ($) and drill farther down
     if part == '$' or part == resource_definition.resource_type.strip():
         #Ignore the dollar sign and the resourcetype
-        return build_structure_recurse(current_struct, json_path, resource_definition, entity_definition, parts, value, previous_parts, part)
+        return build_structure_recurse(current_struct, json_path, resource_definition, dataType, parts, value, previous_parts, part)
     
     # If parts length is one then this is the final key to access and pair
     if len(parts) == 1:
@@ -252,7 +262,7 @@ def build_structure(current_struct, json_path, resource_definition, entity_defin
                 if part + 1 > len(current_struct):
                     current_struct.extend({} for x in range (part + 1 - len(current_struct)))
         #Actual assigning to the path
-        fhir_formatting.assign_value(current_struct, part, value, entity_definition.value_type)
+        fhir_formatting.assign_value(current_struct, part, value, dataType)
         return current_struct
     
     # If there is a simple qualifier with '['and ']'
@@ -274,7 +284,7 @@ def build_structure(current_struct, json_path, resource_definition, entity_defin
             if qualifier_as_number + 1 > len(current_struct):
                 current_struct.extend({} for x in range (qualifier_as_number + 1 - len(current_struct)))
             inner_struct = current_struct[qualifier_as_number]
-            inner_struct = build_structure_recurse(inner_struct, json_path, resource_definition, entity_definition, parts, value, previous_parts, part)
+            inner_struct = build_structure_recurse(inner_struct, json_path, resource_definition, dataType, parts, value, previous_parts, part)
             current_struct[qualifier_as_number] = inner_struct
             return current_struct
         # Create the key part in the structure
@@ -296,7 +306,7 @@ def build_structure(current_struct, json_path, resource_definition, entity_defin
                 inner_struct = {qualifier_key: qualifier_value}
                 current_struct[key_part].append(inner_struct)
             #Recurse into that innerstructure where the qualifier matched to continue the part traversal
-            inner_struct = build_structure_recurse(inner_struct, json_path, resource_definition, entity_definition, parts, value, previous_parts, part)
+            inner_struct = build_structure_recurse(inner_struct, json_path, resource_definition, dataType, parts, value, previous_parts, part)
             return current_struct
         #If there's no qualifier condition, but an index aka '[0]', '[1]' etc, then it's a simple accessor
         elif qualifier.isdigit():
@@ -306,19 +316,19 @@ def build_structure(current_struct, json_path, resource_definition, entity_defin
             if qualifier_as_number > len(current_struct):
                 current_struct[key_part].extend({} for x in range (qualifier_as_number - len(current_struct)))
             inner_struct = current_struct[key_part][qualifier_as_number]
-            inner_struct = build_structure_recurse(inner_struct, json_path, resource_definition, entity_definition, parts, value, previous_parts, part)
+            inner_struct = build_structure_recurse(inner_struct, json_path, resource_definition, dataType, parts, value, previous_parts, part)
             current_struct[key_part][qualifier_as_number] = inner_struct
             return current_struct
     #None qualifier accessor
     else:
         if(part not in current_struct):
             current_struct[part] = {}
-        inner_struct = build_structure_recurse(current_struct[part], json_path, resource_definition, entity_definition, parts, value, previous_parts, part)
+        inner_struct = build_structure_recurse(current_struct[part], json_path, resource_definition, dataType, parts, value, previous_parts, part)
         current_struct[part] = inner_struct
         return current_struct
     
 #Helper function to quickly recurse and return the next level of structure. Used by main recursive function
-def build_structure_recurse(current_struct, json_path, resource_definition, entity_definition, parts, value, previous_parts, part):
+def build_structure_recurse(current_struct, json_path, resource_definition, dataType, parts, value, previous_parts, part):
     previous_parts.append(part)
-    return_struct = build_structure(current_struct, json_path, resource_definition, entity_definition, parts[1:], value, previous_parts)
+    return_struct = build_structure(current_struct, json_path, resource_definition, dataType, parts[1:], value, previous_parts)
     return return_struct

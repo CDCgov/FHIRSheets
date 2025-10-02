@@ -31,7 +31,7 @@ def main(input_file, output_folder):
     resource_definition_entities, resource_link_entities, cohort_data = read_input.read_xlsx_and_process(input_file)
     pprint(cohort_data)
     #For each index of patients
-    for i in range(0,cohort_data.num_entries):
+    for i in range(0,cohort_data.get_num_patients()):
         # Construct the file path for each JSON file
         file_path = output_folder_path / f"{i}.json"
         #Create a bundle

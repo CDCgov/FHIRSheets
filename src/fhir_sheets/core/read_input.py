@@ -1,6 +1,6 @@
 import openpyxl
 
-from .model.cohort_data_entity import CohortData, EntityData, FieldEntry
+from .model.cohort_data_entity import CohortData, CohortData
 
 from .model.resource_definition_entity import ResourceDefinition
 from .model.resource_link_entity import ResourceLink
@@ -21,7 +21,7 @@ def read_xlsx_and_process(file_path):
 
     if 'PatientData' in workbook.sheetnames:
         sheet = workbook['PatientData']
-        cohort_data = process_sheet_patient_data(sheet, resource_definition_entities)
+        cohort_data = process_sheet_patient_data_revised(sheet, resource_definition_entities)
     
     return resource_definition_entities, resource_link_entities, cohort_data
 
@@ -104,4 +104,44 @@ def process_sheet_patient_data(sheet, resource_definition_entities):
                 # Append the actual data values to the 'values' array
                 cohort_data.entities[entity_name].fields[field_name].values.append(value)
     cohort_data.num_entries = num_entries
+    return cohort_data
+
+# Function to process the "PatientData" sheet for the Revised CohortData
+def process_sheet_patient_data_revised(sheet, resource_definition_entities):
+    headers = []
+    patients = []
+    # Initialize the dictionary to store the processed data
+    # Process the Header Entries from the first 6 rows (Entity To Query, JsonPath, etc.) and the data from the rest.
+    for col in sheet.iter_cols(min_row=1, min_col=3, values_only=True):  # Start from 3rd column
+        if all(entry is None for entry in col):
+            continue
+        entity_name = col[0]  # The entity name comes from the first row (Entity To Query)
+        field_name = col[5]  #The "Data Element" comes from the fifth row
+        if (entity_name is None or entity_name == "") and (field_name is not None and field_name != ""):
+            print(f"WARNING: - Reading Patient Data Issue - {field_name} - 'Entity To Query' cell missing for column labelled '{field_name}', please provide entity name from the ResourceDefinitions tab.")
+
+        if entity_name not in [entry.entity_name for entry in resource_definition_entities]:
+            print(f"WARNING: - Reading Patient Data Issue - {field_name} - 'Entity To Query' cell has entity named '{entity_name}', however, the ResourceDefinition tab has no matching resource. Please provide a corresponding entry in the ResourceDefinition tab.")
+
+        # Create a header entry
+        header_data = {
+            "fieldName": field_name,
+            "entityName": entity_name,
+            "jsonpath": col[1],  # JsonPath from the second row
+            "valueType": col[2], # Value Type from the third row
+            "valuesets": col[3] # Value Set from the fourth row
+        }
+        headers.append(header_data)
+        # Create a data entry
+        values = col[6:] # The values come from the 6th row and below
+        values = tuple(item for item in values if item is not None)
+        #Expand the patient dictionary set if needed
+        if len(values) > len(patients):
+            needed_count = len(values) - len(patients)
+            patients.extend([{}] * needed_count)
+        for patient_dict, value in zip(patients, values):
+            patient_dict[field_name] = {}
+            patient_dict[field_name]["entity_name"] = entity_name
+            patient_dict[field_name]["value"] = value
+    cohort_data = CohortData(headers=headers, patients=patients)
     return cohort_data

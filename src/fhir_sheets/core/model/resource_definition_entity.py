@@ -17,4 +17,4 @@ class ResourceDefinition:
         self.profiles = entity_data.get('Profile(s)')
 
     def __repr__(self) -> str:
-        return f"FhirEntity(entity_name='{self.entity_name}', resource_type='{self.resource_type}', profiles={self.profiles})"
+        return f"ResourceDefinition(entity_name='{self.entity_name}', resource_type='{self.resource_type}', profiles={self.profiles})"

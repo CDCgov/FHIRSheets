@@ -27,6 +27,12 @@ def create_transaction_bundle(resource_definition_entities: List[ResourceDefinit
         add_resource_to_transaction_bundle(root_bundle, fhir_resource)
     return root_bundle
 
+def create_singular_resource(resource_definition_entity: ResourceDefinition, resource_link_entities: List[ResourceLink], cohort_data: CohortData, index = 0):
+    fhir_resource = create_fhir_resource(resource_definition, cohort_data, index)
+    add_default_resource_links([fhir_resource], resource_link_entities)
+    create_resource_links([fhir_resource], resource_link_entities, preview_mode = True)
+    return fhir_resource
+
 #Initialize root bundle definition
 def initialize_bundle():
     root_bundle = {}
@@ -150,12 +156,21 @@ def add_default_resource_links(created_resources: dict, resource_link_entities: 
     return
         
             
-#Create resource references/links with created entities
-def create_resource_links(created_resources, resource_link_entites):
+#List function to create resource references/links with created entities
+def create_resource_links(created_resources, resource_link_entites, preview_mode = False):
+    #TODO: Build resource links
+    print("Building resource links")
+    for resource_link_entity in resource_link_entites:
+        create_resource_link(created_resources, resource_link_entity, preview_mode)
+    return
+    
+#Singular function to create a resource link.
+def create_resource_link(created_resources, resource_link_entity, preview_mode = False):
+    # template scaffolding
     reference_json_block = {
         "reference" : "$value"
     }
-
+    #Special reference handling blocks, in the form of (origin_resource, destination_resource, reference_path)
     arrayType_references = [
         ('diagnosticreport', 'specimen', 'specimen'),
         ('diagnosticreport', 'practitioner', 'performer'),
@@ -165,35 +180,36 @@ def create_resource_links(created_resources, resource_link_entites):
         ('diagnosticreport', 'observation', 'result'),
         ('diagnosticreport', 'imagingStudy', 'imagingStudy'),
     ]
-    #TODO: Build resource links
-    print("Building resource links")
-    for resource_link_entity in resource_link_entites:
-        try:
-            origin_resource = created_resources[resource_link_entity.origin_resource]
-        except KeyError:
-            print(f"WARNING: In ResourceLinks tab, found a Origin Resource of : {resource_link_entity.origin_resource}  but no such entity found in PatientData")
-            continue
-        try:
-            destination_resource = created_resources[resource_link_entity.destination_resource]
-        except KeyError:
-            print(f"WARNING: In ResourceLinks tab, found a Desitnation Resource  of : {resource_link_entity.destination_resource}  but no such entity found in PatientData")
-            continue
-        destination_resource_type = created_resources[resource_link_entity.destination_resource]['resourceType']
-        destination_resource_id = created_resources[resource_link_entity.destination_resource]['id']
-        link_tuple = (created_resources[resource_link_entity.origin_resource]['resourceType'].strip().lower(),
-                      created_resources[resource_link_entity.destination_resource]['resourceType'].strip().lower(),
-                      resource_link_entity.reference_path.strip().lower())
-        if link_tuple in arrayType_references:
-            if resource_link_entity.reference_path.strip().lower() not in origin_resource:
-                origin_resource[resource_link_entity.reference_path.strip().lower()] = []
-            new_reference = reference_json_block.copy()
-            new_reference['reference'] = destination_resource_type + "/" + destination_resource_id
-            origin_resource[resource_link_entity.reference_path.strip().lower()].append(new_reference)
-        else:
-            origin_resource[resource_link_entity.reference_path.strip().lower()] = reference_json_block.copy()
-            origin_resource[resource_link_entity.reference_path.strip().lower()]["reference"] = destination_resource_type + "/" + destination_resource_id
+    #Find the origin and destination resource from the link
+    try:
+        origin_resource = created_resources[resource_link_entity.origin_resource]
+    except KeyError:
+        print(f"WARNING: In ResourceLinks tab, found a Origin Resource of : {resource_link_entity.origin_resource}  but no such entity found in PatientData")
+        return
+    try:
+        destination_resource = created_resources[resource_link_entity.destination_resource]
+    except KeyError:
+        print(f"WARNING: In ResourceLinks tab, found a Desitnation Resource  of : {resource_link_entity.destination_resource}  but no such entity found in PatientData")
+        return
+    #Estable the value of the refence
+    if preview_mode:
+        reference_value = destination_resource['resourceType'] + "/" + destination_resource['entityName']
+    else:
+        reference_value = destination_resource['resourceType'] + "/" + destination_resource['id']
+    link_tuple = (origin_resource['resourceType'].strip().lower(),
+                    destination_resource['resourceType'].strip().lower(),
+                    resource_link_entity.reference_path.strip().lower())
+    if link_tuple in arrayType_references:
+        if resource_link_entity.reference_path.strip().lower() not in origin_resource:
+            origin_resource[resource_link_entity.reference_path.strip().lower()] = []
+        new_reference = reference_json_block.copy()
+        new_reference['reference'] = reference_value
+        origin_resource[resource_link_entity.reference_path.strip().lower()].append(new_reference)
+    else:
+        origin_resource[resource_link_entity.reference_path.strip().lower()] = reference_json_block.copy()
+        origin_resource[resource_link_entity.reference_path.strip().lower()]["reference"] = reference_value
     return
-    
+
 def add_resource_to_transaction_bundle(root_bundle, fhir_resource):
     entry = {}
     entry['fullUrl'] = "urn:uuid:"+fhir_resource['id']

@@ -16,4 +16,3 @@ def test_congential_hyperthyrodism_excel_conversion(tmp_path):
 
     assert fhir_bundle['resourceType'] == 'Bundle'
     assert fhir_bundle['type'] == 'transaction'
-    

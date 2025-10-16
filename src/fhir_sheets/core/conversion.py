@@ -27,11 +27,18 @@ def create_transaction_bundle(resource_definition_entities: List[ResourceDefinit
         add_resource_to_transaction_bundle(root_bundle, fhir_resource)
     return root_bundle
 
-def create_singular_resource(resource_definition_entity: ResourceDefinition, resource_link_entities: List[ResourceLink], cohort_data: CohortData, index = 0):
-    fhir_resource = create_fhir_resource(resource_definition, cohort_data, index)
-    add_default_resource_links([fhir_resource], resource_link_entities)
-    create_resource_links([fhir_resource], resource_link_entities, preview_mode = True)
-    return fhir_resource
+def create_singular_resource(singleton_entity_name: str, resource_definition_entities: List[ResourceDefinition], resource_link_entities: List[ResourceLink], cohort_data: CohortData, index = 0):
+    created_resources = {}
+    for resource_definition in resource_definition_entities:
+        entity_name = resource_definition.entity_name
+        #Create and collect fhir resources
+        fhir_resource = create_fhir_resource(resource_definition, cohort_data, index)
+        created_resources[entity_name] = fhir_resource
+        if entity_name == singleton_entity_name:
+            singleton_fhir_resource = fhir_resource
+    add_default_resource_links(created_resources, resource_link_entities)
+    create_resource_links(created_resources, resource_link_entities, preview_mode=True)
+    return singleton_fhir_resource
 
 #Initialize root bundle definition
 def initialize_bundle():
@@ -193,7 +200,7 @@ def create_resource_link(created_resources, resource_link_entity, preview_mode =
         return
     #Estable the value of the refence
     if preview_mode:
-        reference_value = destination_resource['resourceType'] + "/" + destination_resource['entityName']
+        reference_value = destination_resource['resourceType'] + "/" + resource_link_entity.destination_resource
     else:
         reference_value = destination_resource['resourceType'] + "/" + destination_resource['id']
     link_tuple = (origin_resource['resourceType'].strip().lower(),
@@ -251,7 +258,7 @@ def build_structure(current_struct: Dict, json_path: str, resource_definition: R
     #SPECIAL HANDLING CLAUSE
     matching_handler = next((handler for handler in special_values.custom_handlers if (json_path.startswith(handler) or json_path == handler)), None)
     if matching_handler is not None:
-        return special_values.custom_handlers[matching_handler].assign_value(json_path, resource_definition,  current_struct, parts[-1], value)
+        return special_values.custom_handlers[matching_handler].assign_value(json_path, resource_definition, dataType,  current_struct, parts[-1], value)
     #Ignore dollar sign ($) and drill farther down
     if part == '$' or part == resource_definition.resource_type.strip():
         #Ignore the dollar sign and the resourcetype

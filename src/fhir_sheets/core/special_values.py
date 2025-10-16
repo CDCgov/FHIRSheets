@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 class AbstractCustomValueHandler(ABC):
     
     @abstractmethod
-    def assign_value(self, json_path, resource_definition, final_struct, key, value):
+    def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value):
         pass
     
 class PatientRaceExtensionValueHandler(AbstractCustomValueHandler):
@@ -67,7 +67,7 @@ class PatientRaceExtensionValueHandler(AbstractCustomValueHandler):
       "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
     }
     #Create an ombcategory and detailed section of race extension
-    def assign_value(self, json_path, resource_definition, final_struct, key, value):
+    def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value):
         #Retrieve the race extension if it exists; make it if it does not.
         if 'extension' not in final_struct:
             final_struct['extension'] = []
@@ -128,7 +128,7 @@ class PatientEthnicityExtensionValueHandler(AbstractCustomValueHandler):
       "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity"
     }
     #Create an ombcategory and detailed section of ethnicitiy extension
-    def assign_value(self, json_path, resource_definition, final_struct, key, value):
+    def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value):
         #Retrieve the ethncitiy extension if it exists; make it if it does not.
         if 'extension' not in final_struct:
             final_struct['extension'] = []
@@ -154,7 +154,7 @@ class PatientBirthSexExtensionValueHandler(AbstractCustomValueHandler):
       "valueCode" : "$value"
     }
     #Assigna birthsex extension
-    def assign_value(self, json_path, resource_definition, final_struct, key, value):
+    def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value):
         #Retrieve the birthsex extension if it exists; make it if it does not.
         if 'extension' not in final_struct:
             final_struct['extension'] = []
@@ -182,7 +182,7 @@ class PatientMRNIdentifierValueHandler(AbstractCustomValueHandler):
       "value" : "$value"
     }
     #Assign a MRN identifier
-    def assign_value(self, json_path, resource_definition, final_struct, key, value):
+    def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value):
         #Retrieve the MRN identifier if it exists; make it if it does not.
         target_identifier = self.patient_mrn_block
         new_identifier = True
@@ -215,7 +215,7 @@ class PatientSSNIdentifierValueHandler(AbstractCustomValueHandler):
       "value" : "$value"
     }
     #Assign a MRN identifier
-    def assign_value(self, json_path, resource_definition, final_struct, key, value):
+    def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value):
         #Retrieve the MRN identifier if it exists; make it if it does not.
         target_identifier = self.patient_mrn_block
         new_identifier = True
@@ -238,7 +238,7 @@ class OrganizationIdentiferNPIValueHandler(AbstractCustomValueHandler):
       "value" : "$value"
     }
     #Assigna birthsex extension
-    def assign_value(self, json_path, resource_definition, final_struct, key, value):
+    def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value):
         #Retrieve the birthsex extension if it exists; make it if it does not.
         if 'identifier' not in final_struct:
             final_struct['identifier'] = []
@@ -255,7 +255,7 @@ class OrganizationIdentiferCLIAValueHandler(AbstractCustomValueHandler):
       "value" : "$value"
     }
     #Assign a birthsex extension
-    def assign_value(self, json_path, resource_definition, final_struct, key, value):
+    def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value):
         #Retrieve the birthsex extension if it exists; make it if it does not.
         if 'identifier' not in final_struct:
             final_struct['identifier'] = []
@@ -272,7 +272,7 @@ class PractitionerIdentiferNPIValueHandler(AbstractCustomValueHandler):
       "value" : "$value"
     }
     #Assigna birthsex extension
-    def assign_value(self, json_path, resource_definition, final_struct, key, value):
+    def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value):
         #Retrieve the birthsex extension if it exists; make it if it does not.
         if 'identifier' not in final_struct:
             final_struct['identifier'] = []
@@ -309,7 +309,7 @@ class ObservationComponentHandler(AbstractCustomValueHandler):
       }
     }
     #Find the appropriate component for the observaiton; then call build_structure again to continue the drill down
-    def assign_value(self, json_path, resource_definition, final_struct, key, value):
+    def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value):
         #Check to make sure the component part exists
         if 'component' not in final_struct:
           final_struct['component'] = []
@@ -330,7 +330,8 @@ class ObservationComponentHandler(AbstractCustomValueHandler):
           if target_component is self.pulse_oximetry_oxygen_concentration:
             components.append(target_component)
         #Recurse back down into 
-        return conversion.build_structure(target_component, '.'.join(parts[2:]), resource_definition, parts[2:], value, parts[:2])
+        # current_struct: Dict, json_path: str, resource_definition: ResourceDefinition, dataType: str, parts: List[str], value: Any, previous_parts: List[str]
+        return conversion.build_structure(target_component, '.'.join(parts[2:]), resource_definition, dataType, parts[2:], value, parts[:2])
         pass
 
 def utilFindExtensionWithURL(extension_block, url):

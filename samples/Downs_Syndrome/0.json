@@ -1,0 +1,1219 @@
+{
+    "resourceType": "Bundle",
+    "id": "8ca992e0-298f-4cc6-86fc-3ebc15f0f232",
+    "meta": {
+        "security": [
+            {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                "code": "HTEST",
+                "display": "test health data"
+            }
+        ]
+    },
+    "type": "transaction",
+    "entry": [
+        {
+            "fullUrl": "urn:uuid:387099bf-719f-4701-ac29-67776c8fc655",
+            "resource": {
+                "resourceType": "Encounter",
+                "id": "387099bf-719f-4701-ac29-67776c8fc655",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "identifier": [
+                    {
+                        "system": "urn:example:healthcare:system",
+                        "value": "3456"
+                    }
+                ],
+                "status": "finished",
+                "class": {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+                    "code": "IMP",
+                    "display": "inpatient encounter"
+                },
+                "type": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://hl7.org/fhir/sid/icd-10",
+                                "code": "O80",
+                                "display": "full-term uncomplicated delivery"
+                            }
+                        ]
+                    }
+                ],
+                "period": {
+                    "start": "2018-03-13T10:00:14+00:00",
+                    "end": "2018-03-13T10:00:14+00:00"
+                },
+                "hospitalization": {
+                    "dischargeDisposition": {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/discharge-disposition",
+                                "code": "home",
+                                "display": "Home"
+                            }
+                        ]
+                    }
+                },
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Encounter/387099bf-719f-4701-ac29-67776c8fc655"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:9702a7f7-ab98-4072-8f5e-7aa72684523a",
+            "resource": {
+                "resourceType": "Patient",
+                "id": "9702a7f7-ab98-4072-8f5e-7aa72684523a",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "extension": [
+                    {
+                        "extension": [
+                            {
+                                "url": "ombCategory",
+                                "valueCoding": {
+                                    "system": "urn:oid:2.16.840.1.113883.6.238",
+                                    "code": "2028-9",
+                                    "display": "Asian"
+                                }
+                            },
+                            {
+                                "url": "text",
+                                "valueString": "asian"
+                            }
+                        ],
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+                    },
+                    {
+                        "extension": [
+                            {
+                                "url": "ombCategory",
+                                "valueCoding": {
+                                    "system": "urn:oid:2.16.840.1.113883.6.238",
+                                    "code": "2186-5",
+                                    "display": "Not Hispanic or Latino"
+                                }
+                            },
+                            {
+                                "url": "text",
+                                "valueString": "Not Hispanic or Latino"
+                            }
+                        ],
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity"
+                    },
+                    {
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+                        "valueCode": "M"
+                    }
+                ],
+                "identifier": [
+                    {
+                        "value": "4567890",
+                        "system": "http://hospital.smarthealthit.org"
+                    },
+                    {
+                        "use": "usual",
+                        "type": {
+                            "coding": [
+                                {
+                                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                                    "code": "MR",
+                                    "display": "Medical Record Number"
+                                }
+                            ],
+                            "text": "Medical Record Number"
+                        },
+                        "system": "urn:mrn:http://hl7.org/fhir/sid/us-mrn",
+                        "value": "4738920"
+                    },
+                    {
+                        "use": "usual",
+                        "type": {
+                            "coding": [
+                                {
+                                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                                    "code": "SS"
+                                }
+                            ],
+                            "text": "Social Security Number"
+                        },
+                        "system": "http://hl7.org/fhir/sid/us-ssn",
+                        "value": "345-67-8901"
+                    }
+                ],
+                "name": [
+                    {
+                        "given": [
+                            "Elliot"
+                        ],
+                        "family": "Grayson",
+                        "use": "usual"
+                    }
+                ],
+                "telecom": [
+                    {
+                        "system": "phone",
+                        "value": "777-777-7777",
+                        "use": "home"
+                    }
+                ],
+                "gender": "male",
+                "birthDate": "2018-03-13",
+                "address": [
+                    {
+                        "line": [
+                            "678 Pinebrook Avenue"
+                        ],
+                        "city": "Terrille",
+                        "district": "Riverton",
+                        "postalCode": "12345",
+                        "state": "NY",
+                        "country": "US"
+                    }
+                ],
+                "communication": [
+                    {
+                        "language": {
+                            "coding": [
+                                {
+                                    "system": "urn:ietf:bcp:47",
+                                    "code": "en",
+                                    "display": "English"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:e4d32344-4339-475d-bddd-42fd038d11ad",
+            "resource": {
+                "resourceType": "RelatedPerson",
+                "id": "e4d32344-4339-475d-bddd-42fd038d11ad",
+                "identifier": [
+                    {
+                        "system": "urn:example:healthcare:system",
+                        "value": "4567"
+                    }
+                ],
+                "relationship": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                                "code": "MTH",
+                                "display": "Mother"
+                            }
+                        ]
+                    }
+                ],
+                "name": [
+                    {
+                        "given": [
+                            "Emily"
+                        ],
+                        "family": "Grayson",
+                        "use": "usual"
+                    }
+                ],
+                "telecom": [
+                    {
+                        "system": "phone",
+                        "value": "777-777-7777",
+                        "use": "home"
+                    }
+                ],
+                "gender": "female",
+                "patient": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "RelatedPerson/e4d32344-4339-475d-bddd-42fd038d11ad"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:9be033eb-4f33-4a40-a52b-1ca788a3c4cd",
+            "resource": {
+                "resourceType": "Condition",
+                "id": "9be033eb-4f33-4a40-a52b-1ca788a3c4cd",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "clinicalStatus": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                            "code": "active",
+                            "display": "Active"
+                        }
+                    ]
+                },
+                "verificationStatus": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                            "code": "confirmed",
+                            "display": "Confirmed"
+                        }
+                    ]
+                },
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://hl7.org/fhir/us/core/CodeSystem/condition-category",
+                                "code": "health-concern",
+                                "display": "Health Concern"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://hl7.org/fhir/sid/icd-10",
+                            "code": "Q90.9",
+                            "display": "Down syndrome, unspecified"
+                        }
+                    ]
+                },
+                "onsetDateTime": "2018-03-23T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Condition/9be033eb-4f33-4a40-a52b-1ca788a3c4cd"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:20e5a646-a0b0-4899-95f2-c680bb5c7b42",
+            "resource": {
+                "resourceType": "Condition",
+                "id": "20e5a646-a0b0-4899-95f2-c680bb5c7b42",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "verificationStatus": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                            "code": "confirmed",
+                            "display": "Confirmed"
+                        }
+                    ]
+                },
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://hl7.org/fhir/us/core/CodeSystem/condition-category",
+                                "code": "health-concern",
+                                "display": "Health Concern"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://hl7.org/fhir/sid/icd-10",
+                            "code": "E05",
+                            "display": "Hyperthyroidism"
+                        }
+                    ]
+                },
+                "onsetDateTime": "2018-03-23T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Condition/20e5a646-a0b0-4899-95f2-c680bb5c7b42"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:231a90d4-ef8c-4171-a2a9-c51edf9ad0a1",
+            "resource": {
+                "resourceType": "Condition",
+                "id": "231a90d4-ef8c-4171-a2a9-c51edf9ad0a1",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "verificationStatus": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                            "code": "confirmed",
+                            "display": "Confirmed"
+                        }
+                    ]
+                },
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://hl7.org/fhir/us/core/CodeSystem/condition-category",
+                                "code": "health-concern",
+                                "display": "Health Concern"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://snomed.info/sct",
+                            "code": "13213009",
+                            "display": "Congenital heart disease"
+                        }
+                    ]
+                },
+                "onsetDateTime": "2018-03-18T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Condition/231a90d4-ef8c-4171-a2a9-c51edf9ad0a1"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:b7dafcdb-d471-46ce-ac19-d4195bad21cb",
+            "resource": {
+                "resourceType": "Procedure",
+                "id": "b7dafcdb-d471-46ce-ac19-d4195bad21cb",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "completed",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://www.ama-assn.org/go/cpt",
+                            "code": "88230",
+                            "display": "Tissue culture for non-neoplastic disorders"
+                        }
+                    ]
+                },
+                "performedDateTime": "2018-04-15T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Procedure/b7dafcdb-d471-46ce-ac19-d4195bad21cb"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:c8a8ecea-2ae8-499d-a952-ef2de70fe617",
+            "resource": {
+                "resourceType": "Procedure",
+                "id": "c8a8ecea-2ae8-499d-a952-ef2de70fe617",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "completed",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://www.ama-assn.org/go/cpt",
+                            "code": "93303",
+                            "display": "Transthoracic echocardiography for congenital cardiac anomalies"
+                        }
+                    ]
+                },
+                "performedDateTime": "2018-04-15T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                },
+                "encounter": {
+                    "reference": "Encounter/387099bf-719f-4701-ac29-67776c8fc655"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Procedure/c8a8ecea-2ae8-499d-a952-ef2de70fe617"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:7dc5b383-979c-41fb-abf5-ea1e4137a7c2",
+            "resource": {
+                "resourceType": "Encounter",
+                "id": "7dc5b383-979c-41fb-abf5-ea1e4137a7c2",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "identifier": [
+                    {
+                        "system": "urn:example:healthcare:system",
+                        "value": "6543"
+                    }
+                ],
+                "status": "finished",
+                "class": {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+                    "code": "Z13.4",
+                    "display": "screening for developmental disorders in children"
+                },
+                "type": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://hl7.org/fhir/sid/icd-10",
+                                "code": "Z13.4",
+                                "display": "screening for developmental disorders in children"
+                            }
+                        ]
+                    }
+                ],
+                "period": {
+                    "start": "2018-09-02T10:00:14+00:00",
+                    "end": "2018-09-02T12:00:14+00:00"
+                },
+                "hospitalization": {
+                    "dischargeDisposition": {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/discharge-disposition",
+                                "code": "home",
+                                "display": "Home"
+                            }
+                        ]
+                    }
+                },
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Encounter/7dc5b383-979c-41fb-abf5-ea1e4137a7c2"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:1dc91c25-b4db-4861-b1dc-e5da3f4f962e",
+            "resource": {
+                "resourceType": "Procedure",
+                "id": "1dc91c25-b4db-4861-b1dc-e5da3f4f962e",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "completed",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://www.ama-assn.org/go/cpt",
+                            "code": "92557",
+                            "display": "Audiologic Function Tests"
+                        }
+                    ]
+                },
+                "performedDateTime": "2018-09-02T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                },
+                "encounter": {
+                    "reference": "Encounter/7dc5b383-979c-41fb-abf5-ea1e4137a7c2"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Procedure/1dc91c25-b4db-4861-b1dc-e5da3f4f962e"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:c121af57-6507-47c9-b5a0-1c1de56834b1",
+            "resource": {
+                "resourceType": "Procedure",
+                "id": "c121af57-6507-47c9-b5a0-1c1de56834b1",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "completed",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://www.ama-assn.org/go/cpt",
+                            "code": "92015",
+                            "display": "Special Ophthalmological Services and Procedures"
+                        }
+                    ]
+                },
+                "performedDateTime": "2018-09-02T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                },
+                "encounter": {
+                    "reference": "Encounter/7dc5b383-979c-41fb-abf5-ea1e4137a7c2"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Procedure/c121af57-6507-47c9-b5a0-1c1de56834b1"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:6f739b86-8a3e-421b-bd8b-978c08ab8d12",
+            "resource": {
+                "resourceType": "Observation",
+                "id": "6f739b86-8a3e-421b-bd8b-978c08ab8d12",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "final",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "62356-1",
+                            "display": "Chromosome analysis result in ISCN expression"
+                        }
+                    ]
+                },
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                                "code": "laboratory",
+                                "display": "Laboratory"
+                            }
+                        ]
+                    }
+                ],
+                "effectiveDateTime": "2018-10-03T00:00:00+00:00",
+                "valueString": "47,XY,+21",
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Observation/6f739b86-8a3e-421b-bd8b-978c08ab8d12"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:251e81d2-9024-494b-8f56-2484d8343365",
+            "resource": {
+                "resourceType": "Observation",
+                "id": "251e81d2-9024-494b-8f56-2484d8343365",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "final",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "3016-3",
+                            "display": "Thyrotropin [Units/volume] in Serum or Plasma"
+                        }
+                    ]
+                },
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                                "code": "laboratory",
+                                "display": "Laboratory"
+                            }
+                        ]
+                    }
+                ],
+                "effectiveDateTime": "2018-10-03T00:00:00+00:00",
+                "valueQuantity": {
+                    "value": 8.0,
+                    "unit": "mIU/L",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mIU/L"
+                },
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Observation/251e81d2-9024-494b-8f56-2484d8343365"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:ef286d8f-54ce-45fc-a2bf-78408b56301b",
+            "resource": {
+                "resourceType": "Observation",
+                "id": "ef286d8f-54ce-45fc-a2bf-78408b56301b",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "final",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "3024-7",
+                            "display": "Thyroxine (T4) free [Mass/volume] in Serum or Plasma"
+                        }
+                    ]
+                },
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                                "code": "laboratory",
+                                "display": "Laboratory"
+                            }
+                        ]
+                    }
+                ],
+                "effectiveDateTime": "2018-10-03T00:00:00+00:00",
+                "valueQuantity": {
+                    "value": 15.0,
+                    "unit": "\u00b5g/dL",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "\u00b5g/dL"
+                },
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Observation/ef286d8f-54ce-45fc-a2bf-78408b56301b"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:15248279-2041-498c-bbf7-7ff9b0680f8c",
+            "resource": {
+                "resourceType": "DiagnosticReport",
+                "id": "15248279-2041-498c-bbf7-7ff9b0680f8c",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "final",
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                                "code": "LAB",
+                                "display": "Laboratory"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "57021-8",
+                            "display": "CBC W Auto Differential panel - Blood"
+                        }
+                    ]
+                },
+                "effectiveDateTime": "2018-10-03T00:00:00+00:00",
+                "issued": "2018-10-03T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                },
+                "encounter": {
+                    "reference": "Encounter/7dc5b383-979c-41fb-abf5-ea1e4137a7c2"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "DiagnosticReport/15248279-2041-498c-bbf7-7ff9b0680f8c"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:dc61791f-9f3c-44d3-918f-879f33da0d05",
+            "resource": {
+                "resourceType": "DiagnosticReport",
+                "id": "dc61791f-9f3c-44d3-918f-879f33da0d05",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "final",
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                                "code": "LAB",
+                                "display": "Laboratory"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "57717-1",
+                            "display": "Newborn screen card data panel"
+                        }
+                    ]
+                },
+                "effectiveDateTime": "2018-10-03T00:00:00+00:00",
+                "issued": "2018-10-03T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                },
+                "encounter": {
+                    "reference": "Encounter/7dc5b383-979c-41fb-abf5-ea1e4137a7c2"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "DiagnosticReport/dc61791f-9f3c-44d3-918f-879f33da0d05"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:c2243100-4710-4f87-bf60-8269fda8024c",
+            "resource": {
+                "resourceType": "Observation",
+                "id": "c2243100-4710-4f87-bf60-8269fda8024c",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/StructureDefinition/vitalsigns"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "final",
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                                "code": "vital-signs",
+                                "display": "Vital Signs"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "8302-2",
+                            "display": "Body height"
+                        }
+                    ]
+                },
+                "effectiveDateTime": "2018-10-03T00:00:00+00:00",
+                "valueQuantity": {
+                    "value": 4.1,
+                    "unit": "kg",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "kg"
+                },
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Observation/c2243100-4710-4f87-bf60-8269fda8024c"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:6e571de5-4eb4-41a5-81fb-53c52ae34c86",
+            "resource": {
+                "resourceType": "Observation",
+                "id": "6e571de5-4eb4-41a5-81fb-53c52ae34c86",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/head-occipital-frontal-circumference-percentile"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "final",
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                                "code": "vital-signs",
+                                "display": "Vital Signs"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "8287-5",
+                            "display": "Head Occipital-frontal circumference by Tape measure"
+                        }
+                    ]
+                },
+                "effectiveDateTime": "2018-10-03T00:00:00+00:00",
+                "valueQuantity": {
+                    "value": 54.4,
+                    "unit": "cm",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "cm"
+                },
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Observation/6e571de5-4eb4-41a5-81fb-53c52ae34c86"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:b944396f-4d54-4d7a-a4a7-cde956cea84b",
+            "resource": {
+                "resourceType": "Observation",
+                "id": "b944396f-4d54-4d7a-a4a7-cde956cea84b",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/StructureDefinition/vitalsigns"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "final",
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                                "code": "vital-signs",
+                                "display": "Vital Signs"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "8280-0",
+                            "display": "Body weight"
+                        }
+                    ]
+                },
+                "effectiveDateTime": "2018-10-03T00:00:00+00:00",
+                "valueQuantity": {
+                    "value": 25.0,
+                    "unit": "cm",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "cm"
+                },
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Observation/b944396f-4d54-4d7a-a4a7-cde956cea84b"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:c4755b09-d6d3-449b-a1b6-2905be32d373",
+            "resource": {
+                "resourceType": "MedicationRequest",
+                "id": "c4755b09-d6d3-449b-a1b6-2905be32d373",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "active",
+                "intent": "order",
+                "medicationCodeableConcept": {
+                    "coding": [
+                        {
+                            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                            "code": "32675",
+                            "display": "oxybutynin"
+                        }
+                    ]
+                },
+                "authoredOn": "2018-03-12T00:00:00+00:00",
+                "dosageInstruction": [
+                    {
+                        "text": "0.2 mg/kg/dose, given twice daily"
+                    }
+                ],
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "MedicationRequest/c4755b09-d6d3-449b-a1b6-2905be32d373"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:38cc4e92-58a9-411e-8fa0-539621f1a74a",
+            "resource": {
+                "resourceType": "MedicationRequest",
+                "id": "38cc4e92-58a9-411e-8fa0-539621f1a74a",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "active",
+                "intent": "order",
+                "medicationCodeableConcept": {
+                    "coding": [
+                        {
+                            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                            "code": "309045",
+                            "display": "cefaclor 250 MG Oral Capsule"
+                        }
+                    ]
+                },
+                "authoredOn": "2018-03-12T00:00:00+00:00",
+                "dosageInstruction": [
+                    {
+                        "text": "20 mg/kg/day divided into doses every 8 hours"
+                    }
+                ],
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "MedicationRequest/38cc4e92-58a9-411e-8fa0-539621f1a74a"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:ae37eef6-0d82-44e4-8fe0-f7684885990b",
+            "resource": {
+                "resourceType": "MedicationRequest",
+                "id": "ae37eef6-0d82-44e4-8fe0-f7684885990b",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "active",
+                "intent": "order",
+                "medicationCodeableConcept": {
+                    "coding": [
+                        {
+                            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                            "code": "1292",
+                            "display": "bacolofen"
+                        }
+                    ]
+                },
+                "authoredOn": "2018-03-12T00:00:00+00:00",
+                "dosageInstruction": [
+                    {
+                        "text": "Initial dose: 0.3 mg/kg/day, divided into 3 doses. Gradually increased by 0.3 mg/kg/day every 3 days, based on clinical response and tolerance. Maximum dose: 40 mg/day for children weighing less than 10 kg."
+                    }
+                ],
+                "subject": {
+                    "reference": "Patient/9702a7f7-ab98-4072-8f5e-7aa72684523a"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "MedicationRequest/ae37eef6-0d82-44e4-8fe0-f7684885990b"
+            }
+        }
+    ]
+}

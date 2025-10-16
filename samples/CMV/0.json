@@ -1,0 +1,451 @@
+{
+    "resourceType": "Bundle",
+    "id": "32c095bd-18df-40ac-a83f-35df45217065",
+    "meta": {
+        "security": [
+            {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                "code": "HTEST",
+                "display": "test health data"
+            }
+        ]
+    },
+    "type": "transaction",
+    "entry": [
+        {
+            "fullUrl": "urn:uuid:99295f36-1c4c-4e3c-8db7-88eac903c728",
+            "resource": {
+                "resourceType": "Encounter",
+                "id": "99295f36-1c4c-4e3c-8db7-88eac903c728",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "identifier": [
+                    {
+                        "system": "urn:example:healthcare:system",
+                        "value": "2345"
+                    }
+                ],
+                "status": "finished",
+                "class": {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+                    "code": "IMP",
+                    "display": "inpatient encounter"
+                },
+                "type": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://hl7.org/fhir/sid/icd-10",
+                                "code": "O80",
+                                "display": "full-term uncomplicated delivery"
+                            }
+                        ]
+                    }
+                ],
+                "period": {
+                    "start": "2016-02-15T10:00:14+00:00",
+                    "end": "2016-02-18T15:00:00+00:00"
+                },
+                "hospitalization": {
+                    "dischargeDisposition": {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/discharge-disposition",
+                                "code": "home",
+                                "display": "Home"
+                            }
+                        ]
+                    }
+                },
+                "subject": {
+                    "reference": "Patient/1b812787-fae3-4b1d-8223-c8bf225d4692"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Encounter/99295f36-1c4c-4e3c-8db7-88eac903c728"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:1b812787-fae3-4b1d-8223-c8bf225d4692",
+            "resource": {
+                "resourceType": "Patient",
+                "id": "1b812787-fae3-4b1d-8223-c8bf225d4692",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "extension": [
+                    {
+                        "extension": [
+                            {
+                                "url": "ombCategory",
+                                "valueCoding": {
+                                    "system": "urn:oid:2.16.840.1.113883.6.238",
+                                    "code": "2028-9",
+                                    "display": "Asian"
+                                }
+                            },
+                            {
+                                "url": "text",
+                                "valueString": "asian"
+                            }
+                        ],
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+                    },
+                    {
+                        "extension": [
+                            {
+                                "url": "ombCategory",
+                                "valueCoding": {
+                                    "system": "urn:oid:2.16.840.1.113883.6.238",
+                                    "code": "2186-5",
+                                    "display": "Not Hispanic or Latino"
+                                }
+                            },
+                            {
+                                "url": "text",
+                                "valueString": "Not Hispanic or Latino"
+                            }
+                        ],
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity"
+                    },
+                    {
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+                        "valueCode": "F"
+                    }
+                ],
+                "identifier": [
+                    {
+                        "value": "345678",
+                        "system": "http://hospital.smarthealthit.org"
+                    },
+                    {
+                        "use": "usual",
+                        "type": {
+                            "coding": [
+                                {
+                                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                                    "code": "MR",
+                                    "display": "Medical Record Number"
+                                }
+                            ],
+                            "text": "Medical Record Number"
+                        },
+                        "system": "urn:mrn:http://hl7.org/fhir/sid/us-mrn",
+                        "value": "1245689"
+                    },
+                    {
+                        "use": "usual",
+                        "type": {
+                            "coding": [
+                                {
+                                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                                    "code": "SS"
+                                }
+                            ],
+                            "text": "Social Security Number"
+                        },
+                        "system": "http://hl7.org/fhir/sid/us-ssn",
+                        "value": "234-56-7890"
+                    }
+                ],
+                "name": [
+                    {
+                        "given": [
+                            "Alexander"
+                        ],
+                        "family": "Harper",
+                        "use": "usual"
+                    }
+                ],
+                "telecom": [
+                    {
+                        "system": "phone",
+                        "value": "666-666-6666",
+                        "use": "home"
+                    }
+                ],
+                "gender": "female",
+                "birthDate": "2016-02-15",
+                "address": [
+                    {
+                        "line": [
+                            "742 Evergreen Terrace"
+                        ],
+                        "city": "Leaves",
+                        "district": "Springfield",
+                        "postalCode": "62704",
+                        "state": "IL",
+                        "country": "US"
+                    }
+                ],
+                "communication": [
+                    {
+                        "language": {
+                            "coding": [
+                                {
+                                    "system": "urn:ietf:bcp:47",
+                                    "code": "en",
+                                    "display": "English"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Patient/1b812787-fae3-4b1d-8223-c8bf225d4692"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:17e5e816-8446-40e6-a8b1-12328c75c9c1",
+            "resource": {
+                "resourceType": "RelatedPerson",
+                "id": "17e5e816-8446-40e6-a8b1-12328c75c9c1",
+                "identifier": [
+                    {
+                        "system": "urn:example:healthcare:system",
+                        "value": "4567"
+                    }
+                ],
+                "relationship": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                                "code": "MTH",
+                                "display": "Mother"
+                            }
+                        ]
+                    }
+                ],
+                "name": [
+                    {
+                        "given": [
+                            "Tabitha"
+                        ],
+                        "family": "Harper",
+                        "use": "usual"
+                    }
+                ],
+                "telecom": [
+                    {
+                        "system": "phone",
+                        "value": "666-666-6666",
+                        "use": "home"
+                    }
+                ],
+                "gender": "female",
+                "patient": {
+                    "reference": "Patient/1b812787-fae3-4b1d-8223-c8bf225d4692"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "RelatedPerson/17e5e816-8446-40e6-a8b1-12328c75c9c1"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:d8d4287d-788a-49e7-9362-293a215da748",
+            "resource": {
+                "resourceType": "Procedure",
+                "id": "d8d4287d-788a-49e7-9362-293a215da748",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "completed",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://www.ama-assn.org/go/cpt",
+                            "code": "92558",
+                            "display": "Evoked otoacoustic emissions; limited (single stimulus level, either transient or distortion product)"
+                        }
+                    ]
+                },
+                "performedDateTime": "2016-02-16T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/1b812787-fae3-4b1d-8223-c8bf225d4692"
+                },
+                "encounter": {
+                    "reference": "Encounter/99295f36-1c4c-4e3c-8db7-88eac903c728"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Procedure/d8d4287d-788a-49e7-9362-293a215da748"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:a29e8704-4fac-4462-bd66-5ce94b409e36",
+            "resource": {
+                "resourceType": "Procedure",
+                "id": "a29e8704-4fac-4462-bd66-5ce94b409e36",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "completed",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://www.ama-assn.org/go/cpt",
+                            "code": "87496",
+                            "display": "Infectious agent detection by nucleic acid (DNA or RNA); cytomegalovirus, amplified probe technique"
+                        }
+                    ]
+                },
+                "performedDateTime": "2016-02-17T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/1b812787-fae3-4b1d-8223-c8bf225d4692"
+                },
+                "encounter": {
+                    "reference": "Encounter/99295f36-1c4c-4e3c-8db7-88eac903c728"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Procedure/a29e8704-4fac-4462-bd66-5ce94b409e36"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:bc406af0-a6e3-4c8e-9701-f018158c4258",
+            "resource": {
+                "resourceType": "Procedure",
+                "id": "bc406af0-a6e3-4c8e-9701-f018158c4258",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "status": "completed",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://www.ama-assn.org/go/cpt",
+                            "code": "76506",
+                            "display": "Diagnostic Ultrasound Procedures of the Head and Neck"
+                        }
+                    ]
+                },
+                "performedDateTime": "2016-02-18T00:00:00+00:00",
+                "subject": {
+                    "reference": "Patient/1b812787-fae3-4b1d-8223-c8bf225d4692"
+                },
+                "encounter": {
+                    "reference": "Encounter/99295f36-1c4c-4e3c-8db7-88eac903c728"
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Procedure/bc406af0-a6e3-4c8e-9701-f018158c4258"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:0ce761fd-078d-4e91-ae23-df2538edeced",
+            "resource": {
+                "resourceType": "Condition",
+                "id": "0ce761fd-078d-4e91-ae23-df2538edeced",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+                    ],
+                    "security": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                            "code": "HTEST",
+                            "display": "test health data"
+                        }
+                    ]
+                },
+                "clinicalStatus": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                            "code": "active",
+                            "display": "Active"
+                        }
+                    ]
+                },
+                "verificationStatus": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                            "code": "confirmed",
+                            "display": "Confirmed"
+                        }
+                    ]
+                },
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://hl7.org/fhir/us/core/CodeSystem/condition-category",
+                                "code": "health-concern",
+                                "display": "Health Concern"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://hl7.org/fhir/sid/icd-10",
+                            "code": "B25.9",
+                            "display": "Cytomegaloviral disease, unspecified"
+                        }
+                    ]
+                },
+                "onsetDateTime": "2016-02-18T00:00:00+00:00"
+            },
+            "request": {
+                "method": "PUT",
+                "url": "Condition/0ce761fd-078d-4e91-ae23-df2538edeced"
+            }
+        }
+    ]
+}

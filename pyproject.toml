@@ -14,6 +14,7 @@ jsonpath-ng = "1.6.1"
 openpyxl = "3.1.5"
 orjson = "3.10.7"
 ply = "3.11"
+pytest_cov = "7.0.0"
 
 [build-system]
 requires = ["poetry-core"]

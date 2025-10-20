@@ -33,7 +33,7 @@ def process_sheet_resource_definitions(sheet):
     headers = [cell.value for cell in next(sheet.iter_rows(min_row=1, max_row=1))]  # Get headers
 
     for row in sheet.iter_rows(min_row=3, values_only=True):
-        row_data = dict(zip(headers, row))  # Create a dictionary for each row
+        row_data = dict((h, r) for h, r in zip(headers, row) if h is not None)  # Create a dictionary for each row
         if all(cell is None or cell == "" for cell in row_data.values()):
             continue
         # Split 'Profile(s)' column into a list of URLs

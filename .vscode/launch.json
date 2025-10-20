@@ -13,7 +13,7 @@
             "console": "integratedTerminal",
             "args": [
             ]
-        }
+        },
         {
             "name": "Python Debugger: Congenital Hyperthyrodism",
             "type": "debugpy",
@@ -24,6 +24,76 @@
             "args": [
                 "--input_file",
                 "/Users/mriley7/workspace/FHIRSheets/samples/Congenital_Hyperthyrodism/Congenital_Hyperthyrodism_Fhir_Cohort_Import_Template.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/output"
+            ]
+        },
+        {
+            "name": "Python Debugger: Down's Syndrome",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/samples/Downs_Syndrome/Downs_Syndrome_Fhir_Cohort_Import_Template.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/output"
+            ]
+        },
+        {
+            "name": "Python Debugger: Tricuspid Valve Atresia",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/samples/Tricuspid_Valve_Atresia/Tricuspid_Valve_Atresia_Fhir_Cohort_Import_Template.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/output"
+            ]
+        },
+        {
+            "name": "Python Debugger: CMV",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/samples/CMV/CMV_Fhir_Cohort_Import_Template.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/output"
+            ]
+        },
+        {
+            "name": "Python Debugger: Spina Bifida",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/samples/Spina_Bifida/Spina_Bifida_Fhir_Cohort_Import_Template.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/output"
+            ]
+        },
+        {
+            "name": "Python Debugger: ASD",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/samples/ASD/ASD_Fhir_Cohort_Import_Template.xlsx",
                 "--output_folder",
                 "/Users/mriley7/workspace/FHIRSheets/output"
             ]

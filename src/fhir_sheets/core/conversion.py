@@ -3,6 +3,8 @@ import uuid
 from jsonpath_ng.jsonpath import Fields, Slice, Where
 from jsonpath_ng.ext import parse as parse_ext
 
+from .config.FhirSheetsConfiguration import FhirSheetsConfiguration
+
 from .model.cohort_data_entity import CohortData, CohortData
 from .model.resource_definition_entity import ResourceDefinition
 from .model.resource_link_entity import ResourceLink
@@ -11,20 +13,22 @@ from . import special_values
 
 #Main top level function
 #Creates a full transaction bundle for a patient at index
-def create_transaction_bundle(resource_definition_entities: List[ResourceDefinition], resource_link_entities: List[ResourceLink], cohort_data: CohortData, index = 0):
+def create_transaction_bundle(resource_definition_entities: List[ResourceDefinition], resource_link_entities: List[ResourceLink], cohort_data: CohortData, index = 0, config: FhirSheetsConfiguration = FhirSheetsConfiguration({})):
     root_bundle = initialize_bundle()
     created_resources = {}
     for resource_definition in resource_definition_entities:
         entity_name = resource_definition.entity_name
         #Create and collect fhir resources
-        fhir_resource = create_fhir_resource(resource_definition, cohort_data, index)
+        fhir_resource = create_fhir_resource(resource_definition, cohort_data, index, config)
         created_resources[entity_name] = fhir_resource
     #Link resources after creation
     add_default_resource_links(created_resources, resource_link_entities)
-    create_resource_links(created_resources, resource_link_entities)
+    create_resource_links(created_resources, resource_link_entities, config.preview_mode)
     #Construct into fhir bundle
     for fhir_resource in created_resources.values():
         add_resource_to_transaction_bundle(root_bundle, fhir_resource)
+    if config.medications_as_reference:
+        post_process_create_medication_references(root_bundle)
     return root_bundle
 
 def create_singular_resource(singleton_entity_name: str, resource_definition_entities: List[ResourceDefinition], resource_link_entities: List[ResourceLink], cohort_data: CohortData, index = 0):
@@ -73,7 +77,7 @@ def initialize_resource(resource_definition):
     return initial_resource
 
 # Creates a fhir-json structure from a resource definition entity and the patient_data_sheet
-def create_fhir_resource(resource_definition: ResourceDefinition, cohort_data: CohortData, index = 0):
+def create_fhir_resource(resource_definition: ResourceDefinition, cohort_data: CohortData, index: int = 0, config: FhirSheetsConfiguration = None):
     resource_dict = initialize_resource(resource_definition)
     #Get field entries for this entity
     header_entries_for_resourcename = [
@@ -355,3 +359,26 @@ def build_structure_recurse(current_struct, json_path, resource_definition, data
     previous_parts.append(part)
     return_struct = build_structure(current_struct, json_path, resource_definition, dataType, parts[1:], value, previous_parts)
     return return_struct
+
+#Post-process function to add medication reference in specific references
+def post_process_create_medication_references( root_bundle: dict):
+    medication_resources = [resource['resource'] for resource in root_bundle['entry'] if resource['resource']['resourceType'] == "Medication"]
+    medication_request_resources = [resource['resource'] for resource in root_bundle['entry'] if resource['resource']['resourceType'] == "MedicationRequest"]
+    for medication_request_resource in medication_request_resources:
+        #Get candidates
+        medication_candidates = [resource for resource in medication_resources if resource['code'] == medication_request_resource['medicationCodeableConcept']]
+        if not medication_candidates: #If no candidates, create, else get the first candidate
+            medication_target = target_medication = createMedicationResource(root_bundle, medication_request_resource['medicationCodeableConcept'])
+            medication_resources.append(target_medication)
+        else:
+            target_medication = medication_candidates[0]
+            
+        del(medication_request_resource['medicationCodeableConcept'])
+        medication_request_resource['medicationReference'] = target_medication['resourceType'] + "/" + target_medication['id']
+    return
+
+def createMedicationResource(root_bundle, medicationCodeableConcept):
+    target_medication = initialize_resource(ResourceDefinition({'ResourceType': 'Medication'}))
+    target_medication['code'] = medicationCodeableConcept
+    add_resource_to_transaction_bundle(root_bundle, target_medication)
+    return target_medication

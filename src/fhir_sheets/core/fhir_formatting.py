@@ -3,14 +3,14 @@ from datetime import datetime, time, timezone
 
 #Dictionary of regexes
 type_regexes = {
-    'code': '[^\s]+( [^\s]+)*',
-    'decimal': '-?(0|[1-9][0-9]{0,17})(\.[0-9]{1,17})?([eE][+-]?[0-9]{1,9}})?',
-    'id': '[A-Za-z0-9\-\.]{1,64}',
-    'integer': '[0]|[-+]?[1-9][0-9]*',
-    'oid': 'urn:oid:[0-2](\.(0|[1-9][0-9]*))+',
-    'positiveInt': '[1-9][0-9]*',
-    'unsignedInt':'[0]|([1-9][0-9]*)',
-    'uuid':'urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+    'code': r'[^\s]+( [^\s]+)*',
+    'decimal': r'-?(0|[1-9][0-9]{0,17})(\.[0-9]{1,17})?([eE][+-]?[0-9]{1,9}})?',
+    'id': r'[A-Za-z0-9\-\.]{1,64}',
+    'integer': r'[0]|[-+]?[1-9][0-9]*',
+    'oid': r'urn:oid:[0-2](\.(0|[1-9][0-9]*))+',
+    'positiveInt': r'[1-9][0-9]*',
+    'unsignedInt': r'[0]|([1-9][0-9]*)',
+    'uuid': r'urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
 }
 # Assign final_struct[key] to value; with formatting given the valueType
 def assign_value(final_struct, key, value, valueType):

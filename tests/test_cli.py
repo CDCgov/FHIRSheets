@@ -2,6 +2,7 @@ import datetime
 import pathlib
 import json
 from typing import Iterable, Dict
+from src.fhir_sheets.core.config.FhirSheetsConfiguration import FhirSheetsConfiguration
 from src.fhir_sheets.core.conversion import create_singular_resource
 from src.fhir_sheets.core.model.cohort_data_entity import CohortData
 from src.fhir_sheets.core.model.resource_definition_entity import ResourceDefinition
@@ -26,8 +27,26 @@ def test_congential_hyperthyrodism_excel_conversion(tmp_path):
     assert fhir_bundle["resourceType"] == "Bundle"
     assert fhir_bundle["type"] == "transaction"
 
+def test_congential_hyperthyrodism_excel_conversion_preview_mode(tmp_path):
+    input_file = (
+        TOP_DIR
+        / "Congenital_Hyperthyrodism/Congenital_Hyperthyrodism_Fhir_Cohort_Import_Template.xlsx"
+    ).__str__()
+    main(input_file, tmp_path, FhirSheetsConfiguration({"preview_mode": True}))
 
-def test_singleton_resource_creationg():
+    json_files = list(tmp_path.glob("*.json"))
+    json_file = json_files[0]
+    with json_file.open("r") as file:
+        fhir_bundle = json.load(file)
+
+    assert fhir_bundle["resourceType"] == "Bundle"
+    assert fhir_bundle["type"] == "transaction"
+    
+    primaryEncounter = [entry["resource"] for entry in fhir_bundle["entry"] if entry["resource"]["resourceType"] == 'Encounter'][0]
+    assert primaryEncounter
+    assert primaryEncounter["subject"] == { 'reference': 'Patient/PrimaryPatient' }
+
+def test_singleton_resource_creation():
     resource_definitions = [
         {
             "Entity Name": "PrimaryEncounter",

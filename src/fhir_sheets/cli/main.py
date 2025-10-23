@@ -1,3 +1,4 @@
+from ..core.config.FhirSheetsConfiguration import FhirSheetsConfiguration
 from ..core import read_input
 from ..core import conversion
 
@@ -18,7 +19,7 @@ def find_sets(d, path=""):
     elif isinstance(d, set):
         print(f"Set found at path: {path}")
         
-def main(input_file, output_folder):
+def main(input_file, output_folder, config=FhirSheetsConfiguration({})):
     # Step 1: Read the input file using read_input module
     
     # Check if the output folder exists, and create it if not
@@ -34,7 +35,7 @@ def main(input_file, output_folder):
         # Construct the file path for each JSON file
         file_path = output_folder_path / f"{i}.json"
         #Create a bundle
-        fhir_bundle = conversion.create_transaction_bundle(resource_definition_entities, resource_link_entities, cohort_data, i)
+        fhir_bundle = conversion.create_transaction_bundle(resource_definition_entities, resource_link_entities, cohort_data, i, config)
         # Step 3: Write the processed data to the output file
         find_sets(fhir_bundle)
         json_string = orjson.dumps(fhir_bundle)
@@ -55,8 +56,14 @@ if __name__ == "__main__":
     # Define the output file argument
     parser.add_argument('--output_folder', type=str, help="Path to save the output files", default="output/")
     
+    # Config object arguments
+    parser.add_argument('--preview_mode', type=str, help="Configuration option to generate resources as 'preview mode' references will reference the entity name. Will primarily be used to render a singular resource for preview.", default=False)
+    
+    # Define the output file argument
+    parser.add_argument('--medications_as_reference', type=str, help="Configuration option to create medication references. You may still provide medicationCodeableConcept, but a post process will convert the codeableconcepts to medication resources", default=False)
     # Parse the arguments
     args = parser.parse_args()
 
     # Call the main function with the provided arguments
-    main(args.input_file, args.output_folder)
+    config = FhirSheetsConfiguration(vars(args))
+    main(args.input_file, args.output_folder, config)

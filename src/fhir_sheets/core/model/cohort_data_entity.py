@@ -1,6 +1,6 @@
 from typing import Dict, Any, List, Optional, Tuple
 
-from src.fhir_sheets.core.model.common import get_value_from_keys
+from .common import get_value_from_keys
 
 class HeaderEntry:
     def __init__(self, entityName, fieldName, jsonPath, valueType, valueSets):

@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from src.fhir_sheets.core.model.common import get_value_from_keys
+from .common import get_value_from_keys
 
 
 class ResourceDefinition:

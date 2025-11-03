@@ -12,14 +12,15 @@ For CLI usage; refer to the 'README.md' file as the working guide.
 For Core integration the entry point is
 
 ```
-fhir_sheets.core.conversion.create_transaction_bundle(resource_definition_entities, resource_link_entities, patient_data, index = 0):
+fhir_sheets.core.conversion.create_transaction_bundle(resource_definition_entities, resource_link_entities, patient_data, index = 0, config):
 ```
 
-This function takes in 4 sets of input
+This function takes in 5 sets of input
 * A resource definition entities schema
 * A resource link entities schema
 * A patient data schema
 * An index within the patient data
+* An optional configuration option
 
 And creates a transaction bundle consisting of entries, linked together as specified in the resource link entries shcema, AND with data provided by the patient data schema at the specified index
 
@@ -123,6 +124,7 @@ Patient.extension[Ethnicity].ombCategory.value
 
 Special Handling: DataAbsentReason. The jsonpath Manages the terminology for http://terminology.hl7.org/CodeSystem/data-absent-reason as a special case and matches values as needed without having to provide entire coding since it's so prevalent.
 ```
+Patient.name.dataAbsentReason
 Observation.dataAbsentReason
 ```
 

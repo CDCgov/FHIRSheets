@@ -320,7 +320,7 @@ class ObservationComponentHandler(AbstractCustomValueHandler):
         qualifier = parts[1][parts[1].index('[')+1:parts[1].index(']')]
         qualifier_condition = qualifier.split('=')
         
-        target_component = None
+        target_component: dict = {}
         if qualifier_condition[0] == 'code' and qualifier_condition[1] == '3151-8':
           target_component = findComponentWithCoding(components, '3151-8') or self.pulse_oximetry_oxygen_flow_rate
           if target_component is self.pulse_oximetry_oxygen_flow_rate:

@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, time, timezone
+import datetime
 
 #Dictionary of regexes
 type_regexes = {
@@ -41,25 +41,25 @@ def assign_value(final_struct, key, value, valueType):
         elif valueType.lower() == 'coding':
             final_struct[key] = caret_delimited_string_to_coding(value)
         elif valueType.lower() == 'date':
-            if isinstance(value, datetime):
+            if isinstance(value, datetime.datetime):
                 final_struct[key] = value.date()
             elif isinstance(value, str):
-                final_struct[key] = parse_iso8601_date(value).replace(tzinfo=timezone.utc)
+                final_struct[key] = parse_iso8601_date(value).replace(tzinfo=datetime.timezone.utc)
         elif valueType.lower() == 'datetime':
-            if isinstance(value, datetime):
-                final_struct[key] = value.replace(tzinfo=timezone.utc)
+            if isinstance(value, datetime.datetime):
+                final_struct[key] = value.replace(tzinfo=datetime.timezone.utc)
             else:
-                final_struct[key] = parse_iso8601_datetime(value).replace(tzinfo=timezone.utc)
+                final_struct[key] = parse_iso8601_datetime(value).replace(tzinfo=datetime.timezone.utc)
         elif valueType.lower() == 'decimal':
             final_struct[key] = value
         elif valueType.lower() == 'id':
             match = re.search(value, type_regexes['id'])
             final_struct[key] = match.group(0) if match else ''
         elif valueType.lower() == 'instant':
-            if isinstance(value, datetime):
-                final_struct[key] = value.replace(tzinfo=timezone.utc)
+            if isinstance(value, datetime.datetime):
+                final_struct[key] = value.replace(tzinfo=datetime.timezone.utc)
             else:
-                final_struct[key] = final_struct[key] = parse_iso8601_instant(value).replace(tzinfo=timezone.utc)
+                final_struct[key] = final_struct[key] = parse_iso8601_instant(value).replace(tzinfo=datetime.timezone.utc)
         elif valueType.lower() == 'integer':
             match = re.search(value, type_regexes['integer'])
             final_struct[key] = int(match.group(0)) if match else 0
@@ -79,7 +79,7 @@ def assign_value(final_struct, key, value, valueType):
             else:
                 final_struct[key].append(value)
         elif valueType.lower() == 'time':
-            if isinstance(time):
+            if isinstance(value, datetime.time):
                 final_struct[key] = value
             else:
                 final_struct[key] = parse_iso8601_time(value)
@@ -109,7 +109,7 @@ def parse_iso8601_date(input_string):
     match = re.search(pattern, input_string)
     # Check if the input string matches the pattern
     if match:
-        return datetime.strptime(match.group(1), '%Y-%m-%d')
+        return datetime.datetime.strptime(match.group(1), '%Y-%m-%d')
     else:
         raise ValueError(f"Input string '{input_string}' is not in the valid ISO 8601 date format")
 
@@ -123,10 +123,10 @@ def parse_iso8601_datetime(input_string):
         if input_string.endswith('Z'):
             # If it has 'Z', convert to UTC
             try:
-                return datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S').replace(tzinfo=timezone.utc)
+                return datetime.datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S').replace(tzinfo=datetime.timezone.utc)
             except ValueError: # If it fails (because the time part is missing), parse the date-only format and set time to midnight
                 try:
-                    parsed_date = datetime.strptime(match.group(1), '%Y-%m-%d')
+                    parsed_date = datetime.datetime.strptime(match.group(1), '%Y-%m-%d')
                     parsed_datetime = parsed_date.replace(hour=0, minute=0, second=0)
                     return parsed_datetime
                 except ValueError: # Neither format worked so catch an entire error
@@ -134,10 +134,10 @@ def parse_iso8601_datetime(input_string):
         else:
             # Otherwise, just convert without timezone
             try:
-                return datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S').replace(tzinfo=timezone.utc)
+                return datetime.datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S').replace(tzinfo=datetime.timezone.utc)
             except ValueError: # If it fails (because the time part is missing), parse the date-only format and set time to midnight
                 try:
-                    parsed_date = datetime.strptime(match.group(1), '%Y-%m-%d')
+                    parsed_date = datetime.datetime.strptime(match.group(1), '%Y-%m-%d')
                     parsed_datetime = parsed_date.replace(hour=0, minute=0, second=0)
                     return parsed_datetime
                 except ValueError: # Neither format worked so catch an entire error
@@ -155,17 +155,17 @@ def parse_iso8601_instant(input_string):
         if input_string.endswith('Z'):
             if '.' in input_string:
                 # With milliseconds
-                return datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S.%f').replace(tzinfo=timezone.utc)
+                return datetime.datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S.%f').replace(tzinfo=datetime.timezone.utc)
             else:
                 # Without milliseconds
-                return datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S').replace(tzinfo=timezone.utc)
+                return datetime.datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S').replace(tzinfo=datetime.timezone.utc)
         else:
             if '.' in input_string:
                 # With milliseconds
-                return datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S.%f')
+                return datetime.datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S.%f')
             else:
                 # Without milliseconds
-                return datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S')
+                return datetime.datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S')
     else:
         raise ValueError(f"Input string '{input_string}' is not in the valid ISO 8601 instant format")
     
@@ -218,7 +218,7 @@ def caret_delimited_string_to_codeableconcept(caret_delimited_str):
     
     # Initialize the CodeableConcept dictionary
     codeable_concept = {"coding": []}
-    
+    parts = []
     # Loop over each coding section
     for coding_str in codings:
         # Split each part by '^' to get system, code, and display (optionally text at the end)

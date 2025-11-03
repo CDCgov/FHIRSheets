@@ -1,22 +1,32 @@
 from typing import Any, Dict
 
+from src.fhir_sheets.core.model.common import get_value_from_keys
+
 
 class ResourceLink:
     """
     A class to represent a Fhir Reference between two resources.
     """
-    def __init__(self, data: Dict[str, Any]):
+    originResource_keys = ['OriginResource', 'Origin Resource', 'origin_resource']
+    referencePath_keys = ['ReferencePath', 'Reference Path', 'reference_path']
+    destinationResource_keys = ['DestinationResource', 'Destination Resource', 'destination_resource']
+    def __init__(self, originResource: str, referencePath: str, destinationResource: str):
         """
         Initializes the ResourceLink object from a dictionary.
 
         Args:
             data: A dictionary containing 'OriginResource', 'ReferencePath', and 'DestinationResource'.
         """
-        self.origin_resource = data.get('OriginResource')
-        self.reference_path = data.get('ReferencePath')
-        self.destination_resource = data.get('DestinationResource')
+        self.originResource = originResource
+        self.referencePath = referencePath
+        self.destinationResource = destinationResource
+        
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]):
+        return cls(get_value_from_keys(data, cls.originResource_keys, ''), get_value_from_keys(data, cls.referencePath_keys, ''), 
+            get_value_from_keys(data, cls.destinationResource_keys, ''))
         
     def __repr__(self) -> str:
-        return (f"ResourceLink(origin_resource='{self.origin_resource}', "
-                f"reference_path='{self.reference_path}', "
-                f"destination_resource='{self.destination_resource}')")
+        return (f"ResourceLink(originResource='{self.originResource}', "
+                f"referencePath='{self.referencePath}', "
+                f"destinationResource='{self.destinationResource}')")

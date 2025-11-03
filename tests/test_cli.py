@@ -1,13 +1,15 @@
 import datetime
 import pathlib
 import json
-from typing import Iterable, Dict
+from typing import Iterable, Dict, List
+from src.fhir_sheets.core import conversion
 from src.fhir_sheets.core.config.FhirSheetsConfiguration import FhirSheetsConfiguration
 from src.fhir_sheets.core.conversion import create_singular_resource
 from src.fhir_sheets.core.model.cohort_data_entity import CohortData
 from src.fhir_sheets.core.model.resource_definition_entity import ResourceDefinition
 from src.fhir_sheets.core.model.resource_link_entity import ResourceLink
 from src.fhir_sheets.cli.main import main
+import src.fhir_sheets.core.conversion
 
 TOP_DIR = pathlib.Path(__file__).parent.parent / "samples"
 
@@ -54,7 +56,7 @@ def test_singleton_resource_creation():
             "Profile(s)": [
                 "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
             ],
-            None: None,
+            
         },
         {
             "Entity Name": "PrimaryPatient",
@@ -62,13 +64,13 @@ def test_singleton_resource_creation():
             "Profile(s)": [
                 "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
             ],
-            None: None,
+            
         },
         {
             "Entity Name": "Mother",
             "ResourceType": "RelatedPerson",
             "Profile(s)": None,
-            None: None,
+            
         },
         {
             "Entity Name": "HearingScreening",
@@ -76,7 +78,7 @@ def test_singleton_resource_creation():
             "Profile(s)": [
                 "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
             ],
-            None: None,
+            
         },
         {
             "Entity Name": "CMVTest",
@@ -84,7 +86,7 @@ def test_singleton_resource_creation():
             "Profile(s)": [
                 "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
             ],
-            None: None,
+            
         },
         {
             "Entity Name": "Ultrasound",
@@ -92,7 +94,7 @@ def test_singleton_resource_creation():
             "Profile(s)": [
                 "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
             ],
-            None: None,
+            
         },
         {
             "Entity Name": "Diagnosis",
@@ -100,7 +102,7 @@ def test_singleton_resource_creation():
             "Profile(s)": [
                 "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
             ],
-            None: None,
+            
         },
         {
             "Entity Name": "Valganciclovir",
@@ -108,7 +110,7 @@ def test_singleton_resource_creation():
             "Profile(s)": [
                 "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest"
             ],
-            None: None,
+            
         },
     ]
     resource_links = [
@@ -167,394 +169,394 @@ def test_singleton_resource_creation():
         {
             "fieldName": "Patient's OMB Race Category",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.extension[Race].ombCategory",
+            "jsonPath": "Patient.extension[Race].ombCategory",
             "valueType": None,
-            "valuesets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-omb-race-category.html",
+            "valueSets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-omb-race-category.html",
         },
         {
             "fieldName": "Patient's OMB Ethnicity Category",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.extension[Ethnicity].ombCategory.value",
+            "jsonPath": "Patient.extension[Ethnicity].ombCategory.value",
             "valueType": "code",
-            "valuesets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-omb-ethnicity-category.html",
+            "valueSets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-omb-ethnicity-category.html",
         },
         {
             "fieldName": "Patient's Sex at Birth",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.extension[Birthsex].value",
+            "jsonPath": "Patient.extension[Birthsex].value",
             "valueType": "code",
-            "valuesets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-birthsex.html",
+            "valueSets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-birthsex.html",
         },
         {
             "fieldName": "Patient Identifier Value",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.identifier.[0].value",
+            "jsonPath": "Patient.identifier.[0].value",
             "valueType": "string",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Patient Identifier System",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.identifier.[0].system",
+            "jsonPath": "Patient.identifier.[0].system",
             "valueType": "string",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Patient MRN Identifier System",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.identifier[type=MRN].system",
+            "jsonPath": "Patient.identifier[type=MRN].system",
             "valueType": "string",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Patient MRN Identifier Value",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.identifier[type=MRN].value",
+            "jsonPath": "Patient.identifier[type=MRN].value",
             "valueType": "string",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Patient SSN Identifier System",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.identifier[type=SSN].system",
+            "jsonPath": "Patient.identifier[type=SSN].system",
             "valueType": "string",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Patient SSN Identifier Value",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.identifier[type=SSN].value",
+            "jsonPath": "Patient.identifier[type=SSN].value",
             "valueType": "string",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Patient's Given Name",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.name.[0].given",
+            "jsonPath": "Patient.name.[0].given",
             "valueType": "string[]",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Patient's Family Name",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.name.[0].family",
+            "jsonPath": "Patient.name.[0].family",
             "valueType": "string",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Patient name Use (Type)",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.name[0].use",
+            "jsonPath": "Patient.name[0].use",
             "valueType": "code",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Patient's Telecom System (Type)",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.telecom.[0].system",
+            "jsonPath": "Patient.telecom.[0].system",
             "valueType": "string",
-            "valuesets": "https://hl7.org/fhir/R4/valueset-contact-point-system.html",
+            "valueSets": "https://hl7.org/fhir/R4/valueset-contact-point-system.html",
         },
         {
             "fieldName": "Patient's Telecom Number",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.telecom.[0].value",
+            "jsonPath": "Patient.telecom.[0].value",
             "valueType": "string",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Patient's Telecom Purpose",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.telecom.[0].use",
+            "jsonPath": "Patient.telecom.[0].use",
             "valueType": "string",
-            "valuesets": "https://hl7.org/fhir/R4/valueset-contact-point-use.html",
+            "valueSets": "https://hl7.org/fhir/R4/valueset-contact-point-use.html",
         },
         {
             "fieldName": "Patient's Gender",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.gender",
+            "jsonPath": "Patient.gender",
             "valueType": "code",
-            "valuesets": "https://hl7.org/fhir/R4/valueset-administrative-gender.html",
+            "valueSets": "https://hl7.org/fhir/R4/valueset-administrative-gender.html",
         },
         {
             "fieldName": "Patient's Date of Birth",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.birthDate",
+            "jsonPath": "Patient.birthDate",
             "valueType": "date",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Patient's Primary Address",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.address.[0]",
+            "jsonPath": "Patient.address.[0]",
             "valueType": "Address",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Patient's Communication Language",
             "entityName": "PrimaryPatient",
-            "jsonpath": "Patient.communication.[0].language",
+            "jsonPath": "Patient.communication.[0].language",
             "valueType": "CodeableConcept",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Encounter identifier namespace",
             "entityName": "PrimaryEncounter",
-            "jsonpath": "Encounter.identifier.[0].system",
+            "jsonPath": "Encounter.identifier.[0].system",
             "valueType": "string",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Encounter Identifier",
             "entityName": "PrimaryEncounter",
-            "jsonpath": "Encounter.identifier.[0].value",
+            "jsonPath": "Encounter.identifier.[0].value",
             "valueType": "string",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Encounter Status",
             "entityName": "PrimaryEncounter",
-            "jsonpath": "Encounter.status",
+            "jsonPath": "Encounter.status",
             "valueType": "code",
-            "valuesets": "https://hl7.org/fhir/R4/valueset-encounter-status.html",
+            "valueSets": "https://hl7.org/fhir/R4/valueset-encounter-status.html",
         },
         {
             "fieldName": "Encounter patient classification",
             "entityName": "PrimaryEncounter",
-            "jsonpath": "Encounter.class",
+            "jsonPath": "Encounter.class",
             "valueType": "Coding",
-            "valuesets": "https://hl7.org/fhir/R4/v3/ActEncounterCode/vs.html",
+            "valueSets": "https://hl7.org/fhir/R4/v3/ActEncounterCode/vs.html",
         },
         {
             "fieldName": "Specific Encounter Type",
             "entityName": "PrimaryEncounter",
-            "jsonpath": "Encounter.type.[0]",
+            "jsonPath": "Encounter.type.[0]",
             "valueType": "CodeableConcept",
-            "valuesets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-encounter-type.html",
+            "valueSets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-encounter-type.html",
         },
         {
             "fieldName": "Encounter Start Date",
             "entityName": "PrimaryEncounter",
-            "jsonpath": "Encounter.period.start",
+            "jsonPath": "Encounter.period.start",
             "valueType": "dateTime",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Encounter End Date",
             "entityName": "PrimaryEncounter",
-            "jsonpath": "Encounter.period.end",
+            "jsonPath": "Encounter.period.end",
             "valueType": "dateTime",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Type of Facility Patient Discharged To",
             "entityName": "PrimaryEncounter",
-            "jsonpath": "Encounter.hospitalization.dischargeDisposition",
+            "jsonPath": "Encounter.hospitalization.dischargeDisposition",
             "valueType": "CodeableConcept",
-            "valuesets": "https://hl7.org/fhir/R4/valueset-encounter-discharge-disposition.html",
+            "valueSets": "https://hl7.org/fhir/R4/valueset-encounter-discharge-disposition.html",
         },
         {
             "fieldName": "Mother identifier namespace",
             "entityName": "Mother",
-            "jsonpath": "RelatedPerson.identifier.[0].system",
+            "jsonPath": "RelatedPerson.identifier.[0].system",
             "valueType": "string",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Mother identifier",
             "entityName": "Mother",
-            "jsonpath": "RelatedPerson.identifier.[0].value",
+            "jsonPath": "RelatedPerson.identifier.[0].value",
             "valueType": "string",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Mother Relationship Code",
             "entityName": "Mother",
-            "jsonpath": "RelatedPerson.relationship.[0]",
+            "jsonPath": "RelatedPerson.relationship.[0]",
             "valueType": "CodeableConcept",
-            "valuesets": "https://www.hl7.org/fhir/r4/valueset-relatedperson-relationshiptype.html",
+            "valueSets": "https://www.hl7.org/fhir/r4/valueset-relatedperson-relationshiptype.html",
         },
         {
             "fieldName": "Mother's Given Name",
             "entityName": "Mother",
-            "jsonpath": "RelatedPerson.name.[0].given",
+            "jsonPath": "RelatedPerson.name.[0].given",
             "valueType": "string[]",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Mother's Family Name",
             "entityName": "Mother",
-            "jsonpath": "RelatedPerson.name.[0].family",
+            "jsonPath": "RelatedPerson.name.[0].family",
             "valueType": "string",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Mother's name Use (Type)",
             "entityName": "Mother",
-            "jsonpath": "RelatedPerson.name[0].use",
+            "jsonPath": "RelatedPerson.name[0].use",
             "valueType": "code",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Mother's Telecom System (Type)",
             "entityName": "Mother",
-            "jsonpath": "RelatedPerson.telecom.[0].system",
+            "jsonPath": "RelatedPerson.telecom.[0].system",
             "valueType": "string",
-            "valuesets": "https://hl7.org/fhir/R4/valueset-contact-point-system.html",
+            "valueSets": "https://hl7.org/fhir/R4/valueset-contact-point-system.html",
         },
         {
             "fieldName": "Mother's Telecom Number",
             "entityName": "Mother",
-            "jsonpath": "RelatedPerson.telecom.[0].value",
+            "jsonPath": "RelatedPerson.telecom.[0].value",
             "valueType": "string",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Mother's Telecom Purpose",
             "entityName": "Mother",
-            "jsonpath": "RelatedPerson.telecom.[0].use",
+            "jsonPath": "RelatedPerson.telecom.[0].use",
             "valueType": "string",
-            "valuesets": "https://hl7.org/fhir/R4/valueset-contact-point-use.html",
+            "valueSets": "https://hl7.org/fhir/R4/valueset-contact-point-use.html",
         },
         {
             "fieldName": "Mother's Gender",
             "entityName": "Mother",
-            "jsonpath": "RelatedPerson.gender",
+            "jsonPath": "RelatedPerson.gender",
             "valueType": "code",
-            "valuesets": "https://hl7.org/fhir/R4/valueset-administrative-gender.html",
+            "valueSets": "https://hl7.org/fhir/R4/valueset-administrative-gender.html",
         },
         {
             "fieldName": "Procedure Event Status",
             "entityName": "HearingScreening",
-            "jsonpath": "Procedure.status",
+            "jsonPath": "Procedure.status",
             "valueType": "code",
-            "valuesets": "https://hl7.org/fhir/R4/valueset-event-status.html",
+            "valueSets": "https://hl7.org/fhir/R4/valueset-event-status.html",
         },
         {
             "fieldName": "Procedure code",
             "entityName": "HearingScreening",
-            "jsonpath": "Procedure.code",
+            "jsonPath": "Procedure.code",
             "valueType": "CodeableConcept",
-            "valuesets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-procedure-code.html",
+            "valueSets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-procedure-code.html",
         },
         {
             "fieldName": "Procedure's Performed Datetime",
             "entityName": "HearingScreening",
-            "jsonpath": "Procedure.performedDateTime",
+            "jsonPath": "Procedure.performedDateTime",
             "valueType": "dateTime",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Procedure Event Status",
             "entityName": "CMVTest",
-            "jsonpath": "Procedure.status",
+            "jsonPath": "Procedure.status",
             "valueType": "code",
-            "valuesets": "https://hl7.org/fhir/R4/valueset-event-status.html",
+            "valueSets": "https://hl7.org/fhir/R4/valueset-event-status.html",
         },
         {
             "fieldName": "Procedure code",
             "entityName": "CMVTest",
-            "jsonpath": "Procedure.code",
+            "jsonPath": "Procedure.code",
             "valueType": "CodeableConcept",
-            "valuesets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-procedure-code.html",
+            "valueSets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-procedure-code.html",
         },
         {
             "fieldName": "Procedure's Performed Datetime",
             "entityName": "CMVTest",
-            "jsonpath": "Procedure.performedDateTime",
+            "jsonPath": "Procedure.performedDateTime",
             "valueType": "dateTime",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Procedure Event Status",
             "entityName": "Ultrasound",
-            "jsonpath": "Procedure.status",
+            "jsonPath": "Procedure.status",
             "valueType": "code",
-            "valuesets": "https://hl7.org/fhir/R4/valueset-event-status.html",
+            "valueSets": "https://hl7.org/fhir/R4/valueset-event-status.html",
         },
         {
             "fieldName": "Procedure code",
             "entityName": "Ultrasound",
-            "jsonpath": "Procedure.code",
+            "jsonPath": "Procedure.code",
             "valueType": "CodeableConcept",
-            "valuesets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-procedure-code.html",
+            "valueSets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-procedure-code.html",
         },
         {
             "fieldName": "Procedure's Performed Datetime",
             "entityName": "Ultrasound",
-            "jsonpath": "Procedure.performedDateTime",
+            "jsonPath": "Procedure.performedDateTime",
             "valueType": "dateTime",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Condition Clinical Status",
             "entityName": "Diagnosis",
-            "jsonpath": "Condition.clinicalStatus",
+            "jsonPath": "Condition.clinicalStatus",
             "valueType": "CodeableConcept",
-            "valuesets": "https://hl7.org/fhir/R4/valueset-condition-clinical.html",
+            "valueSets": "https://hl7.org/fhir/R4/valueset-condition-clinical.html",
         },
         {
             "fieldName": "Condition Verification Status",
             "entityName": "Diagnosis",
-            "jsonpath": "Condition.verificationStatus",
+            "jsonPath": "Condition.verificationStatus",
             "valueType": "CodeableConcept",
-            "valuesets": "https://hl7.org/fhir/R4/valueset-condition-ver-status.html",
+            "valueSets": "https://hl7.org/fhir/R4/valueset-condition-ver-status.html",
         },
         {
             "fieldName": "Condition Category",
             "entityName": "Diagnosis",
-            "jsonpath": "Condition.category.[0]",
+            "jsonPath": "Condition.category.[0]",
             "valueType": "CodeableConcept",
-            "valuesets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-condition-category.html",
+            "valueSets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-condition-category.html",
         },
         {
             "fieldName": "Condition Code",
             "entityName": "Diagnosis",
-            "jsonpath": "Condition.code",
+            "jsonPath": "Condition.code",
             "valueType": "CodeableConcept",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Condition Onset Date",
             "entityName": "Diagnosis",
-            "jsonpath": "Condition.onsetDateTime",
+            "jsonPath": "Condition.onsetDateTime",
             "valueType": "datetime",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Medication Request Status",
             "entityName": "Valganciclovir",
-            "jsonpath": "MedicationRequest.status",
+            "jsonPath": "MedicationRequest.status",
             "valueType": "code",
-            "valuesets": "https://hl7.org/fhir/R4/valueset-medicationrequest-status.html",
+            "valueSets": "https://hl7.org/fhir/R4/valueset-medicationrequest-status.html",
         },
         {
             "fieldName": "Medication Request Intent",
             "entityName": "Valganciclovir",
-            "jsonpath": "MedicationRequest.intent",
+            "jsonPath": "MedicationRequest.intent",
             "valueType": "code",
-            "valuesets": "https://hl7.org/fhir/R4/valueset-medicationrequest-intent.html",
+            "valueSets": "https://hl7.org/fhir/R4/valueset-medicationrequest-intent.html",
         },
         {
             "fieldName": "Medication Code",
             "entityName": "Valganciclovir",
-            "jsonpath": "MedicationRequest.medicationCodeableConcept",
+            "jsonPath": "MedicationRequest.medicationCodeableConcept",
             "valueType": "CodeableConcept",
-            "valuesets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-medication-codes.html",
+            "valueSets": "https://hl7.org/fhir/us/core/STU3.1.1/ValueSet-us-core-medication-codes.html",
         },
         {
             "fieldName": "Medication Date",
             "entityName": "Valganciclovir",
-            "jsonpath": "MedicationRequest.authoredOn",
+            "jsonPath": "MedicationRequest.authoredOn",
             "valueType": "dateTime",
-            "valuesets": None,
+            "valueSets": None,
         },
         {
             "fieldName": "Medication Dosage Instructions",
             "entityName": "Valganciclovir",
-            "jsonpath": "MedicationRequest.dosageInstruction.[0].text",
+            "jsonPath": "MedicationRequest.dosageInstruction.[0].text",
             "valueType": "string",
-            "valuesets": None,
+            "valueSets": None,
         },
     ]
     patients = [
@@ -690,9 +692,9 @@ def test_singleton_resource_creation():
         }
     ]
     singleton_resource_name = resource_definitions[0]['Entity Name']
-    resource_definitions_class = [ResourceDefinition(x) for x in resource_definitions]
-    resource_links_class = [ResourceLink(x) for x in resource_links]
-    cohort_data_class = CohortData(headers=headers, patients=patients)
+    resource_definitions_class: List[ResourceDefinition] = [ResourceDefinition.from_dict(x) for x in resource_definitions]
+    resource_links_class = [ResourceLink.from_dict(x) for x in resource_links]
+    cohort_data_class = CohortData.from_dict(headers=headers, patients=patients)
     
     singleton_json = create_singular_resource(
         singleton_resource_name, resource_definitions_class, resource_links_class, cohort_data_class, 0
@@ -735,3 +737,37 @@ def test_singleton_resource_creation():
     assert 'meta' in singleton_json and isinstance(singleton_json['meta'].get('profile'), list) and \
         'http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter' in singleton_json['meta']['profile'], \
         "FHIR US Core profile is missing from meta.profile."
+
+def test_API_creation_10302025():
+    resource_definitions = [{'entity_name': 'PrimaryPatient', 'resource_type': 'Patient', 'profiles': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient']}, {'entity_name': 'PrimaryCondition', 'resource_type': 'Condition', 'profiles': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition']}]
+    resource_links = [{'origin_resource': 'PrimaryCondition', 'reference_path': 'subject', 'destination_resource': 'PrimaryPatient'}]
+    headers = [{'entityName': 'PrimaryPatient', 'fieldName': 'PrimaryPatient/Patient.name', 'jsonPath': 'Patient.name', 'valueType': 'HumanName', 'valueSets': None}, {'entityName': 'PrimaryPatient', 'fieldName': 'PrimaryPatient/Patient.birthDate', 'jsonPath': 'Patient.birthDate', 'valueType': 'date', 'valueSets': None}, {'entityName': 'PrimaryPatient', 'fieldName': 'PrimaryPatient/Patient.gender', 'jsonPath': 'Patient.gender', 'valueType': 'code', 'valueSets': None}, {'entityName': 'PrimaryPatient', 'fieldName': 'PrimaryPatient/Patient.identifier', 'jsonPath': 'Patient.identifier', 'valueType': 'Identifier', 'valueSets': None}, {'entityName': 'PrimaryPatient', 'fieldName': 'PrimaryPatient/Patient.active', 'jsonPath': 'Patient.active', 'valueType': 'code', 'valueSets': None}, {'entityName': 'PrimaryPatient', 'fieldName': 'PrimaryPatient/Patient.address', 'jsonPath': 'Patient.address', 'valueType': 'Address', 'valueSets': None}, {'entityName': 'PrimaryCondition', 'fieldName': 'PrimaryCondition/Condition.identifier', 'jsonPath': 'Condition.identifier', 'valueType': 'Identifier', 'valueSets': None}, {'entityName': 'PrimaryCondition', 'fieldName': 'PrimaryCondition/Condition.clinicalStatus', 'jsonPath': 'Condition.clinicalStatus', 'valueType': 'CodeableConcept', 'valueSets': None}, {'entityName': 'PrimaryCondition', 'fieldName': 'PrimaryCondition/Condition.verificationStatus', 'jsonPath': 'Condition.verificationStatus', 'valueType': 'CodeableConcept', 'valueSets': None}, {'entityName': 'PrimaryCondition', 'fieldName': 'PrimaryCondition/Condition.category', 'jsonPath': 'Condition.category', 'valueType': 'CodeableConcept', 'valueSets': None}, {'entityName': 'PrimaryCondition', 'fieldName': 'PrimaryCondition/Condition.code', 'jsonPath': 'Condition.code', 'valueType': '$special', 'valueSets': None}, {'entityName': 'PrimaryCondition', 'fieldName': 'PrimaryCondition/Condition.onsetDateTime', 'jsonPath': 'Condition.onsetDateTime', 'valueType': 'dateTime', 'valueSets': None}]
+
+    patients = [{('PrimaryPatient', 'PrimaryPatient/Patient.gender'): 'Male'}, {('PrimaryPatient', 'PrimaryPatient/Patient.gender'): 'Female'}, {('PrimaryPatient', 'PrimaryPatient/Patient.gender'): 'Female'}, {('PrimaryPatient', 'PrimaryPatient/Patient.gender'): 'Female'}, {('PrimaryPatient', 'PrimaryPatient/Patient.gender'): 'Male'}]
+    resource_definitions_class: List[ResourceDefinition] = [ResourceDefinition.from_dict(x) for x in resource_definitions]
+    resource_links_class = [ResourceLink.from_dict(x) for x in resource_links]
+    cohort_data_class = CohortData.from_dict(headers=headers, patients=patients)
+    
+    fhir_bundle = conversion.create_transaction_bundle(resource_definitions_class, resource_links_class, cohort_data_class, 0)
+    # 1. Top-Level Key Checks
+    assert isinstance(fhir_bundle, dict)
+    primaryPatient = [entry["resource"] for entry in fhir_bundle["entry"] if entry["resource"]["resourceType"] == 'Patient'][0]
+    assert primaryPatient
+    assert primaryPatient["gender"] == 'Male'
+    
+def test_API_creation_11032025():
+    resource_definitions = [{'entity_name': 'PrimaryPatient', 'resource_type': 'Patient', 'profiles': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient']}, {'entity_name': 'PrimaryCondition', 'resource_type': 'Condition', 'profiles': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition']}]
+    resource_links = [{'origin_resource': 'PrimaryCondition', 'reference_path': 'subject', 'destination_resource': 'PrimaryPatient'}]
+    headers = [{'entityName': 'PrimaryPatient', 'fieldName': 'PrimaryPatient/Patient.name', 'jsonpath': 'Patient.name', 'value_type': 'HumanName', 'valuesets': None}, {'entityName': 'PrimaryPatient', 'fieldName': 'PrimaryPatient/Patient.birthDate', 'jsonpath': 'Patient.birthDate', 'value_type': 'date', 'valuesets': None}, {'entityName': 'PrimaryPatient', 'fieldName': 'PrimaryPatient/Patient.gender', 'jsonpath': 'Patient.gender', 'value_type': 'code', 'valuesets': None}, {'entityName': 'PrimaryPatient', 'fieldName': 'PrimaryPatient/Patient.identifier', 'jsonpath': 'Patient.identifier', 'value_type': 'Identifier', 'valuesets': None}, {'entityName': 'PrimaryPatient', 'fieldName': 'PrimaryPatient/Patient.active', 'jsonpath': 'Patient.active', 'value_type': 'code', 'valuesets': None}, {'entityName': 'PrimaryPatient', 'fieldName': 'PrimaryPatient/Patient.address', 'jsonpath': 'Patient.address', 'value_type': 'Address', 'valuesets': None}, {'entityName': 'PrimaryCondition', 'fieldName': 'PrimaryCondition/Condition.identifier', 'jsonpath': 'Condition.identifier', 'value_type': 'Identifier', 'valuesets': None}, {'entityName': 'PrimaryCondition', 'fieldName': 'PrimaryCondition/Condition.clinicalStatus', 'jsonpath': 'Condition.clinicalStatus', 'value_type': 'CodeableConcept', 'valuesets': None}, {'entityName': 'PrimaryCondition', 'fieldName': 'PrimaryCondition/Condition.verificationStatus', 'jsonpath': 'Condition.verificationStatus', 'value_type': 'CodeableConcept', 'valuesets': None}, {'entityName': 'PrimaryCondition', 'fieldName': 'PrimaryCondition/Condition.category', 'jsonpath': 'Condition.category', 'value_type': 'CodeableConcept', 'valuesets': None}, {'entityName': 'PrimaryCondition', 'fieldName': 'PrimaryCondition/Condition.code', 'jsonpath': 'Condition.code', 'value_type': '$special', 'valuesets': None}, {'entityName': 'PrimaryCondition', 'fieldName': 'PrimaryCondition/Condition.onsetDateTime', 'jsonpath': 'Condition.onsetDateTime', 'value_type': 'dateTime', 'valuesets': None}]
+
+    patients = [{('PrimaryPatient', 'PrimaryPatient/Patient.gender'): 'Male'}, {('PrimaryPatient', 'PrimaryPatient/Patient.gender'): 'Female'}, {('PrimaryPatient', 'PrimaryPatient/Patient.gender'): 'Female'}, {('PrimaryPatient', 'PrimaryPatient/Patient.gender'): 'Female'}, {('PrimaryPatient', 'PrimaryPatient/Patient.gender'): 'Male'}]
+    resource_definitions_class: List[ResourceDefinition] = [ResourceDefinition.from_dict(x) for x in resource_definitions]
+    resource_links_class = [ResourceLink.from_dict(x) for x in resource_links]
+    cohort_data_class = CohortData.from_dict(headers=headers, patients=patients)
+    
+    fhir_bundle = conversion.create_transaction_bundle(resource_definitions_class, resource_links_class, cohort_data_class, 0)
+    # 1. Top-Level Key Checks
+    assert isinstance(fhir_bundle, dict)
+    primaryPatient = [entry["resource"] for entry in fhir_bundle["entry"] if entry["resource"]["resourceType"] == 'Patient'][0]
+    assert primaryPatient
+    assert primaryPatient["gender"] == 'Male'

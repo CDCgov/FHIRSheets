@@ -1,20 +1,30 @@
 from typing import Any, Dict, List, Optional
 
+from src.fhir_sheets.core.model.common import get_value_from_keys
+
 
 class ResourceDefinition:
     """
     A class to represent a Resource Definition for FHIR initialization.
     """
-    def __init__(self, entity_data: Dict[str, Any]):
+    entityName_keys = ['Entity Name', 'name', 'entity_name']
+    resourceType_keys = ['ResourceType', 'resource_type', 'type']
+    profile_keys = ['Profile(s)', 'profiles', 'profile_list']
+    
+    def __init__(self, entityName: str, resourceType: str, profiles: List[str]):
         """
         Initializes the ResourceLink object from a dictionary.
 
         Args:
-            data: A dictionary containing 'Entity name', 'ResourceType', and 'Profile(s)'.
+            data: A dictionary containing 'EntityName', 'ResourceType', and 'Profile(s)'.
         """
-        self.entity_name = entity_data.get('Entity Name')
-        self.resource_type = entity_data.get('ResourceType')
-        self.profiles = entity_data.get('Profile(s)')
+        self.entityName = entityName
+        self.resourceType = resourceType
+        self.profiles = profiles
+        
+    @classmethod
+    def from_dict(cls, data:  Dict[str, Any]):
+        return cls(get_value_from_keys(data, cls.entityName_keys, ''), get_value_from_keys(data, cls.resourceType_keys, ''), get_value_from_keys(data, cls.profile_keys, []))
 
     def __repr__(self) -> str:
-        return f"ResourceDefinition(entity_name='{self.entity_name}', resource_type='{self.resource_type}', profiles={self.profiles})"
+        return f"ResourceDefinition(entityName='{self.entityName}', resourceType='{self.resourceType}', profiles={self.profiles})"

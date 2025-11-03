@@ -17,10 +17,10 @@ def create_transaction_bundle(resource_definition_entities: List[ResourceDefinit
     root_bundle = initialize_bundle()
     created_resources = {}
     for resource_definition in resource_definition_entities:
-        entity_name = resource_definition.entity_name
+        entityName = resource_definition.entityName
         #Create and collect fhir resources
         fhir_resource = create_fhir_resource(resource_definition, cohort_data, index, config)
-        created_resources[entity_name] = fhir_resource
+        created_resources[entityName] = fhir_resource
     #Link resources after creation
     add_default_resource_links(created_resources, resource_link_entities)
     create_resource_links(created_resources, resource_link_entities, config.preview_mode)
@@ -31,14 +31,15 @@ def create_transaction_bundle(resource_definition_entities: List[ResourceDefinit
         post_process_create_medication_references(root_bundle)
     return root_bundle
 
-def create_singular_resource(singleton_entity_name: str, resource_definition_entities: List[ResourceDefinition], resource_link_entities: List[ResourceLink], cohort_data: CohortData, index = 0):
+def create_singular_resource(singleton_entityName: str, resource_definition_entities: List[ResourceDefinition], resource_link_entities: List[ResourceLink], cohort_data: CohortData, index = 0):
     created_resources = {}
+    singleton_fhir_resource = {}
     for resource_definition in resource_definition_entities:
-        entity_name = resource_definition.entity_name
+        entityName = resource_definition.entityName
         #Create and collect fhir resources
         fhir_resource = create_fhir_resource(resource_definition, cohort_data, index)
-        created_resources[entity_name] = fhir_resource
-        if entity_name == singleton_entity_name:
+        created_resources[entityName] = fhir_resource
+        if entityName == singleton_entityName:
             singleton_fhir_resource = fhir_resource
     add_default_resource_links(created_resources, resource_link_entities)
     create_resource_links(created_resources, resource_link_entities, preview_mode=True)
@@ -63,7 +64,7 @@ def initialize_bundle():
 #Initialize a resource from a resource definition. Adding basic information all resources need
 def initialize_resource(resource_definition):
     initial_resource = {}
-    initial_resource['resourceType'] = resource_definition.resource_type.strip()
+    initial_resource['resourceType'] = resource_definition.resourceType.strip()
     initial_resource['id'] = str(uuid.uuid4()).strip()
     if resource_definition.profiles:
         initial_resource['meta'] = {
@@ -77,29 +78,38 @@ def initialize_resource(resource_definition):
     return initial_resource
 
 # Creates a fhir-json structure from a resource definition entity and the patient_data_sheet
-def create_fhir_resource(resource_definition: ResourceDefinition, cohort_data: CohortData, index: int = 0, config: FhirSheetsConfiguration = None):
+def create_fhir_resource(resource_definition: ResourceDefinition, cohort_data: CohortData, index: int = 0, config: FhirSheetsConfiguration = FhirSheetsConfiguration({})) -> dict:
     resource_dict = initialize_resource(resource_definition)
     #Get field entries for this entity
     header_entries_for_resourcename = [
         headerEntry
         for headerEntry in cohort_data.headers
-        if headerEntry.entityName == resource_definition.entity_name
+        if headerEntry.entityName == resource_definition.entityName
     ]
     dataelements_for_resourcename = {
         field_name: value
-        for (entity_name, field_name), value in cohort_data.patients[index].entries.items()
-        if entity_name == resource_definition.entity_name
+        for (entityName, field_name), value in cohort_data.patients[index].entries.items()
+        if entityName == resource_definition.entityName
     }
     if len(dataelements_for_resourcename.keys()) == 0:
-        print(f"WARNING: Patient index {index} - Create Fhir Resource Error - {resource_definition.entity_name} - No columns for entity '{resource_definition.entity_name}' found for resource in 'PatientData' sheet")
+        print(f"WARNING: Patient index {index} - Create Fhir Resource Error - {resource_definition.entityName} - No columns for entity '{resource_definition.entityName}' found for resource in 'PatientData' sheet")
         return resource_dict
-        all_field_entries = cohort_data.entities[resource_definition.entity_name].fields
+        all_field_entries = cohort_data.entities[resource_definition.entityName].fields
     #For each field within the entity
-    for fieldname, value in dataelements_for_resourcename.items():
-        header_element = next((header for header in header_entries_for_resourcename if header.fieldName == fieldname), None)
+    for fieldName, value in dataelements_for_resourcename.items():
+        header_element = next((header for header in header_entries_for_resourcename if header.fieldName == fieldName), None)
         if header_element is None:
-            print(f"WARNING: Field Name {fieldname} - No Header Entry found.")
-        create_structure_from_jsonpath(resource_dict, header_element.jsonpath, resource_definition, header_element.value_type, value)
+            print(f"WARNING: Field Name {fieldName} - No Header Entry found.")
+            continue
+        jsonPath = header_element.jsonPath
+        if jsonPath is None:
+            print(f"WARNING: Field Name {fieldName} - Header Entry found, but jsonPath attribute is None. Skipping.")
+            continue
+        valueType = header_element.valueType
+        if valueType is None:
+            print(f"WARNING: Field Name {fieldName} - Header Entry found, but valueType attribute is None. Skipping.")
+            continue
+        create_structure_from_jsonpath(resource_dict, jsonPath, resource_definition, valueType, value)
     return resource_dict
 
 #Create a resource_link for default references in the cases where only 1 resourceType of the source and destination exist
@@ -158,11 +168,7 @@ def add_default_resource_links(created_resources: dict, resource_link_entities: 
             originResourceEntityName = resource_counts[sourceType]['singletonEntityName']
             destinationResourceEntityName = resource_counts[destinationType]['singletonEntityName']
             resource_link_entities.append(
-                ResourceLink({
-                    "OriginResource": originResourceEntityName,
-                    "DestinationResource": destinationResourceEntityName,
-                    "ReferencePath": fieldName
-                })
+                ResourceLink(originResourceEntityName,fieldName,destinationResourceEntityName)
             )
     return
         
@@ -181,7 +187,7 @@ def create_resource_link(created_resources, resource_link_entity, preview_mode =
     reference_json_block = {
         "reference" : "$value"
     }
-    #Special reference handling blocks, in the form of (origin_resource, destination_resource, reference_path)
+    #Special reference handling blocks, in the form of (originResource, destinationResource, referencePath)
     arrayType_references = [
         ('diagnosticreport', 'specimen', 'specimen'),
         ('diagnosticreport', 'practitioner', 'performer'),
@@ -193,32 +199,32 @@ def create_resource_link(created_resources, resource_link_entity, preview_mode =
     ]
     #Find the origin and destination resource from the link
     try:
-        origin_resource = created_resources[resource_link_entity.origin_resource]
+        originResource = created_resources[resource_link_entity.originResource]
     except KeyError:
-        print(f"WARNING: In ResourceLinks tab, found a Origin Resource of : {resource_link_entity.origin_resource}  but no such entity found in PatientData")
+        print(f"WARNING: In ResourceLinks tab, found a Origin Resource of : {resource_link_entity.originResource}  but no such entity found in PatientData")
         return
     try:
-        destination_resource = created_resources[resource_link_entity.destination_resource]
+        destinationResource = created_resources[resource_link_entity.destinationResource]
     except KeyError:
-        print(f"WARNING: In ResourceLinks tab, found a Desitnation Resource  of : {resource_link_entity.destination_resource}  but no such entity found in PatientData")
+        print(f"WARNING: In ResourceLinks tab, found a Desitnation Resource  of : {resource_link_entity.destinationResource}  but no such entity found in PatientData")
         return
     #Estable the value of the refence
     if preview_mode:
-        reference_value = destination_resource['resourceType'] + "/" + resource_link_entity.destination_resource
+        reference_value = destinationResource['resourceType'] + "/" + resource_link_entity.destinationResource
     else:
-        reference_value = destination_resource['resourceType'] + "/" + destination_resource['id']
-    link_tuple = (origin_resource['resourceType'].strip().lower(),
-                    destination_resource['resourceType'].strip().lower(),
-                    resource_link_entity.reference_path.strip().lower())
+        reference_value = destinationResource['resourceType'] + "/" + destinationResource['id']
+    link_tuple = (originResource['resourceType'].strip().lower(),
+                    destinationResource['resourceType'].strip().lower(),
+                    resource_link_entity.referencePath.strip().lower())
     if link_tuple in arrayType_references:
-        if resource_link_entity.reference_path.strip().lower() not in origin_resource:
-            origin_resource[resource_link_entity.reference_path.strip().lower()] = []
+        if resource_link_entity.referencePath.strip().lower() not in originResource:
+            originResource[resource_link_entity.referencePath.strip().lower()] = []
         new_reference = reference_json_block.copy()
         new_reference['reference'] = reference_value
-        origin_resource[resource_link_entity.reference_path.strip().lower()].append(new_reference)
+        originResource[resource_link_entity.referencePath.strip().lower()].append(new_reference)
     else:
-        origin_resource[resource_link_entity.reference_path.strip().lower()] = reference_json_block.copy()
-        origin_resource[resource_link_entity.reference_path.strip().lower()]["reference"] = reference_value
+        originResource[resource_link_entity.referencePath.strip().lower()] = reference_json_block.copy()
+        originResource[resource_link_entity.referencePath.strip().lower()]["reference"] = reference_value
     return
 
 def add_resource_to_transaction_bundle(root_bundle, fhir_resource):
@@ -254,7 +260,7 @@ def create_structure_from_jsonpath(root_struct: Dict, json_path: str, resource_d
     return build_structure(root_struct, json_path, resource_definition, dataType, parts, value, [])
 
 # main recursive function to drill into the json structure, assign paths, and create structure where needed
-def build_structure(current_struct: Dict, json_path: str, resource_definition: ResourceDefinition, dataType: str, parts: List[str], value: Any, previous_parts: List[str]):
+def build_structure(current_struct: Any, json_path: str, resource_definition: ResourceDefinition, dataType: str, parts: List[str], value: Any, previous_parts: List[str]):
     if len(parts) == 0:
         return current_struct
     #Grab current part
@@ -264,7 +270,7 @@ def build_structure(current_struct: Dict, json_path: str, resource_definition: R
     if matching_handler is not None:
         return special_values.custom_handlers[matching_handler].assign_value(json_path, resource_definition, dataType,  current_struct, parts[-1], value)
     #Ignore dollar sign ($) and drill farther down
-    if part == '$' or part == resource_definition.resource_type.strip():
+    if part == '$' or part == resource_definition.resourceType.strip():
         #Ignore the dollar sign and the resourcetype
         return build_structure_recurse(current_struct, json_path, resource_definition, dataType, parts, value, previous_parts, part)
     
@@ -338,7 +344,7 @@ def build_structure(current_struct: Dict, json_path: str, resource_definition: R
         #If there's no qualifier condition, but an index aka '[0]', '[1]' etc, then it's a simple accessor
         elif qualifier.isdigit():
             if not isinstance(current_struct[key_part], list):
-                raise TypeError(f"ERROR: Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + parts[0])} - Expected a list, but got {type(current_struct).__name__} instead.")
+                raise TypeError(f"ERROR: Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + [parts[0]])} - Expected a list, but got {type(current_struct).__name__} instead.")
             qualifier_as_number = int(qualifier)
             if qualifier_as_number > len(current_struct):
                 current_struct[key_part].extend({} for x in range (qualifier_as_number - len(current_struct)))
@@ -378,7 +384,7 @@ def post_process_create_medication_references( root_bundle: dict):
     return
 
 def createMedicationResource(root_bundle, medicationCodeableConcept):
-    target_medication = initialize_resource(ResourceDefinition({'ResourceType': 'Medication'}))
+    target_medication = initialize_resource(ResourceDefinition.from_dict({'ResourceType': 'Medication'}))
     target_medication['code'] = medicationCodeableConcept
     add_resource_to_transaction_bundle(root_bundle, target_medication)
     return target_medication

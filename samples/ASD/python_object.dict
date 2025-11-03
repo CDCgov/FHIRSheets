@@ -1,7 +1,12 @@
 ----------
 Resource Definitions
 ----------
-[{'Entity Name': 'PrimaryEncounter', 'ResourceType': 'Encounter', 'Profile(s)': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter'], None: None}, {'Entity Name': 'PrimaryPatient', 'ResourceType': 'Patient', 'Profile(s)': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient'], None: None}, {'Entity Name': 'Mother', 'ResourceType': 'RelatedPerson', 'Profile(s)': None, None: None}, {'Entity Name': 'PulseOximetryReading', 'ResourceType': 'Observation', 'Profile(s)': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry'], None: None}, {'Entity Name': 'TTEProcedure', 'ResourceType': 'Procedure', 'Profile(s)': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure'], None: None}, {'Entity Name': 'Diagnosis', 'ResourceType': 'Condition', 'Profile(s)': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition'], None: None}]
+[{'Entity Name': 'PrimaryEncounter', 'ResourceType': 'Encounter', 'Profile(s)': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter'], None: None},
+{'Entity Name': 'PrimaryPatient', 'ResourceType': 'Patient', 'Profile(s)': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient'], None: None},
+{'Entity Name': 'Mother', 'ResourceType': 'RelatedPerson', 'Profile(s)': None, None: None},
+{'Entity Name': 'PulseOximetryReading', 'ResourceType': 'Observation', 'Profile(s)': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry'], None: None},
+{'Entity Name': 'TTEProcedure', 'ResourceType': 'Procedure', 'Profile(s)': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure'], None: None},
+{'Entity Name': 'Diagnosis', 'ResourceType': 'Condition', 'Profile(s)': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition'], None: None}]
 ----------
 Resource Links
 ----------

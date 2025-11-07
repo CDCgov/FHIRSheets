@@ -54,6 +54,8 @@ def assign_value(final_struct, key, value, valueType):
                 final_struct[key] = parse_iso8601_datetime(value).replace(tzinfo=datetime.timezone.utc)
         elif valueType.lower() == 'decimal':
             final_struct[key] = value
+        elif valueType.lower() == 'humanname':
+            final_struct[key] = parse_human_name(value)
         elif valueType.lower() == 'id':
             match = re.search(value, type_regexes['id'])
             final_struct[key] = match.group(0) if match else ''
@@ -279,3 +281,12 @@ def string_to_quantity(quantity_str):
     
     
     return quantity
+
+def parse_human_name(value):
+    name_parts = value.split(" ")
+    family: str = name_parts[-1]
+    given: list[str] = name_parts[:-1]
+    return {
+        'family': family,
+        'given': given
+    }

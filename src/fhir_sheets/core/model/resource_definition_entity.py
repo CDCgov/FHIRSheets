@@ -7,9 +7,9 @@ class ResourceDefinition:
     """
     A class to represent a Resource Definition for FHIR initialization.
     """
-    entityName_keys = ['Entity Name', 'name', 'entity_name']
-    resourceType_keys = ['ResourceType', 'resource_type', 'type']
-    profile_keys = ['Profile(s)', 'profiles', 'profile_list']
+    entityName_keys: List[str] = ['Entity Name', 'name', 'entity_name']
+    resourceType_keys: List[str] = ['ResourceType', 'resource_type', 'type']
+    profile_keys: List[str] = ['Profile(s)', 'profiles', 'profile_list']
     
     def __init__(self, entityName: str, resourceType: str, profiles: List[str]):
         """
@@ -18,9 +18,9 @@ class ResourceDefinition:
         Args:
             data: A dictionary containing 'EntityName', 'ResourceType', and 'Profile(s)'.
         """
-        self.entityName = entityName
-        self.resourceType = resourceType
-        self.profiles = profiles
+        self.entityName: str = entityName
+        self.resourceType: str = resourceType
+        self.profiles: List[str] = profiles
         
     @classmethod
     def from_dict(cls, data:  Dict[str, Any]):

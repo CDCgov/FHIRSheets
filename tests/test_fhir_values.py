@@ -1,4 +1,5 @@
 
+import orjson
 from src.fhir_sheets.core.fhir_formatting import caret_delimited_string_to_codeableconcept, parse_flexible_address, parse_iso8601_date, parse_iso8601_datetime, parse_iso8601_instant, string_to_quantity
 
 
@@ -8,6 +9,16 @@ def test_parse_iso8601_date():
     assert date.year == 2025
     assert date.month == 10
     assert date.day == 21
+    
+def test_parse_iso8601_date_and_check_json_dump():
+    input = "2017-05-15"
+    date = parse_iso8601_date(input)
+    assert date.year == 2017
+    assert date.month == 5
+    assert date.day == 15
+    json_string = orjson.dumps(date)
+    print(json_string)
+    assert json_string == b'"2017-05-15"'
     
 def test_parse_iso8601_datetime():
     input = "2025-10-21T11:59:34"

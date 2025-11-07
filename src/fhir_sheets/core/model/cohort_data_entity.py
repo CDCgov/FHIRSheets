@@ -20,7 +20,7 @@ class HeaderEntry:
     
 class PatientEntry:
     def __init__(self, entries:Dict[Tuple[str,str],str]):
-        self.entries = entries
+        self.entries:Dict[Tuple[str,str],str] = entries
        
     @classmethod 
     def from_dict(cls, entries:Dict[Tuple[str,str],str]):
@@ -31,8 +31,8 @@ class PatientEntry:
     
 class CohortData:
     def __init__(self, headers: List[HeaderEntry], patients: List[PatientEntry]):
-        self.headers = headers
-        self.patients = patients
+        self.headers:List[HeaderEntry] = headers
+        self.patients:List[PatientEntry] = patients
         
     @classmethod
     def from_dict(cls, headers: List[Dict[str, Any]], patients: List[Dict[Tuple[str,str],str]]):

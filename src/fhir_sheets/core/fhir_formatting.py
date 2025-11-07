@@ -41,10 +41,12 @@ def assign_value(final_struct, key, value, valueType):
         elif valueType.lower() == 'coding':
             final_struct[key] = caret_delimited_string_to_coding(value)
         elif valueType.lower() == 'date':
-            if isinstance(value, datetime.datetime):
+            if isinstance(value, datetime.date):
+                final_struct[key] = value
+            elif isinstance(value, datetime.datetime):
                 final_struct[key] = value.date()
             elif isinstance(value, str):
-                final_struct[key] = parse_iso8601_date(value).replace(tzinfo=datetime.timezone.utc)
+                final_struct[key] = parse_iso8601_date(value)
         elif valueType.lower() == 'datetime':
             if isinstance(value, datetime.datetime):
                 final_struct[key] = value.replace(tzinfo=datetime.timezone.utc)
@@ -109,7 +111,7 @@ def parse_iso8601_date(input_string):
     match = re.search(pattern, input_string)
     # Check if the input string matches the pattern
     if match:
-        return datetime.datetime.strptime(match.group(1), '%Y-%m-%d')
+        return datetime.datetime.strptime(match.group(1), '%Y-%m-%d').date()
     else:
         raise ValueError(f"Input string '{input_string}' is not in the valid ISO 8601 date format")
 

@@ -13,7 +13,7 @@ from . import special_values
 
 #Main top level function
 #Creates a full transaction bundle for a patient at index
-def create_transaction_bundle(resource_definition_entities: List[ResourceDefinition], resource_link_entities: List[ResourceLink], cohort_data: CohortData, index = 0, config: FhirSheetsConfiguration = FhirSheetsConfiguration({})):
+def create_transaction_bundle(resource_definition_entities: List[ResourceDefinition], resource_link_entities: List[ResourceLink], cohort_data: CohortData, index = 0, config: FhirSheetsConfiguration = FhirSheetsConfiguration({})) -> Dict:
     root_bundle = initialize_bundle()
     created_resources = {}
     for resource_definition in resource_definition_entities:
@@ -31,7 +31,7 @@ def create_transaction_bundle(resource_definition_entities: List[ResourceDefinit
         post_process_create_medication_references(root_bundle)
     return root_bundle
 
-def create_singular_resource(singleton_entityName: str, resource_definition_entities: List[ResourceDefinition], resource_link_entities: List[ResourceLink], cohort_data: CohortData, index = 0):
+def create_singular_resource(singleton_entityName: str, resource_definition_entities: List[ResourceDefinition], resource_link_entities: List[ResourceLink], cohort_data: CohortData, index = 0) -> Dict:
     created_resources = {}
     singleton_fhir_resource = {}
     for resource_definition in resource_definition_entities:
@@ -46,7 +46,7 @@ def create_singular_resource(singleton_entityName: str, resource_definition_enti
     return singleton_fhir_resource
 
 #Initialize root bundle definition
-def initialize_bundle():
+def initialize_bundle() -> Dict:
     root_bundle = {}
     root_bundle['resourceType'] = 'Bundle'
     root_bundle['id'] = str(uuid.uuid4())
@@ -62,7 +62,7 @@ def initialize_bundle():
     return root_bundle
 
 #Initialize a resource from a resource definition. Adding basic information all resources need
-def initialize_resource(resource_definition):
+def initialize_resource(resource_definition) -> Dict:
     initial_resource = {}
     initial_resource['resourceType'] = resource_definition.resourceType.strip()
     initial_resource['id'] = str(uuid.uuid4()).strip()
@@ -78,7 +78,7 @@ def initialize_resource(resource_definition):
     return initial_resource
 
 # Creates a fhir-json structure from a resource definition entity and the patient_data_sheet
-def create_fhir_resource(resource_definition: ResourceDefinition, cohort_data: CohortData, index: int = 0, config: FhirSheetsConfiguration = FhirSheetsConfiguration({})) -> dict:
+def create_fhir_resource(resource_definition: ResourceDefinition, cohort_data: CohortData, index: int = 0, config: FhirSheetsConfiguration = FhirSheetsConfiguration({})) -> Dict:
     resource_dict = initialize_resource(resource_definition)
     #Get field entries for this entity
     header_entries_for_resourcename = [
@@ -113,7 +113,7 @@ def create_fhir_resource(resource_definition: ResourceDefinition, cohort_data: C
     return resource_dict
 
 #Create a resource_link for default references in the cases where only 1 resourceType of the source and destination exist
-def add_default_resource_links(created_resources: dict, resource_link_entities: List[ResourceLink]):
+def add_default_resource_links(created_resources: dict, resource_link_entities: List[ResourceLink]) -> None:
     default_references = [
         ('allergyintolerance', 'patient', 'patient'),
         ('allergyintolerance', 'practitioner', 'asserter'),
@@ -174,7 +174,7 @@ def add_default_resource_links(created_resources: dict, resource_link_entities: 
         
             
 #List function to create resource references/links with created entities
-def create_resource_links(created_resources, resource_link_entites, preview_mode = False):
+def create_resource_links(created_resources, resource_link_entites, preview_mode = False) -> None:
     #TODO: Build resource links
     print("Building resource links")
     for resource_link_entity in resource_link_entites:
@@ -182,7 +182,7 @@ def create_resource_links(created_resources, resource_link_entites, preview_mode
     return
     
 #Singular function to create a resource link.
-def create_resource_link(created_resources, resource_link_entity, preview_mode = False):
+def create_resource_link(created_resources, resource_link_entity, preview_mode = False) -> None:
     # template scaffolding
     reference_json_block = {
         "reference" : "$value"
@@ -227,7 +227,7 @@ def create_resource_link(created_resources, resource_link_entity, preview_mode =
         originResource[resource_link_entity.referencePath.strip().lower()]["reference"] = reference_value
     return
 
-def add_resource_to_transaction_bundle(root_bundle, fhir_resource):
+def add_resource_to_transaction_bundle(root_bundle, fhir_resource) -> Dict:
     entry = {}
     entry['fullUrl'] = "urn:uuid:"+fhir_resource['id']
     entry['resource'] = fhir_resource
@@ -247,7 +247,7 @@ def add_resource_to_transaction_bundle(root_bundle, fhir_resource):
 # resource_definition: resource description model from import
 # entity_definition: specific field entry information for this function
 # value: Actual value to assign
-def create_structure_from_jsonpath(root_struct: Dict, json_path: str, resource_definition: ResourceDefinition,  dataType: str, value: Any):
+def create_structure_from_jsonpath(root_struct: Dict, json_path: str, resource_definition: ResourceDefinition,  dataType: str, value: Any) -> Any:
     #Get all dot notation components as seperate 
     if dataType is not None and dataType.strip().lower() == 'string':
         value = str(value)
@@ -260,7 +260,7 @@ def create_structure_from_jsonpath(root_struct: Dict, json_path: str, resource_d
     return build_structure(root_struct, json_path, resource_definition, dataType, parts, value, [])
 
 # main recursive function to drill into the json structure, assign paths, and create structure where needed
-def build_structure(current_struct: Any, json_path: str, resource_definition: ResourceDefinition, dataType: str, parts: List[str], value: Any, previous_parts: List[str]):
+def build_structure(current_struct: Any, json_path: str, resource_definition: ResourceDefinition, dataType: str, parts: List[str], value: Any, previous_parts: List[str]) -> Any:
     if len(parts) == 0:
         return current_struct
     #Grab current part

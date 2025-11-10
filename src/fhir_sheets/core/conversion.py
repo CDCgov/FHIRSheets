@@ -1,5 +1,6 @@
 from typing import Any, Dict, List
 import uuid
+import random
 from jsonpath_ng.jsonpath import Fields, Slice, Where
 from jsonpath_ng.ext import parse as parse_ext
 
@@ -11,10 +12,13 @@ from .model.resource_link_entity import ResourceLink
 from . import fhir_formatting
 from . import special_values
 
+FILE_RANDOM = random.Random()
 #Main top level function
 #Creates a full transaction bundle for a patient at index
 def create_transaction_bundle(resource_definition_entities: List[ResourceDefinition], resource_link_entities: List[ResourceLink], cohort_data: CohortData, index = 0, config: FhirSheetsConfiguration = FhirSheetsConfiguration({})) -> Dict:
-    root_bundle = initialize_bundle()
+    global FILE_RANDOM
+    FILE_RANDOM = random.Random(config.random_seed)
+    root_bundle = initialize_bundle(config)
     created_resources = {}
     for resource_definition in resource_definition_entities:
         entityName = resource_definition.entityName
@@ -46,10 +50,10 @@ def create_singular_resource(singleton_entityName: str, resource_definition_enti
     return singleton_fhir_resource
 
 #Initialize root bundle definition
-def initialize_bundle() -> Dict:
+def initialize_bundle(config: FhirSheetsConfiguration) -> Dict:
     root_bundle = {}
     root_bundle['resourceType'] = 'Bundle'
-    root_bundle['id'] = str(uuid.uuid4())
+    root_bundle['id'] = str(generate_UUID(config))
     root_bundle['meta'] = {
         'security': [{
             'system': 'http://terminology.hl7.org/CodeSystem/v3-ActReason',
@@ -388,3 +392,15 @@ def createMedicationResource(root_bundle, medicationCodeableConcept):
     target_medication['code'] = medicationCodeableConcept
     add_resource_to_transaction_bundle(root_bundle, target_medication)
     return target_medication
+
+def generate_UUID():
+    # Generate 16 bytes (128 bits) of random data from the seeded generator
+    # A UUID is 16 bytes long.
+    global FILE_RANDOM
+    random_bytes = FILE_RANDOM.getrandbits(128).to_bytes(16, 'big')
+    # Construct the Version 4 UUID from those bytes
+    # Note: This is an UNSTRICT Version 4 UUID because the built-in uuid module
+    # will *correct* the constructed bytes to comply with V4/variant standards.
+    # Specifically, it sets the version bits (4) and the variant bits (10xx).
+    seeded_uuid = uuid.UUID(bytes=random_bytes, version=4)
+    return seeded_uuid

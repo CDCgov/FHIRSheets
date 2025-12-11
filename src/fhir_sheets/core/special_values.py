@@ -4,13 +4,22 @@ from . import conversion
 from abc import ABC, abstractmethod
 
 # Define an abstract base class
-class AbstractCustomValueHandler(ABC):
+class AbstractStructureHandler(ABC):
     
     @abstractmethod
     def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value):
         pass
     
-class PatientRaceExtensionValueHandler(AbstractCustomValueHandler):
+def utilFindExtensionWithURL(extension_block, url):
+  for extension in extension_block:
+      if "url" in extension and extension['url'] == url:
+          return extension
+      return None
+    
+def findComponentWithCoding(components, code):
+  return next((component for component in components if any(coding['code'] == code for coding in component['code']['coding'])), None)
+    
+class PatientRaceExtensionValueHandler(AbstractStructureHandler):
     omb_categories = {
       "american indian or alaska native" : {
         "url" : "ombCategory",
@@ -87,7 +96,7 @@ class PatientRaceExtensionValueHandler(AbstractCustomValueHandler):
                 return final_struct
         pass
 
-class PatientEthnicityExtensionValueHandler(AbstractCustomValueHandler):
+class PatientEthnicityExtensionValueHandler(AbstractStructureHandler):
     omb_categories = {
       "Hispanic or Latino" : {
         "url" : "ombCategory",
@@ -148,7 +157,7 @@ class PatientEthnicityExtensionValueHandler(AbstractCustomValueHandler):
                 return final_struct
         pass
       
-class PatientBirthSexExtensionValueHandler(AbstractCustomValueHandler):
+class PatientBirthSexExtensionValueHandler(AbstractStructureHandler):
     birth_sex_block = {
       "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
       "valueCode" : "$value"
@@ -165,7 +174,7 @@ class PatientBirthSexExtensionValueHandler(AbstractCustomValueHandler):
             final_struct['extension'].append(birthsex_block)
         pass
       
-class PatientMRNIdentifierValueHandler(AbstractCustomValueHandler):
+class PatientMRNIdentifierValueHandler(AbstractStructureHandler):
     patient_mrn_block = {
       "use" : "usual",
       "type" : {
@@ -199,7 +208,7 @@ class PatientMRNIdentifierValueHandler(AbstractCustomValueHandler):
         target_identifier[key] = value
         pass
       
-class PatientSSNIdentifierValueHandler(AbstractCustomValueHandler):
+class PatientSSNIdentifierValueHandler(AbstractStructureHandler):
     patient_mrn_block = {
       "use" : "usual",
       "type" : {
@@ -232,7 +241,7 @@ class PatientSSNIdentifierValueHandler(AbstractCustomValueHandler):
         target_identifier[key] = value
         pass
       
-class OrganizationIdentiferNPIValueHandler(AbstractCustomValueHandler):
+class OrganizationIdentiferNPIValueHandler(AbstractStructureHandler):
     npi_identifier_block = {
       "system" : "http://hl7.org.fhir/sid/us-npi",
       "value" : "$value"
@@ -249,7 +258,7 @@ class OrganizationIdentiferNPIValueHandler(AbstractCustomValueHandler):
         identifier_block['value'] = str(value)
         pass
       
-class OrganizationIdentiferCLIAValueHandler(AbstractCustomValueHandler):
+class OrganizationIdentiferCLIAValueHandler(AbstractStructureHandler):
     clia_identifier_block = {
       "system" : "urn:oid:2.16.840.1.113883.4.7",
       "value" : "$value"
@@ -266,7 +275,7 @@ class OrganizationIdentiferCLIAValueHandler(AbstractCustomValueHandler):
         identifier_block['value'] = str(value)
         pass
       
-class PractitionerIdentiferNPIValueHandler(AbstractCustomValueHandler):
+class PractitionerIdentiferNPIValueHandler(AbstractStructureHandler):
     npi_identifier_block = {
       "system" : "http://hl7.org.fhir/sid/us-npi",
       "value" : "$value"
@@ -283,7 +292,7 @@ class PractitionerIdentiferNPIValueHandler(AbstractCustomValueHandler):
         identifier_block['value'] = value
         pass
       
-class ObservationComponentHandler(AbstractCustomValueHandler):
+class ObservationComponentHandler(AbstractStructureHandler):
     pulse_oximetry_oxygen_flow_rate = {
       "code" : {
         "coding" : [
@@ -334,17 +343,45 @@ class ObservationComponentHandler(AbstractCustomValueHandler):
         return conversion.build_structure(target_component, '.'.join(parts[2:]), resource_definition, dataType, parts[2:], value, parts[:2])
         pass
 
-def utilFindExtensionWithURL(extension_block, url):
-    for extension in extension_block:
-        if "url" in extension and extension['url'] == url:
-            return extension
-        return None
+#Special Handler just for $values. This one is data absent reason
+class AbstractValueHandler(ABC):
+  
+  @abstractmethod
+  def assign_value(self, final_struct, key, value, valueType):
+    pass
+  
 
-def findComponentWithCoding(components, code):
-  return next((component for component in components if any(coding['code'] == code for coding in component['code']['coding'])), None)
-
+class DataAbsentReasonHandler(AbstractValueHandler):
+  #Assign data absent reason extension
+    data_absent_reason_block = {
+      "url" : "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+      "value" : "$value"
+    }
+    data_absent_reason_values = ['$unknown','$asked-unknown','$temp-unknown','$not-asked','$asked-declined','$masked','$not-applicable','$unsupported','$as-text','$error','$not-a-number','$negative-infinity','$positive-infinity','$not-performed','$not-permitted']
+    def assign_value(self, final_struct, key, value, valueType):
+        #Trim the value so the '$' is missing
+        if value and value.startswith('$'):
+          value = value[1:]
+        # if the final_struct is a list, we need the first entry of the list
+        if isinstance(final_struct, list):
+          if len(final_struct) == 0:
+            temp = {}
+            final_struct.append(temp)
+            final_struct = temp
+          else:
+            final_struct = final_struct[0]
+        #Retrieve the DAR extension if it exists; make it if it does not.
+        if 'extension' not in final_struct:
+            final_struct['extension'] = []
+        data_absent_reason_block = utilFindExtensionWithURL(final_struct['extension'], 'http://hl7.org/fhir/StructureDefinition/data-absent-reason')
+        if data_absent_reason_block is None:
+            data_absent_reason_block = self.data_absent_reason_block
+            data_absent_reason_block['value'] = value
+            final_struct['extension'].append(data_absent_reason_block)
+        pass
+      
 #Data dictionary of jsonpaths to match vs classes that need to be called
-custom_handlers = {
+custom_structure_handlers = {
     "Patient.extension[Race].ombCategory": PatientRaceExtensionValueHandler(),
     "Patient.extension[Ethnicity].ombCategory": PatientEthnicityExtensionValueHandler(),
     "Patient.extension[Birthsex].value": PatientBirthSexExtensionValueHandler(),
@@ -359,3 +396,8 @@ custom_handlers = {
     "Practitioner.identifier[system=NPI].value": PractitionerIdentiferNPIValueHandler(),
     "Observation.component[": ObservationComponentHandler()
 }
+
+#Data definition of values to match vs classes tht need to be called
+custom_value_handlers = [
+  {'value_criteria':DataAbsentReasonHandler.data_absent_reason_values, 'handler': DataAbsentReasonHandler()}
+]

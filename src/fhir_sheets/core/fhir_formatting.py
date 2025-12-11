@@ -1,6 +1,8 @@
 import re
 import datetime
 
+from . import special_values
+
 #Dictionary of regexes
 type_regexes = {
     'code': r'[^\s]+( [^\s]+)*',
@@ -14,6 +16,11 @@ type_regexes = {
 }
 # Assign final_struct[key] to value; with formatting given the valueType
 def assign_value(final_struct, key, value, valueType):
+    for value_handler in special_values.custom_value_handlers:
+        if value in value_handler['value_criteria']:
+            handler = value_handler['handler']
+            handler.assign_value(final_struct, key, value, valueType)
+            return final_struct
     # Removing white space
     if isinstance(value, str):
         value = value.strip()
@@ -23,7 +30,7 @@ def assign_value(final_struct, key, value, valueType):
     # If the valueType is not provide, do not construct the value.
     if valueType is None:
         return final_struct
-    # Swtich case for valueType to construct a value
+    # Switch case for valueType to construct a value
     try:
         if valueType.lower() == 'address':
             address_value = parse_flexible_address(value)
@@ -191,7 +198,7 @@ def parse_iso8601_time(input_string):
     
 def parse_flexible_address(address):
     # Attempt to capture postal code, which is often at the end and typically numeric (though it may vary internationally)
-    postal_code_pattern = r'(?P<postalCode>\d{5}(?:-\d{4})?|)'
+    postal_code_pattern = r'(?P<postalCode>.*)'
     
     # State is typically a two-letter code (though this may vary internationally as well)
     state_pattern = r'(?P<state>[A-Za-z]{2}|)'
@@ -210,7 +217,7 @@ def parse_flexible_address(address):
         if not result:
             return None
         #Assign the line as an array of 1
-        if result['line'] and isinstance(result['line'], str):
+        if'line' in result and isinstance(result['line'], str):
             result['line'] = [result['line']]
         return result
     else:

@@ -53,7 +53,7 @@ def create_singular_resource(singleton_entityName: str, resource_definition_enti
 def initialize_bundle(config: FhirSheetsConfiguration) -> Dict:
     root_bundle = {}
     root_bundle['resourceType'] = 'Bundle'
-    root_bundle['id'] = str(generate_UUID(config))
+    root_bundle['id'] = str(generate_UUID())
     root_bundle['meta'] = {
         'security': [{
             'system': 'http://terminology.hl7.org/CodeSystem/v3-ActReason',
@@ -270,9 +270,9 @@ def build_structure(current_struct: Any, json_path: str, resource_definition: Re
     #Grab current part
     part = parts[0]
     #SPECIAL HANDLING CLAUSE
-    matching_handler = next((handler for handler in special_values.custom_handlers if (json_path.startswith(handler) or json_path == handler)), None)
+    matching_handler = next((handler for handler in special_values.custom_structure_handlers if (json_path.startswith(handler) or json_path == handler)), None)
     if matching_handler is not None:
-        return special_values.custom_handlers[matching_handler].assign_value(json_path, resource_definition, dataType,  current_struct, parts[-1], value)
+        return special_values.custom_structure_handlers[matching_handler].assign_value(json_path, resource_definition, dataType,  current_struct, parts[-1], value)
     #Ignore dollar sign ($) and drill farther down
     if part == '$' or part == resource_definition.resourceType.strip():
         #Ignore the dollar sign and the resourcetype
@@ -280,7 +280,7 @@ def build_structure(current_struct: Any, json_path: str, resource_definition: Re
     
     # If parts length is one then this is the final key to access and pair
     if len(parts) == 1:
-        #Check for numeic qualifier '[0]' and '[1]'
+        #Check for numeric qualifier '[0]' and '[1]'
         if '[' in part and ']' in part:
         #Seperate the key from the qualifier
             key_part = part[:part.index('[')]
@@ -291,6 +291,7 @@ def build_structure(current_struct: Any, json_path: str, resource_definition: Re
             if key_part is None or key_part == '':
                 if not qualifier.isdigit():
                     raise TypeError(f"ERROR: Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + parts[:1])} - qualifier - {qualifier} - standalone qualifier expected to be a single index numeric ([0], [1], etc)")
+                qualifier = int(qualifier)
                 if current_struct == {}:
                     current_struct = []
                 if not isinstance(current_struct, list):
@@ -298,7 +299,10 @@ def build_structure(current_struct: Any, json_path: str, resource_definition: Re
                 part = int(qualifier)
                 if part + 1 > len(current_struct):
                     current_struct.extend({} for x in range (part + 1 - len(current_struct)))
-        #Actual assigning to the path
+                #Assign the indexed part
+                fhir_formatting.assign_value(current_struct, part, value, dataType)
+                return current_struct
+        #Default case where there was no qualifier, simply assign here.
         fhir_formatting.assign_value(current_struct, part, value, dataType)
         return current_struct
     

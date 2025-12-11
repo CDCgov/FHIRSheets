@@ -46,6 +46,11 @@ def test_parse_address():
     assert address_result is not None
     assert type(address_result['line']) == list
     
+def test_parse_address_missing_line():
+    address_result = parse_flexible_address("^Atlanta^^^GA^US")
+    assert address_result is not None
+    assert 'line' not in address_result
+    
 def test_caret_delimited_string_to_codeableconcept():
     concept_struct = caret_delimited_string_to_codeableconcept("http://loinc.org^2345^Some Concept Display")
     assert concept_struct['coding']

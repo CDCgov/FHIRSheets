@@ -771,3 +771,39 @@ def test_API_creation_11032025():
     primaryPatient = [entry["resource"] for entry in fhir_bundle["entry"] if entry["resource"]["resourceType"] == 'Patient'][0]
     assert primaryPatient
     assert primaryPatient["gender"] == 'Male'
+    
+def test_data_absent_reason():
+    resource_definitions = [{'entity_name': 'PrimaryPatient', 'resource_type': 'Patient', 'profiles': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient']}]
+    resource_links = []
+    headers = [{'entityName': 'PrimaryPatient', 'fieldName': 'PrimaryPatient/Patient.name', 'jsonpath': 'Patient.name.[0]', 'value_type': 'HumanName', 'valuesets': None}]
+    #Note: the $masked value here should be turned into a data absent reason
+    patients = [{('PrimaryPatient', 'PrimaryPatient/Patient.name'): '$masked'}]
+    resource_definitions_class: List[ResourceDefinition] = [ResourceDefinition.from_dict(x) for x in resource_definitions]
+    resource_links_class = [ResourceLink.from_dict(x) for x in resource_links]
+    cohort_data_class = CohortData.from_dict(headers=headers, patients=patients)
+    fhir_bundle = conversion.create_transaction_bundle(resource_definitions_class, resource_links_class, cohort_data_class, 0)
+    print(fhir_bundle)
+    primaryPatient = [entry["resource"] for entry in fhir_bundle["entry"] if entry["resource"]["resourceType"] == 'Patient'][0]
+    assert primaryPatient
+    assert primaryPatient["name"]
+    assert primaryPatient["name"][0]
+    assert primaryPatient["name"][0]["extension"]
+    assert primaryPatient["name"][0]["extension"][0]
+    assert primaryPatient["name"][0]["extension"][0]["url"] == 'http://hl7.org/fhir/StructureDefinition/data-absent-reason'
+    assert primaryPatient["name"][0]["extension"][0]["value"] == 'masked'
+    
+def test_address_creation_12112025():
+    resource_definitions = [{'entity_name': 'PrimaryPatient', 'resource_type': 'Patient', 'profiles': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient']}]
+    headers = [{'entityName': 'PrimaryPatient', 'fieldName': 'PrimaryPatient/Patient.address.[0]', 'jsonpath': 'Patient.address.[0]', 'value_type': 'Address', 'valuesets': None}]
+
+    patients = [{('PrimaryPatient', 'PrimaryPatient/Patient.address.[0]'): 'a^Atlanta^b^c^GA^US'}]
+    resource_definitions_class: List[ResourceDefinition] = [ResourceDefinition.from_dict(x) for x in resource_definitions]
+    resource_links_class = []
+    cohort_data_class = CohortData.from_dict(headers=headers, patients=patients)
+    
+    fhir_bundle = conversion.create_transaction_bundle(resource_definitions_class, resource_links_class, cohort_data_class, 0)
+    # 1. Top-Level Key Checks
+    assert isinstance(fhir_bundle, dict)
+    primaryPatient = [entry["resource"] for entry in fhir_bundle["entry"] if entry["resource"]["resourceType"] == 'Patient'][0]
+    assert primaryPatient
+    assert primaryPatient['address'][0]['postalCode'] == 'c'

@@ -1,6 +1,7 @@
 import datetime
 import pathlib
 import json
+import logging
 from typing import Iterable, Dict, List
 from src.fhir_sheets.core import conversion
 from src.fhir_sheets.core.config.FhirSheetsConfiguration import FhirSheetsConfiguration
@@ -10,6 +11,8 @@ from src.fhir_sheets.core.model.resource_definition_entity import ResourceDefini
 from src.fhir_sheets.core.model.resource_link_entity import ResourceLink
 from src.fhir_sheets.cli.main import main
 import src.fhir_sheets.core.conversion
+
+logger: logging.Logger = logging.getLogger("fhirsheets.test_cli")
 
 TOP_DIR = pathlib.Path(__file__).parent.parent / "samples"
 
@@ -782,7 +785,6 @@ def test_data_absent_reason():
     resource_links_class = [ResourceLink.from_dict(x) for x in resource_links]
     cohort_data_class = CohortData.from_dict(headers=headers, patients=patients)
     fhir_bundle = conversion.create_transaction_bundle(resource_definitions_class, resource_links_class, cohort_data_class, 0)
-    print(fhir_bundle)
     primaryPatient = [entry["resource"] for entry in fhir_bundle["entry"] if entry["resource"]["resourceType"] == 'Patient'][0]
     assert primaryPatient
     assert primaryPatient["name"]

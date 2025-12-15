@@ -1,7 +1,9 @@
 
 import orjson
+import logging
 from src.fhir_sheets.core.fhir_formatting import caret_delimited_string_to_codeableconcept, parse_flexible_address, parse_iso8601_date, parse_iso8601_datetime, parse_iso8601_instant, string_to_quantity
 
+logger: logging.Logger = logging.getLogger("fhirsheets.test_fhir_values")
 
 def test_parse_iso8601_date():
     input = "2025-10-21"
@@ -17,7 +19,6 @@ def test_parse_iso8601_date_and_check_json_dump():
     assert date.month == 5
     assert date.day == 15
     json_string = orjson.dumps(date)
-    print(json_string)
     assert json_string == b'"2017-05-15"'
     
 def test_parse_iso8601_datetime():

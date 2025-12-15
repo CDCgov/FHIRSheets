@@ -1,7 +1,9 @@
 import re
 import datetime
-
+import logging
 from . import special_values
+
+logger: logging.Logger = logging.getLogger("fhirsheets.core.fhir_formatting")
 
 #Dictionary of regexes
 type_regexes = {
@@ -109,9 +111,9 @@ def assign_value(final_struct, key, value, valueType):
                 final_struct = []
             final_struct.append(value)
         else:
-            print(f"ERROR: - Rending Value - {key} - {value} - {valueType} - Saw a valueType of '{valueType}' unsupported in current formatting")
+            logger.error(f"Rending Value - {key} - {value} - {valueType} - Saw a valueType of '{valueType}' unsupported in current formatting")
     except ValueError as e:
-        print(e)
+        logger.error(e)
     return final_struct
         
 def parse_iso8601_date(input_string):

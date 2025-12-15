@@ -2,11 +2,13 @@ from ..core.config.FhirSheetsConfiguration import FhirSheetsConfiguration
 from ..core import read_input
 from ..core import conversion
 
+import logging
 import argparse
 import orjson
 import json
 from pathlib import Path
-from pprint import pprint
+
+logger: logging.Logger = logging.getLogger("fhirsheets.cli.main")
 
 def find_sets(d, path=""):
     if isinstance(d, dict):
@@ -17,7 +19,7 @@ def find_sets(d, path=""):
         for idx, item in enumerate(d):
             find_sets(item, f"{path}[{idx}]")
     elif isinstance(d, set):
-        print(f"Set found at path: {path}")
+        logger.info(f"Set found at path: {path}")
         
 def main(input_file, output_folder, config=FhirSheetsConfiguration({})):
     # Step 1: Read the input file using read_input module

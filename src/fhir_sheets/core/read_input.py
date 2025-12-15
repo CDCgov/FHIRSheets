@@ -1,10 +1,13 @@
 from typing import List
 import openpyxl
+import logging
 
 from .model.cohort_data_entity import CohortData, CohortData
 
 from .model.resource_definition_entity import ResourceDefinition
 from .model.resource_link_entity import ResourceLink
+
+logger: logging.Logger = logging.getLogger("fhirsheets.core.read_input")
 
 # Function to read the xlsx file and access specific sheets
 def read_xlsx_and_process(file_path):
@@ -44,7 +47,7 @@ def process_sheet_resource_definitions(sheet) -> List[ResourceDefinition]:
             row_data["Profile(s)"] = [url.strip() for url in row_data["Profile(s)"].split(",")]
         resource_definition_entities.append(ResourceDefinition.from_dict(row_data))
         resource_definitions.append(row_data)
-    print(f"Resource Definitions\n----------{resource_definitions}")
+    logger.info(f"Resource Definitions\n----------{resource_definitions}")
     return resource_definition_entities
 
 # Function to process the specific sheet with 'OriginResource', 'ReferencePath', and 'DestinationResource'
@@ -58,7 +61,7 @@ def process_sheet_resource_links(sheet) -> List[ResourceLink]:
             continue
         resource_links.append(row_data)
         resource_link_entities.append(ResourceLink.from_dict(row_data))
-    print(f"Resource Links\n----------{resource_links}")
+    logger.info(f"Resource Links\n----------{resource_links}")
     return resource_link_entities
 
 # Function to process the "PatientData" sheet for the Revised CohortData
@@ -73,10 +76,10 @@ def process_sheet_patient_data_revised(sheet, resource_definition_entities):
         entity_name = col[0]  # The entity name comes from the first row (Entity To Query)
         field_name = col[5]  #The "Data Element" comes from the fifth row
         if (entity_name is None or entity_name == "") and (field_name is not None and field_name != ""):
-            print(f"WARNING: - Reading Patient Data Issue - {field_name} - 'Entity To Query' cell missing for column labelled '{field_name}', please provide entity name from the ResourceDefinitions tab.")
+            logger.warning(f"Reading Patient Data Issue - {field_name} - 'Entity To Query' cell missing for column labelled '{field_name}', please provide entity name from the ResourceDefinitions tab.")
 
         if entity_name not in [entry.entityName for entry in resource_definition_entities]:
-            print(f"WARNING: - Reading Patient Data Issue - {field_name} - 'Entity To Query' cell has entity named '{entity_name}', however, the ResourceDefinition tab has no matching resource. Please provide a corresponding entry in the ResourceDefinition tab.")
+            logger.warning(f"Reading Patient Data Issue - {field_name} - 'Entity To Query' cell has entity named '{entity_name}', however, the ResourceDefinition tab has no matching resource. Please provide a corresponding entry in the ResourceDefinition tab.")
 
         # Create a header entry
         header_data = {
@@ -96,7 +99,7 @@ def process_sheet_patient_data_revised(sheet, resource_definition_entities):
             patients.extend([{}] * needed_count)
         for patient_dict, value in zip(patients, values):
             patient_dict[(entity_name, field_name)] = value
-    print(f"Headers\n----------{headers}")
-    print(f"Patients\n----------{patients}")
+    logger.info(f"Headers\n----------{headers}")
+    logger.info(f"Patients\n----------{patients}")
     cohort_data = CohortData.from_dict(headers=headers, patients=patients)
     return cohort_data

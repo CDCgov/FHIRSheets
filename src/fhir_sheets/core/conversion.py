@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 import uuid
 import random
+import logging
 from jsonpath_ng.jsonpath import Fields, Slice, Where
 from jsonpath_ng.ext import parse as parse_ext
 
@@ -11,6 +12,8 @@ from .model.resource_definition_entity import ResourceDefinition
 from .model.resource_link_entity import ResourceLink
 from . import fhir_formatting
 from . import special_values
+
+logger = logging.getLogger("fhirsheets.core.conversion")
 
 FILE_RANDOM = random.Random()
 #Main top level function
@@ -96,22 +99,22 @@ def create_fhir_resource(resource_definition: ResourceDefinition, cohort_data: C
         if entityName == resource_definition.entityName
     }
     if len(dataelements_for_resourcename.keys()) == 0:
-        print(f"WARNING: Patient index {index} - Create Fhir Resource Error - {resource_definition.entityName} - No columns for entity '{resource_definition.entityName}' found for resource in 'PatientData' sheet")
+        logger.warning(f"Patient index {index} - Create Fhir Resource Error - {resource_definition.entityName} - No columns for entity '{resource_definition.entityName}' found for resource in 'PatientData' sheet")
         return resource_dict
         all_field_entries = cohort_data.entities[resource_definition.entityName].fields
     #For each field within the entity
     for fieldName, value in dataelements_for_resourcename.items():
         header_element = next((header for header in header_entries_for_resourcename if header.fieldName == fieldName), None)
         if header_element is None:
-            print(f"WARNING: Field Name {fieldName} - No Header Entry found.")
+            logger.warning(f" Field Name {fieldName} - No Header Entry found.")
             continue
         jsonPath = header_element.jsonPath
         if jsonPath is None:
-            print(f"WARNING: Field Name {fieldName} - Header Entry found, but jsonPath attribute is None. Skipping.")
+            logger.warning(f" Field Name {fieldName} - Header Entry found, but jsonPath attribute is None. Skipping.")
             continue
         valueType = header_element.valueType
         if valueType is None:
-            print(f"WARNING: Field Name {fieldName} - Header Entry found, but valueType attribute is None. Skipping.")
+            logger.warning(f" Field Name {fieldName} - Header Entry found, but valueType attribute is None. Skipping.")
             continue
         create_structure_from_jsonpath(resource_dict, jsonPath, resource_definition, valueType, value)
     return resource_dict
@@ -179,8 +182,7 @@ def add_default_resource_links(created_resources: dict, resource_link_entities: 
             
 #List function to create resource references/links with created entities
 def create_resource_links(created_resources, resource_link_entites, preview_mode = False) -> None:
-    #TODO: Build resource links
-    print("Building resource links")
+    logger.info("Building resource links")
     for resource_link_entity in resource_link_entites:
         create_resource_link(created_resources, resource_link_entity, preview_mode)
     return
@@ -205,12 +207,12 @@ def create_resource_link(created_resources, resource_link_entity, preview_mode =
     try:
         originResource = created_resources[resource_link_entity.originResource]
     except KeyError:
-        print(f"WARNING: In ResourceLinks tab, found a Origin Resource of : {resource_link_entity.originResource}  but no such entity found in PatientData")
+        logger.warning(f" In ResourceLinks tab, found a Origin Resource of : {resource_link_entity.originResource}  but no such entity found in PatientData")
         return
     try:
         destinationResource = created_resources[resource_link_entity.destinationResource]
     except KeyError:
-        print(f"WARNING: In ResourceLinks tab, found a Desitnation Resource  of : {resource_link_entity.destinationResource}  but no such entity found in PatientData")
+        logger.warning(f" In ResourceLinks tab, found a Desitnation Resource  of : {resource_link_entity.destinationResource}  but no such entity found in PatientData")
         return
     #Estable the value of the refence
     if preview_mode:
@@ -257,7 +259,7 @@ def create_structure_from_jsonpath(root_struct: Dict, json_path: str, resource_d
         value = str(value)
     
     if value == None:
-        print(f"WARNING: Full jsonpath: {json_path} - Expected to find a value but found None instead")
+        logger.warning(f" Full jsonpath: {json_path} - Expected to find a value but found None instead")
         return root_struct
     #Start of top-level function which calls the enclosed recursive function
     parts = json_path.split('.')

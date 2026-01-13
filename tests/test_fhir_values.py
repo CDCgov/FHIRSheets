@@ -1,7 +1,7 @@
 
 import orjson
 import logging
-from src.fhir_sheets.core.fhir_formatting import caret_delimited_string_to_codeableconcept, parse_flexible_address, parse_iso8601_date, parse_iso8601_datetime, parse_iso8601_instant, string_to_quantity
+from src.fhir_sheets.core.fhir_formatting import caret_delimited_string_to_codeableconcept, parse_flexible_address, parse_iso8601_date, parse_iso8601_datetime, parse_iso8601_instant, string_to_quantity, parse_iso8601_time, parse_human_name
 
 logger: logging.Logger = logging.getLogger("fhirsheets.test_fhir_values")
 
@@ -64,3 +64,28 @@ def test_string_to_quantity():
     quantity = string_to_quantity("12^dm/L")
     assert quantity['value'] == 12
     assert quantity['unit'] == 'dm/L'
+
+def test_parse_iso8601_time():
+    input = "14:30:25"
+    time = parse_iso8601_time(input)
+    assert time.hour == 14
+    assert time.minute == 30
+    assert time.second == 25
+
+def test_parse_iso8601_time_with_microseconds():
+    input = "14:30:25.123456"
+    time = parse_iso8601_time(input)
+    assert time.hour == 14
+    assert time.minute == 30
+    assert time.second == 25
+    assert time.microsecond == 123456
+
+def test_parse_human_name():
+    name = parse_human_name("John Michael Doe")
+    assert name['family'] == 'Doe'
+    assert name['given'] == ['John', 'Michael']
+
+def test_parse_human_name_single():
+    name = parse_human_name("Jane")
+    assert name['family'] == 'Jane'
+    assert name['given'] == []

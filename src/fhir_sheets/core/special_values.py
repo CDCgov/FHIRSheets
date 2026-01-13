@@ -1,6 +1,6 @@
 
 from . import conversion
-
+import copy
 from abc import ABC, abstractmethod
 
 # Define an abstract base class
@@ -12,9 +12,9 @@ class AbstractStructureHandler(ABC):
     
 def utilFindExtensionWithURL(extension_block, url):
   for extension in extension_block:
-      if "url" in extension and extension['url'] == url:
-          return extension
-      return None
+    if "url" in extension and extension['url'] == url:
+      return extension
+  return None
     
 def findComponentWithCoding(components, code):
   return next((component for component in components if any(coding['code'] == code for coding in component['code']['coding'])), None)
@@ -82,7 +82,7 @@ class PatientRaceExtensionValueHandler(AbstractStructureHandler):
             final_struct['extension'] = []
         race_block = utilFindExtensionWithURL(final_struct['extension'], 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-race')
         if race_block is None:
-            race_block = self.initial_race_json
+            race_block = copy.deepcopy(self.initial_race_json)
             final_struct['extension'].append(race_block)
         for race_key, race_structure in self.omb_categories.items():
             if value.strip().lower() == race_key:
@@ -90,7 +90,7 @@ class PatientRaceExtensionValueHandler(AbstractStructureHandler):
                 for i, item in enumerate(race_block["extension"]):
                     if isinstance(item, set) and "$ombCategory" in item:
                         # Replace the set with the new structure
-                        race_block["extension"][i] = race_structure
+                        race_block["extension"][i] = copy.deepcopy(race_structure)
                     elif isinstance(item, dict) and item.get("valueString") == "$text":
                         item['valueString'] = race_key
                 return final_struct
@@ -143,17 +143,17 @@ class PatientEthnicityExtensionValueHandler(AbstractStructureHandler):
             final_struct['extension'] = []
         ethnicity_block = utilFindExtensionWithURL(final_struct['extension'], 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity')
         if ethnicity_block is None:
-            ethnicity_block = self.initial_ethnicity_json
+            ethnicity_block = copy.deepcopy(self.initial_ethnicity_json)
             final_struct['extension'].append(ethnicity_block)
-        for race_key, race_structure in self.omb_categories.items():
-            if value.strip().lower() == race_key.strip().lower():
+        for ethnicity_key, ethnicity_structure in self.omb_categories.items():
+            if value.strip().lower() == ethnicity_key.strip().lower():
                 # Replace $ombCategory in the extension list
                 for i, item in enumerate(ethnicity_block["extension"]):
                     if isinstance(item, set) and "$ombCategory" in item:
                         # Replace the set with the new structure
-                        ethnicity_block["extension"][i] = race_structure
+                        ethnicity_block["extension"][i] = copy.deepcopy(ethnicity_structure)
                     elif isinstance(item, dict) and item.get("valueString") == "$text":
-                        item['valueString'] = race_key
+                        item['valueString'] = ethnicity_key
                 return final_struct
         pass
       

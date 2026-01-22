@@ -25,6 +25,14 @@ class TestInitializeBundle:
         bundle = initialize_bundle(config)
         assert bundle['resourceType'] == 'Bundle'
         assert bundle['type'] == 'transaction'
+        
+    def test_initialize_bundle_distinct_ids(self):
+        config = FhirSheetsConfiguration({"preview_mode": True})
+        bundleA = initialize_bundle(config)
+        bundleB = initialize_bundle(config)
+        bundleA_id = bundleA['id']
+        bundleB_id = bundleB['id']
+        assert bundleA_id != bundleB_id
 
 
 class TestInitializeResource:

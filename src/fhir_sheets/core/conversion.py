@@ -25,6 +25,9 @@ def create_transaction_bundle(resource_definition_entities: List[ResourceDefinit
     created_resources = {}
     for resource_definition in resource_definition_entities:
         entityName = resource_definition.entityName
+        if not entries_exist(entityName, cohort_data, index) and not config.build_empty_resources:
+            logger.info(f"Patient index {index} - Skipping resource creation for entity '{entityName}' as no data entries found and build_empty_resources is set to False")
+            continue
         #Create and collect fhir resources
         fhir_resource = create_fhir_resource(resource_definition, cohort_data, index, config)
         created_resources[entityName] = fhir_resource
@@ -56,7 +59,7 @@ def create_singular_resource(singleton_entityName: str, resource_definition_enti
 def initialize_bundle(config: FhirSheetsConfiguration) -> Dict:
     root_bundle = {}
     root_bundle['resourceType'] = 'Bundle'
-    root_bundle['id'] = str(generate_UUID())
+    root_bundle['id'] = str(generate_UUID()).strip()
     root_bundle['meta'] = {
         'security': [{
             'system': 'http://terminology.hl7.org/CodeSystem/v3-ActReason',
@@ -72,7 +75,7 @@ def initialize_bundle(config: FhirSheetsConfiguration) -> Dict:
 def initialize_resource(resource_definition) -> Dict:
     initial_resource = {}
     initial_resource['resourceType'] = resource_definition.resourceType.strip()
-    initial_resource['id'] = str(uuid.uuid4()).strip()
+    initial_resource['id'] = str(generate_UUID()).strip()
     if resource_definition.profiles:
         initial_resource['meta'] = {
             'profile': resource_definition.profiles,
@@ -400,13 +403,9 @@ def createMedicationResource(root_bundle, medicationCodeableConcept):
     return target_medication
 
 def generate_UUID():
-    # Generate 16 bytes (128 bits) of random data from the seeded generator
-    # A UUID is 16 bytes long.
-    global FILE_RANDOM
-    random_bytes = FILE_RANDOM.getrandbits(128).to_bytes(16, 'big')
-    # Construct the Version 4 UUID from those bytes
-    # Note: This is an UNSTRICT Version 4 UUID because the built-in uuid module
-    # will *correct* the constructed bytes to comply with V4/variant standards.
-    # Specifically, it sets the version bits (4) and the variant bits (10xx).
-    seeded_uuid = uuid.UUID(bytes=random_bytes, version=4)
-    return seeded_uuid
+    """Generate a random UUID (Version 4)."""
+    return uuid.uuid4()
+
+def entries_exist(entityName : str, cohort_data: CohortData, index = 0) -> bool:
+    patient = cohort_data.patients[index]
+    return any(entry_entityName == entityName for (entry_entityName, field_name), value in patient.entries.items())

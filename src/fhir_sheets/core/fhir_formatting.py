@@ -272,6 +272,9 @@ def caret_delimited_string_to_coding(caret_delimited_str):
     return coding
 
 def string_to_quantity(quantity_str):
+    # Define potential comparators
+    comparators = ['<=', '>=', '<', '>']
+    found_comparator = None
     # Split the string into value and unit by whitespace
     parts = quantity_str.split('^',maxsplit=1)
     
@@ -280,7 +283,17 @@ def string_to_quantity(quantity_str):
     
     # First part is the value (convert to float)
     if len(parts) > 0:
-        quantity['value'] = float(parts[0])
+        value = parts[0]
+        #Handle Comparator if it exists
+        for comp in comparators:
+            if parts[0].startswith(comp):
+                found_comparator = comp
+                # Remove the comparator from the string to leave just "value"
+                value = value[len(comp):].strip()
+                break
+        if found_comparator:
+            quantity['comparator'] = found_comparator
+        quantity['value'] = float(value)
     
     # Second part is the unit (if present)
     if len(parts) > 1:

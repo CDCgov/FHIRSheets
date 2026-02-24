@@ -65,6 +65,12 @@ def test_string_to_quantity():
     assert quantity['value'] == 12
     assert quantity['unit'] == 'dm/L'
 
+def test_string_to_quantity_with_comparator():
+    quantity = string_to_quantity("<=13^mmol/L")
+    assert quantity['value'] == 13
+    assert quantity['unit'] == 'mmol/L'
+    assert quantity['comparator'] == '<='
+    
 def test_parse_iso8601_time():
     input = "14:30:25"
     time = parse_iso8601_time(input)

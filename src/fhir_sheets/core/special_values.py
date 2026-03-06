@@ -2,12 +2,20 @@
 from . import conversion
 import copy
 from abc import ABC, abstractmethod
+from typing import Any
 
 # Define an abstract base class
 class AbstractStructureHandler(ABC):
     
     @abstractmethod
-    def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value):
+    def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value) -> Any:
+        """Assign a value to the final structure.
+
+        Subclasses may return the modified ``final_struct`` (or a different
+        structure) or ``None``.  The return type is deliberately generic to
+        accommodate the ``PatientRaceExtensionValueHandler`` implementation
+        which now returns an empty ``dict`` when no match is found.
+        """
         pass
     
 def utilFindExtensionWithURL(extension_block, url):
@@ -60,6 +68,22 @@ class PatientRaceExtensionValueHandler(AbstractStructureHandler):
           "code" : "2106-3",
           "display" : "White"
         }
+      },
+      "asked but unknown" : {
+        "url" : "ombCategory",
+        "valueCoding" : {
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-NullFlavor",
+          "code" : "ASKU",
+          "display" : "Asked but Unknown"
+          }
+      },
+      "unknown" : {
+        "url" : "ombCategory",
+        "valueCoding" : {
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-NullFlavor",
+          "code" : "UNK",
+          "display" : "Unknown"
+          }
       }
     }
     
@@ -77,15 +101,27 @@ class PatientRaceExtensionValueHandler(AbstractStructureHandler):
     }
     #Create an ombcategory and detailed section of race extension
     def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value):
-        #Retrieve the race extension if it exists; make it if it does not.
+        """Assign a race extension value.
+
+        If the provided ``value`` matches one of the known ``omb_categories`` the
+        appropriate extension structure is added/updated and ``final_struct`` is
+        returned.  When there is **no** match, the function now returns an empty
+        dictionary (``{}``) as requested, effectively discarding any partially
+        built race extension.
+        """
+        original_final_struct = copy.deepcopy(final_struct)  # Keep a copy of the original structure
+        # Retrieve the race extension if it exists; make it if it does not.
         if 'extension' not in final_struct:
             final_struct['extension'] = []
         race_block = utilFindExtensionWithURL(final_struct['extension'], 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-race')
         if race_block is None:
             race_block = copy.deepcopy(self.initial_race_json)
             final_struct['extension'].append(race_block)
+
+        matched = False
         for race_key, race_structure in self.omb_categories.items():
             if value.strip().lower() == race_key:
+                matched = True
                 # Replace $ombCategory in the extension list
                 for i, item in enumerate(race_block["extension"]):
                     if isinstance(item, set) and "$ombCategory" in item:
@@ -94,7 +130,11 @@ class PatientRaceExtensionValueHandler(AbstractStructureHandler):
                     elif isinstance(item, dict) and item.get("valueString") == "$text":
                         item['valueString'] = race_key
                 return final_struct
-        pass
+        # No match found – return an empty structure as per the new requirement
+        if not matched:
+            final_struct.clear()  # Clear any changes made to final_struct
+            final_struct.update(original_final_struct) # Revert to the original structure to discard any partial changes
+            return {}
 
 class PatientEthnicityExtensionValueHandler(AbstractStructureHandler):
     omb_categories = {
@@ -114,12 +154,20 @@ class PatientEthnicityExtensionValueHandler(AbstractStructureHandler):
           "display" : "Not Hispanic or Latino"
           }
       },
-      "Not Hispanic or Latino" : {
+      "asked but unknown" : {
         "url" : "ombCategory",
         "valueCoding" : {
-          "system" : "urn:oid:2.16.840.1.113883.6.238",
-          "code" : "2186-5",
-          "display" : "Not Hispanic or Latino"
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-NullFlavor",
+          "code" : "ASKU",
+          "display" : "Asked but Unknown"
+          }
+      },
+      "unknown" : {
+        "url" : "ombCategory",
+        "valueCoding" : {
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-NullFlavor",
+          "code" : "UNK",
+          "display" : "Unknown"
           }
       }
     }
@@ -138,15 +186,27 @@ class PatientEthnicityExtensionValueHandler(AbstractStructureHandler):
     }
     #Create an ombcategory and detailed section of ethnicitiy extension
     def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value):
-        #Retrieve the ethncitiy extension if it exists; make it if it does not.
+        """Assign an ethnicity extension value.
+
+        Mirrors the behaviour of :class:`PatientRaceExtensionValueHandler` – if the
+        supplied ``value`` matches one of the known ``omb_categories`` the
+        appropriate extension is added/updated and ``final_struct`` is returned.
+        When there is **no** match the function now returns an empty dictionary
+        (``{}``) to satisfy the new test requirement.
+        """
+        original_final_struct = copy.deepcopy(final_struct)  # Keep a copy of the original structure
+        # Retrieve the ethnicity extension if it exists; make it if it does not.
         if 'extension' not in final_struct:
             final_struct['extension'] = []
         ethnicity_block = utilFindExtensionWithURL(final_struct['extension'], 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity')
         if ethnicity_block is None:
             ethnicity_block = copy.deepcopy(self.initial_ethnicity_json)
             final_struct['extension'].append(ethnicity_block)
+
+        matched = False
         for ethnicity_key, ethnicity_structure in self.omb_categories.items():
             if value.strip().lower() == ethnicity_key.strip().lower():
+                matched = True
                 # Replace $ombCategory in the extension list
                 for i, item in enumerate(ethnicity_block["extension"]):
                     if isinstance(item, set) and "$ombCategory" in item:
@@ -155,7 +215,11 @@ class PatientEthnicityExtensionValueHandler(AbstractStructureHandler):
                     elif isinstance(item, dict) and item.get("valueString") == "$text":
                         item['valueString'] = ethnicity_key
                 return final_struct
-        pass
+        # No match – return empty dict as required
+        if not matched:
+            final_struct.clear()  # Clear any changes made to final_struct
+            final_struct.update(original_final_struct)  # Revert to the original structure to discard any partial changes
+            return {}
       
 class PatientBirthSexExtensionValueHandler(AbstractStructureHandler):
     birth_sex_block = {

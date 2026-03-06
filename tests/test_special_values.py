@@ -66,6 +66,23 @@ class TestPatientRaceExtensionValueHandler:
         omb_ext = race_ext['extension'][0]
         assert omb_ext['valueCoding']['code'] == '2106-3'
 
+    def test_assign_value_no_match(self):
+        """When the race value does not match any known category the handler should return an empty dict."""
+        handler = PatientRaceExtensionValueHandler()
+        rd = ResourceDefinition("Patient", "Patient", [])
+        final_struct = {}
+        result = handler.assign_value(
+            "Patient.extension[Race].ombCategory",
+            rd,
+            "string",
+            final_struct,
+            "ombCategory",
+            "nonexistentrace",
+        )
+        assert result == {}
+        # final_struct should remain empty because no extension was added
+        assert final_struct == {}
+
 
 class TestPatientEthnicityExtensionValueHandler:
     def test_assign_value_hispanic(self):
@@ -78,6 +95,22 @@ class TestPatientEthnicityExtensionValueHandler:
         assert ethnicity_ext['url'] == 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity'
         omb_ext = ethnicity_ext['extension'][0]
         assert omb_ext['valueCoding']['code'] == '2135-2'
+
+    def test_assign_value_no_match(self):
+        """When the ethnicity value does not match any known category the handler should return an empty dict."""
+        handler = PatientEthnicityExtensionValueHandler()
+        rd = ResourceDefinition("Patient", "Patient", [])
+        final_struct = {}
+        result = handler.assign_value(
+            "Patient.extension[Ethnicity].ombCategory",
+            rd,
+            "string",
+            final_struct,
+            "ombCategory",
+            "nonexistentethnicity",
+        )
+        assert result == {}
+        assert final_struct == {}
 
 
 class TestPatientBirthSexExtensionValueHandler:

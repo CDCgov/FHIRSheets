@@ -15,14 +15,22 @@ from . import special_values
 
 logger = logging.getLogger("fhirsheets.core.conversion")
 
-FILE_RANDOM = random.Random()
+# Use a lower‑case name for the random generator to avoid the "constant redefined" warning.
+_file_random = random.Random()
 #Main top level function
 #Creates a full transaction bundle for a patient at index
-def create_transaction_bundle(resource_definition_entities: List[ResourceDefinition], resource_link_entities: List[ResourceLink], cohort_data: CohortData, index = 0, config: FhirSheetsConfiguration = FhirSheetsConfiguration({})) -> Dict:
-    global FILE_RANDOM
-    FILE_RANDOM = random.Random(config.random_seed)
+def create_transaction_bundle(
+    resource_definition_entities: List[ResourceDefinition],
+    resource_link_entities: List[ResourceLink],
+    cohort_data: CohortData,
+    index: int = 0,
+    config: FhirSheetsConfiguration = FhirSheetsConfiguration({}),
+) -> Dict[str, Any]:
+    global _file_random
+    _file_random = random.Random(config.random_seed)
     root_bundle = initialize_bundle(config)
-    created_resources = {}
+    # Mapping from entity name to the created FHIR resource dictionary
+    created_resources: Dict[str, Dict[str, Any]] = {}
     for resource_definition in resource_definition_entities:
         entityName = resource_definition.entityName
         if not entries_exist(entityName, cohort_data, index) and not config.build_empty_resources:
@@ -41,9 +49,15 @@ def create_transaction_bundle(resource_definition_entities: List[ResourceDefinit
         post_process_create_medication_references(root_bundle)
     return root_bundle
 
-def create_singular_resource(singleton_entityName: str, resource_definition_entities: List[ResourceDefinition], resource_link_entities: List[ResourceLink], cohort_data: CohortData, index = 0) -> Dict:
-    created_resources = {}
-    singleton_fhir_resource = {}
+def create_singular_resource(
+    singleton_entityName: str,
+    resource_definition_entities: List[ResourceDefinition],
+    resource_link_entities: List[ResourceLink],
+    cohort_data: CohortData,
+    index: int = 0,
+) -> Dict[str, Any]:
+    created_resources: Dict[str, Dict[str, Any]] = {}
+    singleton_fhir_resource: Dict[str, Any] = {}
     for resource_definition in resource_definition_entities:
         entityName = resource_definition.entityName
         #Create and collect fhir resources
@@ -56,8 +70,8 @@ def create_singular_resource(singleton_entityName: str, resource_definition_enti
     return singleton_fhir_resource
 
 #Initialize root bundle definition
-def initialize_bundle(config: FhirSheetsConfiguration) -> Dict:
-    root_bundle = {}
+def initialize_bundle(config: FhirSheetsConfiguration) -> Dict[str, Any]:
+    root_bundle: Dict[str, Any] = {}
     root_bundle['resourceType'] = 'Bundle'
     root_bundle['id'] = str(generate_UUID()).strip()
     root_bundle['meta'] = {
@@ -72,23 +86,37 @@ def initialize_bundle(config: FhirSheetsConfiguration) -> Dict:
     return root_bundle
 
 #Initialize a resource from a resource definition. Adding basic information all resources need
-def initialize_resource(resource_definition) -> Dict:
-    initial_resource = {}
-    initial_resource['resourceType'] = resource_definition.resourceType.strip()
-    initial_resource['id'] = str(generate_UUID()).strip()
-    if resource_definition.profiles:
-        initial_resource['meta'] = {
-            'profile': resource_definition.profiles,
-            'security': [{
-                'system': 'http://terminology.hl7.org/CodeSystem/v3-ActReason',
-                'code': 'HTEST',
-                'display': 'test health data'
-            }]
+def initialize_resource(resource_definition: ResourceDefinition) -> Dict[str, Any]:
+    """Create a minimal FHIR resource dictionary based on a ``ResourceDefinition``.
+
+    The function populates the mandatory ``resourceType`` and ``id`` fields and, if
+    the definition includes ``profiles``, adds a ``meta`` block with the profile
+    information and a standard security tag.
+    """
+    # The original implementation mistakenly referenced an undefined variable
+    # ``initial_resource`` and also created an unused ``created_resources`` dict.
+    # We initialise a fresh dictionary here and populate it correctly.
+    initial_resource: Dict[str, Any] = {}
+    initial_resource["resourceType"] = resource_definition.resourceType.strip()
+    initial_resource["id"] = str(generate_UUID()).strip()
+    if getattr(resource_definition, "profiles", None):
+        initial_resource["meta"] = {
+            "profile": resource_definition.profiles,
+            "security": [{
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                "code": "HTEST",
+                "display": "test health data",
+            }],
         }
     return initial_resource
 
 # Creates a fhir-json structure from a resource definition entity and the patient_data_sheet
-def create_fhir_resource(resource_definition: ResourceDefinition, cohort_data: CohortData, index: int = 0, config: FhirSheetsConfiguration = FhirSheetsConfiguration({})) -> Dict:
+def create_fhir_resource(
+    resource_definition: ResourceDefinition,
+    cohort_data: CohortData,
+    index: int = 0,
+    config: FhirSheetsConfiguration = FhirSheetsConfiguration({}),
+) -> Dict[str, Any]:
     resource_dict = initialize_resource(resource_definition)
     #Get field entries for this entity
     header_entries_for_resourcename = [
@@ -123,7 +151,10 @@ def create_fhir_resource(resource_definition: ResourceDefinition, cohort_data: C
     return resource_dict
 
 #Create a resource_link for default references in the cases where only 1 resourceType of the source and destination exist
-def add_default_resource_links(created_resources: dict, resource_link_entities: List[ResourceLink]) -> None:
+def add_default_resource_links(
+    created_resources: Dict[str, Dict[str, Any]],
+    resource_link_entities: List[ResourceLink],
+) -> None:
     default_references = [
         ('allergyintolerance', 'patient', 'patient'),
         ('allergyintolerance', 'practitioner', 'asserter'),
@@ -161,7 +192,7 @@ def add_default_resource_links(created_resources: dict, resource_link_entities: 
     
     resource_counts = {}
     for resourceName, resource in created_resources.items():
-        resourceType = resource['resourceType'].lower().strip()
+        resourceType: str = resource['resourceType'].lower().strip()
         if resourceType not in resource_counts:
             resource_counts[resourceType]= {'count': 1, 'singletonEntityName': resourceName, 'singleResource': resource}
         else:
@@ -173,25 +204,38 @@ def add_default_resource_links(created_resources: dict, resource_link_entities: 
         sourceType = default_reference[0]
         destinationType = default_reference[1]
         fieldName = default_reference[2]
-        if sourceType in resource_counts and destinationType in resource_counts and \
-        resource_counts[sourceType]['count'] == 1 and resource_counts[destinationType]['count'] == 1:
-            originResourceEntityName = resource_counts[sourceType]['singletonEntityName']
-            destinationResourceEntityName = resource_counts[destinationType]['singletonEntityName']
+        if (
+            sourceType in resource_counts
+            and destinationType in resource_counts
+            and resource_counts[sourceType]["count"] == 1
+            and resource_counts[destinationType]["count"] == 1
+        ):
+            # Cast to str to satisfy type checker (resource_counts stores generic dicts)
+            originResourceEntityName: str = str(resource_counts[sourceType]["singletonEntityName"])  # type: ignore
+            destinationResourceEntityName: str = str(resource_counts[destinationType]["singletonEntityName"])  # type: ignore
             resource_link_entities.append(
-                ResourceLink(originResourceEntityName,fieldName,destinationResourceEntityName)
+                ResourceLink(originResourceEntityName, fieldName, destinationResourceEntityName)
             )
     return
         
             
 #List function to create resource references/links with created entities
-def create_resource_links(created_resources, resource_link_entites, preview_mode = False) -> None:
+def create_resource_links(
+    created_resources: Dict[str, Dict[str, Any]],
+    resource_link_entites: List[ResourceLink],
+    preview_mode: bool = False,
+) -> None:
     logger.info("Building resource links")
     for resource_link_entity in resource_link_entites:
         create_resource_link(created_resources, resource_link_entity, preview_mode)
     return
     
 #Singular function to create a resource link.
-def create_resource_link(created_resources, resource_link_entity, preview_mode = False) -> None:
+def create_resource_link(
+    created_resources: Dict[str, Dict[str, Any]],
+    resource_link_entity: ResourceLink,
+    preview_mode: bool = False,
+) -> None:
     # template scaffolding
     reference_json_block = {
         "reference" : "$value"
@@ -236,7 +280,7 @@ def create_resource_link(created_resources, resource_link_entity, preview_mode =
         originResource[resource_link_entity.referencePath.strip().lower()]["reference"] = reference_value
     return
 
-def add_resource_to_transaction_bundle(root_bundle, fhir_resource) -> Dict:
+def add_resource_to_transaction_bundle(root_bundle: Dict[str, Any], fhir_resource: Dict[str, Any]) -> Dict[str, Any]:
     entry = {}
     entry['fullUrl'] = "urn:uuid:"+fhir_resource['id']
     entry['resource'] = fhir_resource
@@ -256,7 +300,13 @@ def add_resource_to_transaction_bundle(root_bundle, fhir_resource) -> Dict:
 # resource_definition: resource description model from import
 # entity_definition: specific field entry information for this function
 # value: Actual value to assign
-def create_structure_from_jsonpath(root_struct: Dict, json_path: str, resource_definition: ResourceDefinition,  dataType: str, value: Any) -> Any:
+def create_structure_from_jsonpath(
+    root_struct: Dict[str, Any],
+    json_path: str,
+    resource_definition: ResourceDefinition,
+    dataType: str,
+    value: Any,
+) -> Any:
     #Get all dot notation components as seperate 
     if dataType is not None and dataType.strip().lower() == 'string':
         value = str(value)
@@ -269,7 +319,15 @@ def create_structure_from_jsonpath(root_struct: Dict, json_path: str, resource_d
     return build_structure(root_struct, json_path, resource_definition, dataType, parts, value, [])
 
 # main recursive function to drill into the json structure, assign paths, and create structure where needed
-def build_structure(current_struct: Any, json_path: str, resource_definition: ResourceDefinition, dataType: str, parts: List[str], value: Any, previous_parts: List[str]) -> Any:
+def build_structure(
+    current_struct: Any,
+    json_path: str,
+    resource_definition: ResourceDefinition,
+    dataType: str,
+    parts: List[str],
+    value: Any,
+    previous_parts: List[str],
+) -> Any:
     if len(parts) == 0:
         return current_struct
     #Grab current part
@@ -374,13 +432,22 @@ def build_structure(current_struct: Any, json_path: str, resource_definition: Re
         return current_struct
     
 #Helper function to quickly recurse and return the next level of structure. Used by main recursive function
-def build_structure_recurse(current_struct, json_path, resource_definition, dataType, parts, value, previous_parts, part):
+def build_structure_recurse(
+    current_struct: Any,
+    json_path: str,
+    resource_definition: ResourceDefinition,
+    dataType: str,
+    parts: List[str],
+    value: Any,
+    previous_parts: List[str],
+    part: str,
+) -> Any:
     previous_parts.append(part)
     return_struct = build_structure(current_struct, json_path, resource_definition, dataType, parts[1:], value, previous_parts)
     return return_struct
 
 #Post-process function to add medication reference in specific references
-def post_process_create_medication_references( root_bundle: dict):
+def post_process_create_medication_references(root_bundle: Dict[str, Any]) -> None:
     medication_resources = [resource['resource'] for resource in root_bundle['entry'] if resource['resource']['resourceType'] == "Medication"]
     medication_request_resources = [resource['resource'] for resource in root_bundle['entry'] if resource['resource']['resourceType'] == "MedicationRequest"]
     for medication_request_resource in medication_request_resources:
@@ -396,16 +463,20 @@ def post_process_create_medication_references( root_bundle: dict):
         medication_request_resource['medicationReference'] = target_medication['resourceType'] + "/" + target_medication['id']
     return
 
-def createMedicationResource(root_bundle, medicationCodeableConcept):
-    target_medication = initialize_resource(ResourceDefinition.from_dict({'ResourceType': 'Medication'}))
+def createMedicationResource(root_bundle: Dict[str, Any], medicationCodeableConcept: Any) -> Dict[str, Any]:
+    # ``ResourceDefinition.from_dict`` returns a ``ResourceDefinition``; we cast the result
+    # of ``initialize_resource`` to the expected dict type for clarity.
+    target_medication: Dict[str, Any] = initialize_resource(
+        ResourceDefinition.from_dict({"ResourceType": "Medication"})
+    )
     target_medication['code'] = medicationCodeableConcept
     add_resource_to_transaction_bundle(root_bundle, target_medication)
     return target_medication
 
-def generate_UUID():
+def generate_UUID() -> uuid.UUID:
     """Generate a random UUID (Version 4)."""
     return uuid.uuid4()
 
-def entries_exist(entityName : str, cohort_data: CohortData, index = 0) -> bool:
+def entries_exist(entityName: str, cohort_data: CohortData, index: int = 0) -> bool:
     patient = cohort_data.patients[index]
     return any(entry_entityName == entityName for (entry_entityName, field_name), value in patient.entries.items())

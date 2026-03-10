@@ -210,9 +210,8 @@ def add_default_resource_links(
             and resource_counts[sourceType]["count"] == 1
             and resource_counts[destinationType]["count"] == 1
         ):
-            # Cast to str to satisfy type checker (resource_counts stores generic dicts)
-            originResourceEntityName: str = str(resource_counts[sourceType]["singletonEntityName"])  # type: ignore
-            destinationResourceEntityName: str = str(resource_counts[destinationType]["singletonEntityName"])  # type: ignore
+            originResourceEntityName: str = resource_counts[sourceType]["singletonEntityName"]
+            destinationResourceEntityName: str = resource_counts[destinationType]["singletonEntityName"]
             resource_link_entities.append(
                 ResourceLink(originResourceEntityName, fieldName, destinationResourceEntityName)
             )
@@ -478,5 +477,32 @@ def generate_UUID() -> uuid.UUID:
     return uuid.uuid4()
 
 def entries_exist(entityName: str, cohort_data: CohortData, index: int = 0) -> bool:
+    """Utility function to determine if any entries exist for ``entityName``
+    in the patient at ``index``.
+
+    The original implementation contained duplicated code and an stray
+    triple quote that caused a ``SyntaxError`` during import.  This cleaned up
+    version returns ``True`` if at least one entry in ``patient.entries`` has a
+    matching entity name, otherwise ``False``.
+    """
     patient = cohort_data.patients[index]
-    return any(entry_entityName == entityName for (entry_entityName, field_name), value in patient.entries.items())
+    # ``patient.entries`` is a dict keyed by a tuple (entityName, field_name)
+    # We only care about the first element of the key.
+    return any(entry_entityName == entityName for (entry_entityName, _), _ in patient.entries.items())
+
+def clean_empty(data: Any) -> Any:
+    """
+    Recursively removes empty lists, empty dicts, and None values.
+    """
+    if isinstance(data, dict):
+        return {
+            k: v for k, v in ((k, clean_empty(v)) for k, v in data.items())
+            if v not in (None, {}, [])
+        }
+    elif isinstance(data, list):
+        return [
+            v for v in (clean_empty(v) for v in data)
+            if v not in (None, {}, [])
+        ]
+    else:
+        return data

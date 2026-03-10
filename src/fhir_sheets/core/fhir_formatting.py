@@ -159,28 +159,46 @@ def parse_iso8601_datetime(input_string):
         raise ValueError(f"Input string '{input_string}' is not in the valid ISO 8601 format date or datetime format")
     
 def parse_iso8601_instant(input_string):
-    # Regular expression to match ISO 8601 instant format with optional milliseconds and 'Z'
-    pattern = r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z)?)'
-    match = re.search(pattern, input_string)
-    # Check if the input string matches the pattern
+    """Parse an ISO‑8601 *instant* string.
+
+    The original implementation only accepted strings that contained a ``T``
+    separator and a time component (e.g. ``2025-10-21T11:59:34``).  The test suite
+    includes a case where a plain date (``2025-10-21``) should be interpreted as
+    an instant at midnight.  This function now supports both full instant strings
+    and simple date strings.  It also continues to accept any leading characters
+    (prefixes) because we use ``re.search`` rather than ``re.match``.
+
+    The function returns a ``datetime.datetime`` object.  If the input ends with a
+    ``Z`` the resulting datetime is timezone‑aware (UTC).  Otherwise it is naive.
+    """
+
+    # Try to match a full datetime instant first (with optional fractional seconds and optional Z)
+    instant_pattern = r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z)?)"
+    match = re.search(instant_pattern, input_string)
     if match:
-        # If it ends with 'Z', it's UTC
-        if input_string.endswith('Z'):
-            if '.' in input_string:
-                # With milliseconds
-                return datetime.datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S.%f').replace(tzinfo=datetime.timezone.utc)
-            else:
-                # Without milliseconds
-                return datetime.datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S').replace(tzinfo=datetime.timezone.utc)
-        else:
-            if '.' in input_string:
-                # With milliseconds
-                return datetime.datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S.%f')
-            else:
-                # Without milliseconds
-                return datetime.datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S')
-    else:
-        raise ValueError(f"Input string '{input_string}' is not in the valid ISO 8601 instant format")
+        iso_str = match.group(1)
+        # Determine if timezone UTC is indicated
+        is_utc = iso_str.endswith('Z')
+        # Strip trailing Z for parsing with strptime
+        if is_utc:
+            iso_str = iso_str[:-1]
+        # Choose format based on presence of fractional seconds
+        fmt = "%Y-%m-%dT%H:%M:%S.%f" if '.' in iso_str else "%Y-%m-%dT%H:%M:%S"
+        dt = datetime.datetime.strptime(iso_str, fmt)
+        if is_utc:
+            dt = dt.replace(tzinfo=datetime.timezone.utc)
+        return dt
+
+    # If not a full instant, fall back to a plain date (YYYY‑MM‑DD)
+    date_pattern = r"(\d{4}-\d{2}-\d{2})"
+    match = re.search(date_pattern, input_string)
+    if match:
+        # Parse the date and set time components to zero
+        dt = datetime.datetime.strptime(match.group(1), "%Y-%m-%d")
+        return dt  # naive datetime at midnight
+
+    # No recognizable pattern found
+    raise ValueError(f"Input string '{input_string}' is not in a recognized ISO 8601 instant or date format")
     
 def parse_iso8601_time(input_string):
     # Regular expression to match the time format HH:MM:SS or HH:MM:SS.ssssss

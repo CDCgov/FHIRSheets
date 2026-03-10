@@ -7,6 +7,9 @@ from src.fhir_sheets.core.conversion import (
 from src.fhir_sheets.core.config.FhirSheetsConfiguration import FhirSheetsConfiguration
 from src.fhir_sheets.core.model.resource_definition_entity import ResourceDefinition
 
+import json
+from src.fhir_sheets.core.conversion import clean_empty
+
 
 class TestInitializeBundle:
     def test_initialize_bundle_default(self):
@@ -96,3 +99,58 @@ class TestCreateStructureFromJsonpath:
         rd = ResourceDefinition("Patient", "Patient", [])
         result = create_structure_from_jsonpath(root, "Patient.active", rd, "string", 123)
         assert result['active'] == "123"  # Converted to string
+
+
+class TestCleanEmptyFunction:
+    def test_clean_empty_removes_empty_structures(self):
+        """Ensure that clean_empty removes empty dicts, lists, and None values.
+
+        The provided JSON includes a ``dosageInstruction`` field that contains a
+        list with a single empty dictionary. After cleaning, the field should be
+        removed entirely from the resulting dictionary.
+        """
+        json_input = """
+        {
+            "resourceType": "MedicationRequest",
+            "id": "136b3216-dfe4-4509-9565-4f7e769f08c9",
+            "meta": {
+              "profile": [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest"
+              ],
+              "security": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+                  "code": "HTEST",
+                  "display": "test health data"
+                }
+              ]
+            },
+            "status": "active",
+            "intent": "plan",
+            "medicationCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "2711688",
+                  "display": "allantoin 0.0075 MG/MG Medicated Patch"
+                }
+              ]
+            },
+            "dosageInstruction": [
+              {}
+            ],
+            "subject": {
+              "reference": "Patient/eebf273b-9d52-4fc6-8e26-081fded5a497"
+            }
+          }
+        """
+        data = json.loads(json_input)
+        cleaned = clean_empty(data)
+        # The dosageInstruction key should be removed because it only contained an empty dict.
+        assert "dosageInstruction" not in cleaned
+        # Verify that other top‑level keys remain unchanged.
+        assert cleaned["resourceType"] == "MedicationRequest"
+        assert cleaned["status"] == "active"
+        # Re‑serialize to ensure the result is JSON‑serializable.
+        serialized = json.dumps(cleaned)
+        assert isinstance(serialized, str)

@@ -41,6 +41,52 @@ def test_parse_iso8601_instant():
     assert date.minute == 59
     assert date.second == 34
     assert date.microsecond == 123000
+
+def test_parse_iso8601_instant_and_check_json_dump():
+    """Parse a full ISO‑8601 instant and verify its JSON representation.
+
+    The ``orjson`` serializer should output the datetime in ISO‑8601 format
+    including fractional seconds when present.
+    """
+    input = "2025-10-21T11:59:34.123"
+    instant = parse_iso8601_instant(input)
+    # Ensure parsing is correct (mirrors ``test_parse_iso8601_instant``)
+    assert instant.year == 2025
+    assert instant.month == 10
+    assert instant.day == 21
+    assert instant.hour == 11
+    assert instant.minute == 59
+    assert instant.second == 34
+    assert instant.microsecond == 123000
+    # Serialize to JSON and check the exact string representation
+    json_string = orjson.dumps(instant)
+    assert json_string == b'"2025-10-21T11:59:34.123000"'
+    
+def test_parse_iso8601_instant_issue_03092026():
+    input = "2025-10-21"
+    date = parse_iso8601_instant(input)
+    assert date.year == 2025
+    assert date.month == 10
+    assert date.day == 21
+    assert date.hour == 0
+    assert date.minute == 0
+    assert date.second == 0
+    assert date.microsecond == 0
+
+def test_parse_iso8601_instant_date_only_and_check_json_dump():
+    input = "2025-10-21"
+    instant = parse_iso8601_instant(input)
+    # Verify that the parsed datetime defaults to midnight
+    assert instant.year == 2025
+    assert instant.month == 10
+    assert instant.day == 21
+    assert instant.hour == 0
+    assert instant.minute == 0
+    assert instant.second == 0
+    assert instant.microsecond == 0
+    # Dump to JSON and check the ISO‑8601 representation
+    json_string = orjson.dumps(instant)
+    assert json_string == b'"2025-10-21T00:00:00"'
     
 def test_parse_address():
     address_result = parse_flexible_address("1234 Main Street^Atlanta^Fulton^30345^GA^USA")

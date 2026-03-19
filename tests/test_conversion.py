@@ -1,11 +1,15 @@
 import pytest
 import uuid
 from src.fhir_sheets.core.conversion import (
-    initialize_bundle, initialize_resource, add_resource_to_transaction_bundle,
-    create_structure_from_jsonpath
+    initialize_bundle,
+    initialize_resource,
+    add_resource_to_transaction_bundle,
+    create_structure_from_jsonpath,
+    create_resources,
 )
 from src.fhir_sheets.core.config.FhirSheetsConfiguration import FhirSheetsConfiguration
 from src.fhir_sheets.core.model.resource_definition_entity import ResourceDefinition
+from src.fhir_sheets.core.model.cohort_data_entity import CohortData, HeaderEntry, PatientEntry
 
 import json
 from src.fhir_sheets.core.conversion import clean_empty
@@ -154,3 +158,54 @@ class TestCleanEmptyFunction:
         # Re‑serialize to ensure the result is JSON‑serializable.
         serialized = json.dumps(cleaned)
         assert isinstance(serialized, str)
+
+
+class TestCreateResources:
+    """Tests for the ``create_resources`` function.
+
+    The function creates FHIR resources based on a list of ``ResourceDefinition``
+    objects and a ``CohortData`` instance. It skips creation when there are no
+    entries for the entity unless ``build_empty_resources`` is enabled in the
+    configuration.
+    """
+
+    def _make_cohort_data(self, entries: dict = None) -> CohortData:
+        """Utility to build a minimal ``CohortData`` instance.
+
+        ``entries`` is a mapping of ``(entityName, field_name)`` to a value. If
+        ``None`` an empty dict is used, representing a patient with no data.
+        The concrete ``PatientEntry`` class expects a ``Dict[Tuple[str, str], str]``
+        but for the purposes of these tests an empty dict satisfies the type
+        checker when we avoid explicit type annotations on the intermediate
+        variables.
+        """
+        # No header entries are needed for these tests.
+        headers = []
+        patient_entries = entries or {}
+        patients = [PatientEntry(patient_entries)]
+        return CohortData(headers, patients)
+
+    def test_create_resources_skips_when_no_data_and_build_empty_false(self):
+        """When ``build_empty_resources`` is ``False`` and there is no patient data,
+        ``create_resources`` should return an empty dict.
+        """
+        rd = ResourceDefinition("TestEntity", "Patient", [])
+        cohort = self._make_cohort_data()
+        config = FhirSheetsConfiguration({})  # defaults to build_empty_resources=False
+        result = create_resources([rd], [], cohort, index=0, config=config)
+        assert result == {}
+
+    def test_create_resources_creates_when_build_empty_true(self):
+        """When ``build_empty_resources`` is ``True`` the function should create a
+        minimal resource even if there is no patient data.
+        """
+        rd = ResourceDefinition("TestEntity", "Patient", [])
+        cohort = self._make_cohort_data()
+        config = FhirSheetsConfiguration({"build_empty_resources": True})
+        result = create_resources([rd], [], cohort, index=0, config=config)
+        # The result should contain a single entry keyed by the entity name.
+        assert "TestEntity" in result
+        resource = result["TestEntity"]
+        # Verify minimal required fields are present.
+        assert resource["resourceType"] == "Patient"
+        assert isinstance(resource["id"], str)

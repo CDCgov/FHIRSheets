@@ -29,6 +29,27 @@ def create_transaction_bundle(
     global _file_random
     _file_random = random.Random(config.random_seed)
     root_bundle = initialize_bundle(config)
+    created_resources = create_resources(
+        resource_definition_entities,
+        resource_link_entities,
+        cohort_data,
+        index,
+        config
+    )
+    #Construct into fhir bundle
+    for fhir_resource in created_resources.values():
+        add_resource_to_transaction_bundle(root_bundle, fhir_resource)
+    if config.medications_as_reference:
+        post_process_create_medication_references(root_bundle)
+    return root_bundle
+
+def create_resources(
+    resource_definition_entities: List[ResourceDefinition],
+    resource_link_entities: List[ResourceLink],
+    cohort_data: CohortData,
+    index: int = 0,
+    config: FhirSheetsConfiguration = FhirSheetsConfiguration({}),
+) -> Dict[str, Dict[str, Any]]:
     # Mapping from entity name to the created FHIR resource dictionary
     created_resources: Dict[str, Dict[str, Any]] = {}
     for resource_definition in resource_definition_entities:
@@ -42,12 +63,7 @@ def create_transaction_bundle(
     #Link resources after creation
     add_default_resource_links(created_resources, resource_link_entities)
     create_resource_links(created_resources, resource_link_entities, config.preview_mode)
-    #Construct into fhir bundle
-    for fhir_resource in created_resources.values():
-        add_resource_to_transaction_bundle(root_bundle, fhir_resource)
-    if config.medications_as_reference:
-        post_process_create_medication_references(root_bundle)
-    return root_bundle
+    return created_resources
 
 def create_singular_resource(
     singleton_entityName: str,

@@ -146,7 +146,7 @@ class PatientEthnicityExtensionValueHandler(AbstractStructureHandler):
           "display" : "Hispanic or Latino"
           }
       },
-      "Non Hispanic or Latino" : {
+      "Not Hispanic or Latino" : {
         "url" : "ombCategory",
         "valueCoding" : {
           "system" : "urn:oid:2.16.840.1.113883.6.238",

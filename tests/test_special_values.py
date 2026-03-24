@@ -96,6 +96,34 @@ class TestPatientEthnicityExtensionValueHandler:
         omb_ext = ethnicity_ext['extension'][0]
         assert omb_ext['valueCoding']['code'] == '2135-2'
 
+    def test_assign_value_not_hispanic(self):
+        """Verify that the handler correctly processes the "Not Hispanic or Latino"
+        ethnicity category (key "Non Hispanic or Latino"). The resulting extension
+        should contain the appropriate coding with code '2186-5' and the text value
+        should match the key used in the handler.
+        """
+        handler = PatientEthnicityExtensionValueHandler()
+        rd = ResourceDefinition("Patient", "Patient", [])
+        final_struct = {}
+        # Use the exact key as defined in the handler's omb_categories
+        handler.assign_value(
+            "Patient.extension[Ethnicity].ombCategory",
+            rd,
+            "string",
+            final_struct,
+            "ombCategory",
+            "Not Hispanic or Latino",
+        )
+        assert 'extension' in final_struct
+        ethnicity_ext = final_struct['extension'][0]
+        assert ethnicity_ext['url'] == 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity'
+        omb_ext = ethnicity_ext['extension'][0]
+        # Verify the correct code for "Not Hispanic or Latino"
+        assert omb_ext['valueCoding']['code'] == '2186-5'
+        # The valueString should be set to the key (preserving case)
+        text_ext = ethnicity_ext['extension'][1]
+        assert text_ext['valueString'] == 'Not Hispanic or Latino'
+
     def test_assign_value_no_match(self):
         """When the ethnicity value does not match any known category the handler should return an empty dict."""
         handler = PatientEthnicityExtensionValueHandler()

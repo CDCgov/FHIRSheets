@@ -1,7 +1,17 @@
 
 import orjson
 import logging
-from src.fhir_sheets.core.fhir_formatting import caret_delimited_string_to_codeableconcept, parse_flexible_address, parse_iso8601_date, parse_iso8601_datetime, parse_iso8601_instant, string_to_quantity, parse_iso8601_time, parse_human_name
+from src.fhir_sheets.core.fhir_formatting import (
+    caret_delimited_string_to_codeableconcept,
+    parse_flexible_address,
+    parse_iso8601_date,
+    parse_iso8601_datetime,
+    parse_iso8601_instant,
+    string_to_quantity,
+    parse_iso8601_time,
+    parse_human_name,
+    parse_boolean,
+)
 
 logger: logging.Logger = logging.getLogger("fhirsheets.test_fhir_values")
 
@@ -141,3 +151,29 @@ def test_parse_human_name_single():
     name = parse_human_name("Jane")
     assert name['family'] == 'Jane'
     assert name['given'] == []
+    
+def test_parse_boolean_variants():
+    """Validate that various representations are correctly parsed to booleans.
+
+    The ``parse_boolean`` wrapper should interpret common truthy and falsy
+    literals, numeric values, and actual ``bool`` objects.  Unrecognised strings
+    must raise ``ValueError``.
+    """
+    # Direct bools
+    assert parse_boolean(True) is True
+    assert parse_boolean(False) is False
+    # Numeric values
+    assert parse_boolean(1) is True
+    assert parse_boolean(0) is False
+    assert parse_boolean(3.14) is True
+    # String representations (case‑insensitive, whitespace tolerant)
+    for true_str in ["true", "True", "TRUE", "  true  ", "1", "yes", "Y"]:
+        assert parse_boolean(true_str) is True, f"{true_str} should be True"
+    for false_str in ["false", "False", "FALSE", "  false  ", "0", "no", "N"]:
+        assert parse_boolean(false_str) is False, f"{false_str} should be False"
+    # ``None`` is treated as False
+    assert parse_boolean(None) is False
+    # Unrecognised string should raise ValueError
+    import pytest
+    with pytest.raises(ValueError):
+        parse_boolean("notabool")

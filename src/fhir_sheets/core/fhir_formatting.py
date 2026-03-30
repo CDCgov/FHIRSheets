@@ -2,6 +2,7 @@ import re
 import datetime
 import logging
 from . import special_values
+from typing import Any
 
 logger: logging.Logger = logging.getLogger("fhirsheets.core.fhir_formatting")
 
@@ -41,7 +42,8 @@ def assign_value(final_struct, key, value, valueType):
         elif valueType.lower() == 'base64binary':
             final_struct[key] = value
         elif valueType.lower() == 'boolean':
-            final_struct[key] = bool(value)
+            # Use a robust parser to handle various boolean representations
+            final_struct[key] = parse_boolean(value)
         elif valueType.lower() == 'codeableconcept':
             final_struct[key] = caret_delimited_string_to_codeableconcept(value)
         elif valueType.lower() == 'code':
@@ -115,6 +117,33 @@ def assign_value(final_struct, key, value, valueType):
     except ValueError as e:
         logger.error(e)
     return final_struct
+
+def parse_boolean(value: Any) -> bool:
+    """Interpret *value* as a boolean.
+
+    Handles common representations:
+    * ``bool`` – returned unchanged.
+    * ``None`` – treated as ``False``.
+    * ``int``/``float`` – ``0`` is ``False``, any other number is ``True``.
+    * ``str`` – case‑insensitive matches for ``"true"``, ``"1"``, ``"yes"``, ``"y"`` → ``True``
+      and ``"false"``, ``"0"``, ``"no"``, ``"n"`` → ``False``. Whitespace is ignored.
+      Unrecognised strings raise ``ValueError`` to surface data issues.
+    """
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in {"true", "1", "yes", "y"}:
+            return True
+        if lowered in {"false", "0", "no", "n"}:
+            return False
+        raise ValueError(f"Unrecognised boolean string: '{value}'")
+    # Fallback to Python truthiness for any other type
+    return bool(value)
         
 def parse_iso8601_date(input_string):
     # Regular expression to match ISO 8601 format with optional timezone 'Z'

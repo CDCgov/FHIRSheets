@@ -184,6 +184,7 @@ def add_default_resource_links(
         ('diagnosticreport', 'practitioner', 'performer'),
         ('diagnosticreport', 'practitionerrole', 'performer'),
         ('diagnosticreport', 'specimen', 'specimen'),
+        ('encounter', 'condition', 'reasonReference'),
         ('encounter', 'location', 'location'),
         ('encounter', 'organization', 'serviceProvider'),
         ('encounter', 'patient', 'subject'),

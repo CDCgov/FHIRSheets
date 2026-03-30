@@ -274,9 +274,9 @@ def create_resource_link(
     try:
         destinationResource = created_resources[resource_link_entity.destinationResource]
     except KeyError:
-        logger.warning(f" In ResourceLinks tab, found a Desitnation Resource  of : {resource_link_entity.destinationResource}  but no such entity found in PatientData")
+        logger.warning(f" In ResourceLinks tab, found a Destination Resource  of : {resource_link_entity.destinationResource}  but no such entity found in PatientData")
         return
-    #Estable the value of the refence
+    #Establish the value of the reference
     if preview_mode:
         reference_value = destinationResource['resourceType'] + "/" + resource_link_entity.destinationResource
     else:
@@ -513,12 +513,12 @@ def clean_empty(data: Any) -> Any:
     if isinstance(data, dict):
         return {
             k: v for k, v in ((k, clean_empty(v)) for k, v in data.items())
-            if v not in (None, {}, [])
+            if v not in (None, {}, [], "")
         }
     elif isinstance(data, list):
         return [
             v for v in (clean_empty(v) for v in data)
-            if v not in (None, {}, [])
+            if v not in (None, {}, [], "")
         ]
     else:
         return data

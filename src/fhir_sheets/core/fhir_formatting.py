@@ -27,8 +27,13 @@ def assign_value(final_struct, key, value, valueType):
     # Removing white space
     if isinstance(value, str):
         value = value.strip()
-    # Checking for null or empty string values. If so; we do not construct the value
-    if not value:
+    # Checking for null or empty *string* values. We intentionally allow falsy
+    # non‑string values such as ``False`` or ``0`` because they may be valid
+    # FHIR primitive values (e.g., ``deceasedBoolean``). Previously the code
+    # used ``if not value`` which incorrectly filtered out ``False``.
+    if value is None:
+        return final_struct
+    if isinstance(value, str) and not value.strip():
         return final_struct
     # If the valueType is not provide, do not construct the value.
     if valueType is None:

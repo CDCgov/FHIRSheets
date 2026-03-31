@@ -19,11 +19,21 @@ class HeaderEntry:
                 f"\n\tvalueSets='{self.valueSets}')")
     
 class PatientEntry:
-    def __init__(self, entries:Dict[Tuple[str,str],str]):
-        self.entries:Dict[Tuple[str,str],str] = entries
-       
-    @classmethod 
-    def from_dict(cls, entries:Dict[Tuple[str,str],str]):
+    """Container for a single patient's data entries.
+
+    The original implementation restricted entry values to ``str`` which
+    prevented non‑string values (e.g., booleans for ``deceasedBoolean``) from
+    being used. The conversion logic can handle any JSON‑serialisable type, so
+    we relax the annotation to ``Any``.
+    """
+
+    def __init__(self, entries: Dict[Tuple[str, str], Any]):
+        # Store the raw mapping; conversion functions will interpret the values
+        # based on the associated ``valueType`` from the header.
+        self.entries: Dict[Tuple[str, str], Any] = entries
+
+    @classmethod
+    def from_dict(cls, entries: Dict[Tuple[str, str], Any]):
         return cls(entries)
 
     def __repr__(self) -> str:

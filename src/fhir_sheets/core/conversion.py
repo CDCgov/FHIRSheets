@@ -282,18 +282,27 @@ def create_resource_link(
         reference_value = destinationResource['resourceType'] + "/" + resource_link_entity.destinationResource
     else:
         reference_value = destinationResource['resourceType'] + "/" + destinationResource['id']
-    link_tuple = (originResource['resourceType'].strip().lower(),
-                    destinationResource['resourceType'].strip().lower(),
-                    resource_link_entity.referencePath.strip().lower())
+
+    # Preserve the original case of the referencePath when adding it to the
+    # resource. Previously the code lower‑cased the path, which caused keys such
+    # as "reasonReference" to become "reasonreference" and broke tests that
+    # expect the exact field name.
+    ref_path = resource_link_entity.referencePath.strip()
+
+    link_tuple = (
+        originResource['resourceType'].strip().lower(),
+        destinationResource['resourceType'].strip().lower(),
+        ref_path[0].lower() + ref_path[1:]
+    )
     if link_tuple in arrayType_references:
-        if resource_link_entity.referencePath.strip().lower() not in originResource:
-            originResource[resource_link_entity.referencePath.strip().lower()] = []
+        if ref_path not in originResource:
+            originResource[ref_path] = []
         new_reference = reference_json_block.copy()
         new_reference['reference'] = reference_value
-        originResource[resource_link_entity.referencePath.strip().lower()].append(new_reference)
+        originResource[ref_path].append(new_reference)
     else:
-        originResource[resource_link_entity.referencePath.strip().lower()] = reference_json_block.copy()
-        originResource[resource_link_entity.referencePath.strip().lower()]["reference"] = reference_value
+        originResource[ref_path] = reference_json_block.copy()
+        originResource[ref_path]["reference"] = reference_value
     return
 
 def add_resource_to_transaction_bundle(root_bundle: Dict[str, Any], fhir_resource: Dict[str, Any]) -> Dict[str, Any]:
@@ -508,18 +517,42 @@ def entries_exist(entityName: str, cohort_data: CohortData, index: int = 0) -> b
     return any(entry_entityName == entityName for (entry_entityName, _), _ in patient.entries.items())
 
 def clean_empty(data: Any) -> Any:
-    """
-    Recursively removes empty lists, empty dicts, and None values.
+    """Recursively remove *empty* structures while preserving empty strings.
+
+    The original implementation filtered out empty strings (""), which caused
+    legitimate empty‑string values to be lost. The test suite expects empty
+    strings to be retained, but still wants to drop structures that are
+    effectively empty – for example a ``coding`` entry where *all* fields are
+    empty strings. To satisfy both requirements we:
+
+    1. Preserve empty strings as values.
+    2. Remove ``None``, empty dicts, and empty lists.
+    3. Treat a dict whose **all** values are empty strings as empty and drop
+       it, which removes empty ``coding`` objects while keeping other empty
+       strings intact.
     """
     if isinstance(data, dict):
-        return {
-            k: v for k, v in ((k, clean_empty(v)) for k, v in data.items())
-            if v not in (None, {}, [], "")
-        }
+        # Build a new dict with explicit typing to satisfy static analysis.
+        cleaned_dict: Dict[str, Any] = {}
+        for k, v in data.items():  # type: ignore[assignment]
+            cleaned_val = clean_empty(v)
+            if cleaned_val not in (None, {}, []):
+                cleaned_dict[k] = cleaned_val
+        # If the dict is now empty **or** all remaining values are empty strings,
+        # consider it empty and return an empty dict so the caller can filter it.
+        if not cleaned_dict:
+            return {}
+        if all(isinstance(v, str) and v == "" for v in cleaned_dict.values()):
+            return {}
+        return cleaned_dict
     elif isinstance(data, list):
-        return [
-            v for v in (clean_empty(v) for v in data)
-            if v not in (None, {}, [], "")
-        ]
+        # Clean each element and filter out empty structures.
+        cleaned_list: List[Any] = []
+        for item in data:  # type: ignore[assignment]
+            cleaned_item = clean_empty(item)
+            if cleaned_item not in (None, {}, []):
+                cleaned_list.append(cleaned_item)
+        return cleaned_list
     else:
+        # Primitive values (including empty strings) are returned unchanged.
         return data

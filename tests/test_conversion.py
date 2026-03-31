@@ -9,6 +9,7 @@ from src.fhir_sheets.core.conversion import (
 )
 from src.fhir_sheets.core.config.FhirSheetsConfiguration import FhirSheetsConfiguration
 from src.fhir_sheets.core.model.resource_definition_entity import ResourceDefinition
+from src.fhir_sheets.core.model.resource_link_entity import ResourceLink
 from src.fhir_sheets.core.model.cohort_data_entity import CohortData, HeaderEntry, PatientEntry
 
 import json
@@ -159,6 +160,95 @@ class TestCleanEmptyFunction:
         serialized = json.dumps(cleaned)
         assert isinstance(serialized, str)
 
+    def test_clean_empty_removes_code_coding_key(self):
+        """Validate that ``clean_empty`` removes an empty ``code.coding`` entry.
+
+        The provided Condition resource contains a ``code`` object where the
+        ``coding`` list holds a single entry with empty ``system``, ``code``
+        and ``display`` values. After cleaning, the ``coding`` key should be
+        removed entirely, leaving only the ``text`` field under ``code``.
+        """
+        json_input = """
+          {
+            "resourceType": "Condition",
+            "id": "example",
+            "clinicalStatus": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                  "code": "active"
+                }
+              ]
+            },
+            "verificationStatus": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                  "code": "confirmed"
+                }
+              ]
+            },
+            "category": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                    "code": "encounter-diagnosis",
+                    "display": "Encounter Diagnosis"
+                  },
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "439401001",
+                    "display": "Diagnosis"
+                  }
+                ]
+              }
+            ],
+            "severity": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "24484000",
+                  "display": "Severe"
+                }
+              ]
+            },
+            "code": {
+              "coding": [
+                {
+                  "system": "",
+                  "code": "",
+                  "display": ""
+                }
+              ],
+              "text": "Burnt Ear"
+            },
+            "bodySite": [
+              {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "49521004",
+                    "display": "Left external ear structure"
+                  }
+                ],
+                "text": "Left Ear"
+              }
+            ],
+            "subject": {
+              "reference": "Patient/example"
+            },
+            "onsetDateTime": "2012-05-24"
+          }
+        """
+        data = json.loads(json_input)
+        cleaned = clean_empty(data)
+        # ``code`` should still exist but without ``coding``
+        assert "code" in cleaned
+        assert "coding" not in cleaned["code"]
+        # ``text`` should remain unchanged
+        assert cleaned["code"].get("text") == "Burnt Ear"
+
 
 class TestCreateResources:
     """Tests for the ``create_resources`` function.
@@ -209,3 +299,80 @@ class TestCreateResources:
         # Verify minimal required fields are present.
         assert resource["resourceType"] == "Patient"
         assert isinstance(resource["id"], str)
+
+    def test_create_resources_deceased_boolean_true(self):
+        """Create a Patient resource with deceasedBoolean set to True and verify.
+
+        The test constructs minimal header and cohort data for the Patient
+        entity, invokes ``create_resources`` and asserts that the resulting
+        resource contains the ``deceasedBoolean`` field with the expected
+        boolean value.
+        """
+        # Define a header entry for the deceasedBoolean field
+        header = HeaderEntry(
+            entityName="Patient",
+            fieldName="deceasedBoolean",
+            jsonPath="Patient.deceasedBoolean",
+            valueType="boolean",
+            valueSets=None,
+        )
+        # Cohort data with a single patient entry setting the field to True
+        cohort = CohortData(headers=[header], patients=[PatientEntry({("Patient", "deceasedBoolean"): True})])
+        # Resource definition for Patient (no profiles needed)
+        rd = ResourceDefinition("Patient", "Patient", [])
+        config = FhirSheetsConfiguration({})
+        result = create_resources([rd], [], cohort, index=0, config=config)
+        patient_resource = result["Patient"]
+        assert patient_resource["resourceType"] == "Patient"
+        assert patient_resource["deceasedBoolean"] is True
+
+    def test_create_resources_deceased_boolean_false(self):
+        """Create a Patient resource with deceasedBoolean set to False and verify.
+        """
+        header = HeaderEntry(
+            entityName="Patient",
+            fieldName="deceasedBoolean",
+            jsonPath="Patient.deceasedBoolean",
+            valueType="boolean",
+            valueSets=None,
+        )
+        cohort = CohortData(headers=[header], patients=[PatientEntry({("Patient", "deceasedBoolean"): False})])
+        rd = ResourceDefinition("Patient", "Patient", [])
+        config = FhirSheetsConfiguration({})
+        result = create_resources([rd], [], cohort, index=0, config=config)
+        patient_resource = result["Patient"]
+        assert patient_resource["resourceType"] == "Patient"
+        assert patient_resource["deceasedBoolean"] is False
+
+    def test_create_resources_encounter_reason_reference(self):
+        """Create an Encounter linked to a Condition via reasonReference.
+
+        The test builds minimal ``ResourceDefinition`` objects for Encounter and
+        Condition, forces resource creation with ``build_empty_resources`` and
+        supplies a ``ResourceLink`` that specifies ``reasonReference`` as the
+        reference path. It then verifies that the resulting Encounter resource
+        contains the ``reasonReference`` field and that the reference points to
+        the generated Condition resource's id.
+        """
+        # Resource definitions for Encounter and Condition (no specific fields)
+        encounter_rd = ResourceDefinition("Encounter", "Encounter", [])
+        condition_rd = ResourceDefinition("Condition", "Condition", [])
+
+        # Empty cohort data – we rely on build_empty_resources to create resources
+        cohort = CohortData(headers=[], patients=[PatientEntry({})])
+        config = FhirSheetsConfiguration({"build_empty_resources": True})
+
+        # Link Encounter.reasonReference -> Condition
+        link = ResourceLink("Encounter", "reasonReference", "Condition")
+
+        result = create_resources([encounter_rd, condition_rd], [link], cohort, index=0, config=config)
+        encounter_res = result["Encounter"]
+        condition_res = result["Condition"]
+
+        # Verify the reference field exists and uses the correct key name
+        assert "reasonReference" in encounter_res
+        # The reference should be a dict with the proper FHIR reference string
+        ref = encounter_res["reasonReference"]
+        assert isinstance(ref, dict)
+        expected_ref = f"Condition/{condition_res['id']}"
+        assert ref["reference"] == expected_ref

@@ -63,6 +63,8 @@ def create_resources(
     #Link resources after creation
     add_default_resource_links(created_resources, resource_link_entities)
     create_resource_links(created_resources, resource_link_entities, config.preview_mode)
+    #Post-Process to clean the empty references from the resources
+    created_resources = clean_empty(created_resources)
     return created_resources
 
 def create_singular_resource(
@@ -229,9 +231,11 @@ def add_default_resource_links(
         ):
             originResourceEntityName: str = resource_counts[sourceType]["singletonEntityName"]
             destinationResourceEntityName: str = resource_counts[destinationType]["singletonEntityName"]
-            resource_link_entities.append(
-                ResourceLink(originResourceEntityName, fieldName, destinationResourceEntityName)
-            )
+            new_link = ResourceLink(originResourceEntityName, fieldName, destinationResourceEntityName)
+            if (new_link.originResource, new_link.referencePath, new_link.destinationResource) not in [(l.originResource, l.referencePath, l.destinationResource) for l in resource_link_entities]:
+                resource_link_entities.append(
+                    new_link
+                )
     return
         
             

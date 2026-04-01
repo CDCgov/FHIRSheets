@@ -809,3 +809,19 @@ def test_address_creation_12112025():
     primaryPatient = [entry["resource"] for entry in fhir_bundle["entry"] if entry["resource"]["resourceType"] == 'Patient'][0]
     assert primaryPatient
     assert primaryPatient['address'][0]['postalCode'] == 'c'
+    
+def test_condition_code_missing_system(tmp_path):
+    input_file = (
+        TOP_DIR
+        / "debug/condition_code_missing_system.xlsx"
+    ).__str__()
+    main(input_file, tmp_path)
+
+    json_files = list(tmp_path.glob("*.json"))
+    json_file = json_files[0]
+    with json_file.open("r") as file:
+        fhir_bundle = json.load(file)
+
+    
+    assert fhir_bundle["entry"][1]["resource"]["resourceType"] == "Condition"
+    assert "system" not in fhir_bundle["entry"][1]["resource"]["code"]["coding"][0]

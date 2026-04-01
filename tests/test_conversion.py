@@ -251,7 +251,6 @@ class TestCleanEmptyFunction:
         
     def test_clean_empty_removes_code_system_key(self):
         """Validate that ``clean_empty`` removes an empty ``code.system`` entry, but leaves the othesrs
-
         The provided Condition resource contains a ``code`` object where the
         ``coding`` list holds a single entry with empty ``system``, and valid ``code``
         and ``display`` values. After cleaning, the ``coding`` key should exist,
@@ -454,9 +453,9 @@ class TestCreateResources:
         config = FhirSheetsConfiguration({"build_empty_resources": True})
 
         # Link Encounter.reasonReference -> Condition
-        # link = ResourceLink("Encounter", "reasonReference", "Condition")
-        # Occurs by default behavior for reasonReference, but we can explicitly include it here for clarity.
-        result = create_resources([encounter_rd, condition_rd], [], cohort, index=0, config=config)
+        link = ResourceLink("Encounter", "reasonReference", "Condition")
+        
+        result = create_resources([encounter_rd, condition_rd], [link], cohort, index=0, config=config)
         encounter_res = result["Encounter"]
         condition_res = result["Condition"]
 
@@ -467,3 +466,4 @@ class TestCreateResources:
         assert isinstance(ref, list)
         expected_ref = f"Condition/{condition_res['id']}"
         assert ref[0]["reference"] == expected_ref
+        assert len(ref) == 1

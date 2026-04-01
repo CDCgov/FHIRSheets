@@ -248,6 +248,97 @@ class TestCleanEmptyFunction:
         assert "coding" not in cleaned["code"]
         # ``text`` should remain unchanged
         assert cleaned["code"].get("text") == "Burnt Ear"
+        
+    def test_clean_empty_removes_code_system_key(self):
+        """Validate that ``clean_empty`` removes an empty ``code.system`` entry, but leaves the othesrs
+
+        The provided Condition resource contains a ``code`` object where the
+        ``coding`` list holds a single entry with empty ``system``, and valid ``code``
+        and ``display`` values. After cleaning, the ``coding`` key should exist,
+        but the ``system`` key should be removed.
+        """
+        json_input = """
+          {
+            "resourceType": "Condition",
+            "id": "example",
+            "clinicalStatus": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                  "code": "active"
+                }
+              ]
+            },
+            "verificationStatus": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                  "code": "confirmed"
+                }
+              ]
+            },
+            "category": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                    "code": "encounter-diagnosis",
+                    "display": "Encounter Diagnosis"
+                  },
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "439401001",
+                    "display": "Diagnosis"
+                  }
+                ]
+              }
+            ],
+            "severity": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "24484000",
+                  "display": "Severe"
+                }
+              ]
+            },
+            "code": {
+              "coding": [
+                {
+                  "system": "",
+                  "code": "39065001",
+                  "display": "Burn of Ear"
+                }
+              ],
+              "text": "Burnt Ear"
+            },
+            "bodySite": [
+              {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "49521004",
+                    "display": "Left external ear structure"
+                  }
+                ],
+                "text": "Left Ear"
+              }
+            ],
+            "subject": {
+              "reference": "Patient/example"
+            },
+            "onsetDateTime": "2012-05-24"
+          }
+        """
+        data = json.loads(json_input)
+        cleaned = clean_empty(data)
+        # ``code`` should still exist but without ``coding``
+        assert "code" in cleaned
+        assert "coding" in cleaned["code"]
+        # ``text`` should remain unchanged
+        assert cleaned["code"]["coding"][0].get("code") == "39065001"
+        assert cleaned["code"]["coding"][0].get("display") == "Burn of Ear"
+        assert cleaned["code"]["coding"][0].get("system") is None # system should be removed because it was empty
 
 
 class TestCreateResources:
@@ -363,9 +454,9 @@ class TestCreateResources:
         config = FhirSheetsConfiguration({"build_empty_resources": True})
 
         # Link Encounter.reasonReference -> Condition
-        link = ResourceLink("Encounter", "reasonReference", "Condition")
-
-        result = create_resources([encounter_rd, condition_rd], [link], cohort, index=0, config=config)
+        # link = ResourceLink("Encounter", "reasonReference", "Condition")
+        # Occurs by default behavior for reasonReference, but we can explicitly include it here for clarity.
+        result = create_resources([encounter_rd, condition_rd], [], cohort, index=0, config=config)
         encounter_res = result["Encounter"]
         condition_res = result["Condition"]
 
@@ -373,6 +464,6 @@ class TestCreateResources:
         assert "reasonReference" in encounter_res
         # The reference should be a dict with the proper FHIR reference string
         ref = encounter_res["reasonReference"]
-        assert isinstance(ref, dict)
+        assert isinstance(ref, list)
         expected_ref = f"Condition/{condition_res['id']}"
-        assert ref["reference"] == expected_ref
+        assert ref[0]["reference"] == expected_ref

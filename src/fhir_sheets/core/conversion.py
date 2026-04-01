@@ -265,6 +265,7 @@ def create_resource_link(
         ('diagnosticreport', 'careteam', 'performer'),
         ('diagnosticreport', 'observation', 'result'),
         ('diagnosticreport', 'imagingStudy', 'imagingStudy'),
+        ('encounter', 'condition', 'reasonReference'),
     ]
     #Find the origin and destination resource from the link
     try:
@@ -536,7 +537,7 @@ def clean_empty(data: Any) -> Any:
         cleaned_dict: Dict[str, Any] = {}
         for k, v in data.items():  # type: ignore[assignment]
             cleaned_val = clean_empty(v)
-            if cleaned_val not in (None, {}, []):
+            if cleaned_val not in (None, {}, [], ""):
                 cleaned_dict[k] = cleaned_val
         # If the dict is now empty **or** all remaining values are empty strings,
         # consider it empty and return an empty dict so the caller can filter it.

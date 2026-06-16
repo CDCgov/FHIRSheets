@@ -30,7 +30,6 @@ class FhirSheetsConfiguration():
             ('encounter', 'location', 'location'),
             ('encounter', 'organization', 'serviceProvider'),
             ('encounter', 'patient', 'subject'),
-            ('encounter', 'practitioner', 'participant'),
             ('goal', 'condition', 'addresses'),
             ('goal', 'patient', 'subject'),
             ('immunization', 'patient', 'patient'),
@@ -59,6 +58,7 @@ class FhirSheetsConfiguration():
             ('diagnosticreport', 'observation', 'result'),
             ('diagnosticreport', 'imagingStudy', 'imagingStudy'),
             ('encounter', 'condition', 'reasonReference'),
+            ('observation', 'practitioner', 'performer'),
         ])
     
     def __repr__(self) -> str:

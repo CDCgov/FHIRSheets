@@ -67,7 +67,7 @@ def assign_value(final_struct, key, value, valueType):
             if isinstance(value, datetime.datetime):
                 final_struct[key] = value.replace(tzinfo=datetime.timezone.utc)
             else:
-                final_struct[key] = parse_iso8601_datetime(value).replace(tzinfo=datetime.timezone.utc)
+                final_struct[key] = parse_iso8601_datetime(value)
         elif valueType.lower() == 'decimal':
             final_struct[key] = value
         elif valueType.lower() == 'humanname':
@@ -166,7 +166,7 @@ def parse_iso8601_datetime(input_string):
     match = re.search(pattern, input_string)
     # Check if the input string matches the pattern
     if match:
-        # Convert to datetime object
+        # Convert to datetime object, always setting timezone to UTC
         if input_string.endswith('Z'):
             # If it has 'Z', convert to UTC
             try:
@@ -174,18 +174,18 @@ def parse_iso8601_datetime(input_string):
             except ValueError: # If it fails (because the time part is missing), parse the date-only format and set time to midnight
                 try:
                     parsed_date = datetime.datetime.strptime(match.group(1), '%Y-%m-%d')
-                    parsed_datetime = parsed_date.replace(hour=0, minute=0, second=0)
+                    parsed_datetime = parsed_date.replace(hour=0, minute=0, second=0, tzinfo=datetime.timezone.utc)
                     return parsed_datetime
                 except ValueError: # Neither format worked so catch an entire error
                     raise ValueError(f"Input string '{input_string}' is not in the valid ISO 8601 format date or datetime format")
         else:
-            # Otherwise, just convert without timezone
+            # Convert and set timezone to UTC
             try:
                 return datetime.datetime.strptime(match.group(1), '%Y-%m-%dT%H:%M:%S').replace(tzinfo=datetime.timezone.utc)
             except ValueError: # If it fails (because the time part is missing), parse the date-only format and set time to midnight
                 try:
                     parsed_date = datetime.datetime.strptime(match.group(1), '%Y-%m-%d')
-                    parsed_datetime = parsed_date.replace(hour=0, minute=0, second=0)
+                    parsed_datetime = parsed_date.replace(hour=0, minute=0, second=0, tzinfo=datetime.timezone.utc)
                     return parsed_datetime
                 except ValueError: # Neither format worked so catch an entire error
                     raise ValueError(f"Input string '{input_string}' is not in the valid ISO 8601 format date or datetime format")

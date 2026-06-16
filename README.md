@@ -50,7 +50,92 @@ FhirSheets is a command-line tool that reads an Excel file in FHIR cohort format
 
 ```bash
 python -m src.fhir_sheets.cli.main --input_file src/resources/Fhir_Cohort_Import_Template.xlsx --output_folder ./output_bundles
+```
 In this example, each row in the `Fhir_Cohort_Import_Template.xlsx` file will be processed, and a corresponding JSON file will be generated in the `output_bundles` folder.
+
+## Configuration
+
+FHIRSheets supports configuration through JSON files or command-line arguments to customize behavior, including default resource references.
+
+### Using a Configuration File
+
+Create a JSON configuration file (e.g., `my_config.json`):
+
+```json
+{
+  "enable_default_resource_links": true,
+  "default_resource_references": [
+    ["observation", "patient", "subject"],
+    ["procedure", "patient", "subject"]
+  ]
+}
+```
+
+Then use it with the CLI:
+
+```bash
+python -m src.fhir_sheets.cli.main --input_file input.xlsx --output_folder output/ --config_file my_config.json
+```
+
+### Configuration Options
+
+- **`enable_default_resource_links`** (boolean, default: `true`): Enable/disable automatic default resource linking
+- **`default_resource_references`** (array): Customize which default resource references to create automatically
+- **`array_type_references`** (array): Specify which references should be arrays
+- **`preview_mode`** (boolean, default: `false`): Generate resources in preview mode
+- **`medications_as_reference`** (boolean, default: `false`): Convert medicationCodeableConcept to medication resources
+- **`build_empty_resources`** (boolean, default: `false`): Build resources even when no data exists
+
+### Command-Line Arguments
+
+You can also pass configuration options directly:
+
+```bash
+python -m src.fhir_sheets.cli.main \
+  --input_file input.xlsx \
+  --output_folder output/ \
+  --enable_default_resource_links true \
+  --build_empty_resources false
+```
+
+Or use the convenient flag to disable default resource links:
+
+```bash
+python -m src.fhir_sheets.cli.main \
+  --input_file input.xlsx \
+  --output_folder output/ \
+  --no-default-links
+```
+
+**Note:** For advanced configuration like customizing `default_resource_references` lists, use a JSON config file.
+
+### Example Configuration File
+
+See `config_example.json` for a complete example with all default values and available options.
+
+### Programmatic Usage
+
+When using FHIRSheets as a Python library:
+
+```python
+from fhir_sheets.core.config.FhirSheetsConfiguration import FhirSheetsConfiguration
+from fhir_sheets.core import conversion, read_input
+import json
+
+# Load configuration from JSON file
+with open('my_config.json', 'r') as f:
+    config_dict = json.load(f)
+config = FhirSheetsConfiguration(config_dict)
+
+# Use the configuration
+resource_defs, resource_links, cohort_data = read_input.read_xlsx_and_process("input.xlsx")
+bundle = conversion.create_transaction_bundle(
+    resource_defs, 
+    resource_links, 
+    cohort_data, 
+    index=0, 
+    config=config
+)
 ```
 
 ## License

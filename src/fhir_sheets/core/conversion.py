@@ -61,8 +61,8 @@ def create_resources(
         fhir_resource = create_fhir_resource(resource_definition, cohort_data, index, config)
         created_resources[entityName] = fhir_resource
     #Link resources after creation
-    add_default_resource_links(created_resources, resource_link_entities)
-    create_resource_links(created_resources, resource_link_entities, config.preview_mode)
+    add_default_resource_links(created_resources, resource_link_entities, config)
+    create_resource_links(created_resources, resource_link_entities, config)
     #Post-Process to clean the empty references from the resources
     created_resources = clean_empty(created_resources)
     return created_resources
@@ -73,18 +73,26 @@ def create_singular_resource(
     resource_link_entities: List[ResourceLink],
     cohort_data: CohortData,
     index: int = 0,
+    config: FhirSheetsConfiguration = FhirSheetsConfiguration({}),
 ) -> Dict[str, Any]:
     created_resources: Dict[str, Dict[str, Any]] = {}
     singleton_fhir_resource: Dict[str, Any] = {}
+    # Create a preview mode config for singular resource
+    preview_config = FhirSheetsConfiguration({
+        'preview_mode': True,
+        'enable_default_resource_links': config.enable_default_resource_links,
+        'default_resource_references': config.default_resource_references,
+        'array_type_references': config.array_type_references,
+    })
     for resource_definition in resource_definition_entities:
         entityName = resource_definition.entityName
         #Create and collect fhir resources
-        fhir_resource = create_fhir_resource(resource_definition, cohort_data, index)
+        fhir_resource = create_fhir_resource(resource_definition, cohort_data, index, config)
         created_resources[entityName] = fhir_resource
         if entityName == singleton_entityName:
             singleton_fhir_resource = fhir_resource
-    add_default_resource_links(created_resources, resource_link_entities)
-    create_resource_links(created_resources, resource_link_entities, preview_mode=True)
+    add_default_resource_links(created_resources, resource_link_entities, preview_config)
+    create_resource_links(created_resources, resource_link_entities, preview_config)
     return singleton_fhir_resource
 
 #Initialize root bundle definition
@@ -172,42 +180,13 @@ def create_fhir_resource(
 def add_default_resource_links(
     created_resources: Dict[str, Dict[str, Any]],
     resource_link_entities: List[ResourceLink],
+    config: FhirSheetsConfiguration = FhirSheetsConfiguration({}),
 ) -> None:
-    default_references = [
-        ('allergyintolerance', 'patient', 'patient'),
-        ('allergyintolerance', 'practitioner', 'asserter'),
-        ('careplan', 'goal', 'goal'),
-        ('careplan', 'patient', 'subject'),
-        ('careplan', 'practitioner', 'performer'),
-        ('diagnosticreport', 'careteam', 'performer'),
-        ('diagnosticreport', 'imagingStudy', 'imagingStudy'),
-        ('diagnosticreport', 'observation', 'result'),
-        ('diagnosticreport', 'organization', 'performer'),
-        ('diagnosticreport', 'practitioner', 'performer'),
-        ('diagnosticreport', 'practitionerrole', 'performer'),
-        ('diagnosticreport', 'specimen', 'specimen'),
-        ('encounter', 'condition', 'reasonReference'),
-        ('encounter', 'location', 'location'),
-        ('encounter', 'organization', 'serviceProvider'),
-        ('encounter', 'patient', 'subject'),
-        ('encounter', 'practitioner', 'participant'),
-        ('goal', 'condition', 'addresses'),
-        ('goal', 'patient', 'subject'),
-        ('immunization', 'patient', 'patient'),
-        ('immunization', 'practitioner', 'performer'),
-        ('immunization', 'organization', 'manufacturer'),
-        ('medicationrequest', 'medication', 'medicationReference'),
-        ('medicationrequest', 'patient', 'subject'),
-        ('medicationrequest', 'practitioner', 'requester'),
-        ('observation', 'device', 'device'),
-        ('observation', 'patient', 'subject'),
-        ('observation', 'practitioner', 'performer'),
-        ('observation', 'specimen', 'specimen'),
-        ('procedure', 'device', 'usedReference'),
-        ('procedure', 'location', 'location'),
-        ('procedure', 'patient', 'subject'),
-        ('procedure', 'practitioner', 'performer'),
-    ]
+    # Check if default resource links are enabled
+    if not config.enable_default_resource_links:
+        return
+    
+    default_references = config.default_resource_references
     
     resource_counts = {}
     for resourceName, resource in created_resources.items():
@@ -243,34 +222,25 @@ def add_default_resource_links(
 def create_resource_links(
     created_resources: Dict[str, Dict[str, Any]],
     resource_link_entites: List[ResourceLink],
-    preview_mode: bool = False,
+    config: FhirSheetsConfiguration = FhirSheetsConfiguration({}),
 ) -> None:
     logger.info("Building resource links")
     for resource_link_entity in resource_link_entites:
-        create_resource_link(created_resources, resource_link_entity, preview_mode)
+        create_resource_link(created_resources, resource_link_entity, config)
     return
     
 #Singular function to create a resource link.
 def create_resource_link(
     created_resources: Dict[str, Dict[str, Any]],
     resource_link_entity: ResourceLink,
-    preview_mode: bool = False,
+    config: FhirSheetsConfiguration = FhirSheetsConfiguration({}),
 ) -> None:
     # template scaffolding
     reference_json_block = {
         "reference" : "$value"
     }
     #Special reference handling blocks, in the form of (originResource, destinationResource, referencePath)
-    arrayType_references = [
-        ('diagnosticreport', 'specimen', 'specimen'),
-        ('diagnosticreport', 'practitioner', 'performer'),
-        ('diagnosticreport', 'practitionerrole', 'performer'),
-        ('diagnosticreport', 'organization', 'performer'),
-        ('diagnosticreport', 'careteam', 'performer'),
-        ('diagnosticreport', 'observation', 'result'),
-        ('diagnosticreport', 'imagingStudy', 'imagingStudy'),
-        ('encounter', 'condition', 'reasonReference'),
-    ]
+    arrayType_references = config.array_type_references
     #Find the origin and destination resource from the link
     try:
         originResource = created_resources[resource_link_entity.originResource]
@@ -283,31 +253,98 @@ def create_resource_link(
         logger.warning(f" In ResourceLinks tab, found a Destination Resource  of : {resource_link_entity.destinationResource}  but no such entity found in PatientData")
         return
     #Establish the value of the reference
-    if preview_mode:
+    if config.preview_mode:
         reference_value = destinationResource['resourceType'] + "/" + resource_link_entity.destinationResource
     else:
         reference_value = destinationResource['resourceType'] + "/" + destinationResource['id']
 
-    # Preserve the original case of the referencePath when adding it to the
-    # resource. Previously the code lower‑cased the path, which caused keys such
-    # as "reasonReference" to become "reasonreference" and broke tests that
-    # expect the exact field name.
     ref_path = resource_link_entity.referencePath.strip()
 
+    # Parse the reference path to handle nested paths like "performer.[0].actor"
+    def parse_path(path: str):
+        """Parse a path string into segments, handling array indices."""
+        import re
+        # Split by dots, but keep array indices with their parent
+        segments = []
+        parts = path.split('.')
+        for part in parts:
+            # Check if this part contains an array index
+            match = re.match(r'^([^\[]+)(\[\d+\])$', part)
+            if match:
+                # Split into field name and array index
+                segments.append(match.group(1))
+                segments.append(match.group(2))
+            else:
+                segments.append(part)
+        return segments
+    
+    def set_nested_reference(obj, segments, reference_json, reference_val, is_array_type):
+        """Navigate through nested path and set the reference at the target location."""
+        current = obj
+        
+        # Navigate to the parent of the final segment
+        for i, segment in enumerate(segments[:-1]):
+            if segment.startswith('[') and segment.endswith(']'):
+                # This is an array index
+                index = int(segment[1:-1])
+                # Ensure the current object is a list with enough elements
+                if not isinstance(current, list):
+                    raise ValueError(f"Expected array at segment {i}, but found {type(current)}")
+                # Extend list if necessary
+                while len(current) <= index:
+                    current.append({})
+                current = current[index]
+            else:
+                # This is a regular field
+                if segment not in current:
+                    # Determine if next segment is an array index
+                    if i + 1 < len(segments) - 1 and segments[i + 1].startswith('['):
+                        current[segment] = []
+                    else:
+                        current[segment] = {}
+                current = current[segment]
+        
+        # Set the reference at the final segment
+        final_segment = segments[-1]
+        if final_segment.startswith('[') and final_segment.endswith(']'):
+            # Final segment is an array index
+            index = int(final_segment[1:-1])
+            if not isinstance(current, list):
+                raise ValueError(f"Expected array at final segment, but found {type(current)}")
+            while len(current) <= index:
+                current.append({})
+            new_reference = reference_json.copy()
+            new_reference['reference'] = reference_val
+            current[index] = new_reference
+        else:
+            # Final segment is a regular field
+            if is_array_type:
+                if final_segment not in current:
+                    current[final_segment] = []
+                new_reference = reference_json.copy()
+                new_reference['reference'] = reference_val
+                current[final_segment].append(new_reference)
+            else:
+                current[final_segment] = reference_json.copy()
+                current[final_segment]["reference"] = reference_val
+    
+    # Parse the path into segments
+    path_segments = parse_path(ref_path)
+    
+    # Determine if this is an array type reference
     link_tuple = (
         originResource['resourceType'].strip().lower(),
         destinationResource['resourceType'].strip().lower(),
         ref_path[0].lower() + ref_path[1:]
     )
-    if link_tuple in arrayType_references:
-        if ref_path not in originResource:
-            originResource[ref_path] = []
-        new_reference = reference_json_block.copy()
-        new_reference['reference'] = reference_value
-        originResource[ref_path].append(new_reference)
-    else:
-        originResource[ref_path] = reference_json_block.copy()
-        originResource[ref_path]["reference"] = reference_value
+    is_array_type = link_tuple in arrayType_references
+    
+    # Set the nested reference
+    try:
+        set_nested_reference(originResource, path_segments, reference_json_block, reference_value, is_array_type)
+    except (ValueError, KeyError, IndexError) as e:
+        logger.warning(f"Failed to set reference at path '{ref_path}': {e}")
+    
     return
 
 def add_resource_to_transaction_bundle(root_bundle: Dict[str, Any], fhir_resource: Dict[str, Any]) -> Dict[str, Any]:

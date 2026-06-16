@@ -825,3 +825,98 @@ def test_condition_code_missing_system(tmp_path):
     
     assert fhir_bundle["entry"][1]["resource"]["resourceType"] == "Condition"
     assert "system" not in fhir_bundle["entry"][1]["resource"]["code"]["coding"][0]
+
+def test_no_default_links_via_config_object(tmp_path):
+    """Test that enable_default_resource_links=False prevents automatic linking via config object."""
+    input_file = (
+        TOP_DIR / "ASD/ASD_Fhir_Cohort_Import_Template.xlsx"
+    ).__str__()
+    
+    # Create config with default links disabled
+    config = FhirSheetsConfiguration({"enable_default_resource_links": False})
+    
+    # Run main function with config
+    main(input_file, tmp_path, config)
+    
+    # Load the generated JSON file
+    json_files = list(tmp_path.glob("*.json"))
+    assert len(json_files) > 0, "No JSON files were generated"
+    
+    json_file = json_files[0]
+    with json_file.open("r") as file:
+        fhir_bundle = json.load(file)
+    
+    # Verify bundle was created
+    assert fhir_bundle["resourceType"] == "Bundle"
+    assert fhir_bundle["type"] == "transaction"
+    
+    # Find an Observation resource
+    observations = [
+        entry["resource"]
+        for entry in fhir_bundle["entry"]
+        if entry["resource"]["resourceType"] == "Observation"
+    ]
+    
+    if observations:
+        observation = observations[0]
+        # Verify that the observation does NOT have a subject reference
+        assert "subject" not in observation, (
+            "Observation should not have a 'subject' reference when "
+            "enable_default_resource_links is False, but it does"
+        )
+
+def test_default_links_enabled_by_default(tmp_path):
+    """Test that default resource links ARE created when flag is not used (default behavior)."""
+    input_file = (
+        TOP_DIR / "ASD/ASD_Fhir_Cohort_Import_Template.xlsx"
+    ).__str__()
+    
+    # Run main function with default config (links enabled)
+    config = FhirSheetsConfiguration({})
+    main(input_file, tmp_path, config)
+    
+    # Load the generated JSON file
+    json_files = list(tmp_path.glob("*.json"))
+    assert len(json_files) > 0, "No JSON files were generated"
+    
+    json_file = json_files[0]
+    with json_file.open("r") as file:
+        fhir_bundle = json.load(file)
+    
+    # Verify bundle was created
+    assert fhir_bundle["resourceType"] == "Bundle"
+    assert fhir_bundle["type"] == "transaction"
+    
+    # Find an Observation resource
+    observations = [
+        entry["resource"]
+        for entry in fhir_bundle["entry"]
+        if entry["resource"]["resourceType"] == "Observation"
+    ]
+    
+    # Find a Patient resource
+    patients = [
+        entry["resource"]
+        for entry in fhir_bundle["entry"]
+        if entry["resource"]["resourceType"] == "Patient"
+    ]
+    
+    # If both Observation and Patient exist, verify the default link was created
+    if observations and patients and len(observations) == 1 and len(patients) == 1:
+        observation = observations[0]
+        patient = patients[0]
+        
+        # Verify that the observation DOES have a subject reference (default behavior)
+        assert "subject" in observation, (
+            "Observation should have a 'subject' reference by default when "
+            "only one Observation and one Patient exist"
+        )
+        assert "reference" in observation["subject"], (
+            "Observation subject should have a 'reference' field"
+        )
+        # Verify it references the patient
+        expected_reference = f"Patient/{patient['id']}"
+        assert observation["subject"]["reference"] == expected_reference, (
+            f"Observation subject should reference {expected_reference}, "
+            f"but got {observation['subject']['reference']}"
+        )

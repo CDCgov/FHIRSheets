@@ -46,6 +46,7 @@
     ["diagnosticreport", "careteam", "performer"],
     ["diagnosticreport", "observation", "result"],
     ["diagnosticreport", "imagingStudy", "imagingStudy"],
-    ["encounter", "condition", "reasonReference"]
+    ["encounter", "condition", "reasonReference"],
+    ["observation", "practitioner", "performer"]
   ]
 }

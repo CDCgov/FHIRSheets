@@ -6,6 +6,7 @@ from src.fhir_sheets.core.conversion import (
     add_resource_to_transaction_bundle,
     create_structure_from_jsonpath,
     create_resources,
+    create_transaction_bundle,
 )
 from src.fhir_sheets.core.config.FhirSheetsConfiguration import FhirSheetsConfiguration
 from src.fhir_sheets.core.model.resource_definition_entity import ResourceDefinition
@@ -467,3 +468,56 @@ class TestCreateResources:
         expected_ref = f"Condition/{condition_res['id']}"
         assert ref[0]["reference"] == expected_ref
         assert len(ref) == 1
+
+    def test_create_resources_observation_performer_array(self):
+        """Create a full transaction bundle with an Observation linked to a Practitioner via performer.
+
+        The test builds minimal ``ResourceDefinition`` objects for Observation and
+        Practitioner, forces resource creation with ``build_empty_resources`` and
+        supplies a ``ResourceLink`` that specifies ``performer`` as the reference
+        path. It uses the full ``create_transaction_bundle`` function to create a
+        complete FHIR transaction bundle, then verifies that the Observation resource
+        within the bundle contains the ``performer`` field as an array and that the
+        reference points to the generated Practitioner resource's id.
+        """
+        # Resource definitions for Observation and Practitioner (no specific fields)
+        observation_rd = ResourceDefinition("Observation", "Observation", [])
+        practitioner_rd = ResourceDefinition("Practitioner", "Practitioner", [])
+
+        # Empty cohort data – we rely on build_empty_resources to create resources
+        cohort = CohortData(headers=[], patients=[PatientEntry({})])
+        config = FhirSheetsConfiguration({"build_empty_resources": True})
+
+        # Link Observation.performer -> Practitioner
+        link = ResourceLink("Observation", "performer", "Practitioner")
+        
+        # Create the full transaction bundle
+        bundle = create_transaction_bundle([observation_rd, practitioner_rd], [link], cohort, index=0, config=config)
+        
+        # Verify bundle structure
+        assert bundle["resourceType"] == "Bundle"
+        assert bundle["type"] == "transaction"
+        assert "entry" in bundle
+        assert len(bundle["entry"]) == 2
+        
+        # Extract resources from bundle entries
+        resources = {entry["resource"]["resourceType"]: entry["resource"] for entry in bundle["entry"]}
+        observation_res = resources["Observation"]
+        practitioner_res = resources["Practitioner"]
+
+        # Verify the performer field exists and is an array
+        assert "performer" in observation_res
+        assert isinstance(observation_res["performer"], list)
+        assert len(observation_res["performer"]) == 1
+        
+        # Verify the reference points to the Practitioner
+        expected_ref = f"Practitioner/{practitioner_res['id']}"
+        assert observation_res["performer"][0]["reference"] == expected_ref
+        
+        # Output the bundle as JSON for validation
+        bundle_json = json.dumps(bundle, indent=2)
+        print("\n" + "="*80)
+        print("Generated FHIR Bundle for Observation.performer validation:")
+        print("="*80)
+        print(bundle_json)
+        print("="*80 + "\n")

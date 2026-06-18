@@ -21,22 +21,21 @@ class TestNestedReferencePaths:
         assert 'subject' in created_resources['Observation1']
         assert created_resources['Observation1']['subject']['reference'] == 'Patient/patient-123'
 
-    def test_nested_path_with_array_index(self):
-        """Test nested reference path like 'performer.[0].actor'"""
+    def test_observation_performer_array_type(self):
+        """Test that observation.performer creates an array automatically when configured as array type"""
         created_resources = {
             'Practitioner1': {'resourceType': 'Practitioner', 'id': 'prac-789'},
             'Observation2': {'resourceType': 'Observation', 'id': 'obs-999'}
         }
-        link = ResourceLink('Observation2', 'performer.[0].actor', 'Practitioner1')
+        link = ResourceLink('Observation2', 'performer', 'Practitioner1')
         config = FhirSheetsConfiguration({})
         
         create_resource_link(created_resources, link, config)
         
         assert 'performer' in created_resources['Observation2']
         assert isinstance(created_resources['Observation2']['performer'], list)
-        assert len(created_resources['Observation2']['performer']) >= 1
-        assert 'actor' in created_resources['Observation2']['performer'][0]
-        assert created_resources['Observation2']['performer'][0]['actor']['reference'] == 'Practitioner/prac-789'
+        assert len(created_resources['Observation2']['performer']) == 1
+        assert created_resources['Observation2']['performer'][0]['reference'] == 'Practitioner/prac-789'
 
     def test_nested_path_multiple_levels(self):
         """Test nested reference path with multiple levels like 'entry.[0].resource.subject'"""
@@ -167,3 +166,19 @@ class TestNestedReferencePaths:
         
         # Destination doesn't exist, so reference shouldn't be created
         assert 'subject' not in created_resources['Observation7']
+
+    def test_observation_to_practitioner_role(self):
+        """Test Observation to PractitionerRole reference"""
+        created_resources = {
+            'PractitionerRole1': {'resourceType': 'PractitionerRole', 'id': 'role-123'},
+            'Observation8': {'resourceType': 'Observation', 'id': 'obs-eee'}
+        }
+        link = ResourceLink('Observation8', 'performer', 'PractitionerRole1')
+        config = FhirSheetsConfiguration({})
+        
+        create_resource_link(created_resources, link, config)
+        
+        assert 'performer' in created_resources['Observation8']
+        assert isinstance(created_resources['Observation8']['performer'], list)
+        assert len(created_resources['Observation8']['performer']) == 1
+        assert created_resources['Observation8']['performer'][0]['reference'] == 'PractitionerRole/role-123'

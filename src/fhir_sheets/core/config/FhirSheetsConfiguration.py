@@ -41,6 +41,11 @@ class FhirSheetsConfiguration():
             ('observation', 'device', 'device'),
             ('observation', 'patient', 'subject'),
             ('observation', 'practitioner', 'performer'),
+            ('observation', 'practitionerrole', 'performer'),
+            ('observation', 'organization', 'performer'),
+            ('observation', 'careteam', 'performer'),
+            ('observation', 'patient', 'performer'),
+            ('observation', 'relatedperson', 'performer'),
             ('observation', 'specimen', 'specimen'),
             ('procedure', 'device', 'usedReference'),
             ('procedure', 'location', 'location'),
@@ -59,6 +64,11 @@ class FhirSheetsConfiguration():
             ('diagnosticreport', 'imagingStudy', 'imagingStudy'),
             ('encounter', 'condition', 'reasonReference'),
             ('observation', 'practitioner', 'performer'),
+            ('observation', 'practitionerrole', 'performer'),
+            ('observation', 'organization', 'performer'),
+            ('observation', 'careteam', 'performer'),
+            ('observation', 'patient', 'performer'),
+            ('observation', 'relatedperson', 'performer'),
         ])
     
     def __repr__(self) -> str:

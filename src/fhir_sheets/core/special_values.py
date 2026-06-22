@@ -419,7 +419,7 @@ class DataAbsentReasonHandler(AbstractValueHandler):
   #Assign data absent reason extension
     data_absent_reason_block = {
       "url" : "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
-      "value" : "$value"
+      "valueCode" : "$value"
     }
     data_absent_reason_values = ['$unknown','$asked-unknown','$temp-unknown','$not-asked','$asked-declined','$masked','$not-applicable','$unsupported','$as-text','$error','$not-a-number','$negative-infinity','$positive-infinity','$not-performed','$not-permitted']
     def assign_value(self, final_struct, key, value, valueType):

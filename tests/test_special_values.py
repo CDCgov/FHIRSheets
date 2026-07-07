@@ -17,7 +17,7 @@ class TestDataAbsentReasonHandler:
         assert len(final_struct['extension']) == 1
         ext = final_struct['extension'][0]
         assert ext['url'] == 'http://hl7.org/fhir/StructureDefinition/data-absent-reason'
-        assert ext['value'] == 'masked'
+        assert ext['valueCode'] == 'masked'
 
     def test_assign_value_unknown(self):
         handler = DataAbsentReasonHandler()
@@ -25,7 +25,7 @@ class TestDataAbsentReasonHandler:
         handler.assign_value(final_struct, "birthDate", "$unknown", "date")
         assert 'extension' in final_struct
         ext = final_struct['extension'][0]
-        assert ext['value'] == 'unknown'
+        assert ext['valueCode'] == 'unknown'
 
     def test_assign_value_on_list(self):
         handler = DataAbsentReasonHandler()
@@ -34,7 +34,25 @@ class TestDataAbsentReasonHandler:
         assert len(final_struct) == 1
         assert 'extension' in final_struct[0]
         ext = final_struct[0]['extension'][0]
-        assert ext['value'] == 'masked'
+        assert ext['valueCode'] == 'masked'
+
+    def test_data_absent_reason_uses_valueCode_not_value(self):
+        """
+        Test that data absent reason extension uses 'valueCode' field, not 'value'.
+        This is required for FHIR compliance.
+        """
+        handler = DataAbsentReasonHandler()
+        final_struct = {}
+        handler.assign_value(final_struct, "birthDate", "$unknown", "date")
+        
+        assert 'extension' in final_struct
+        ext = final_struct['extension'][0]
+        assert ext['url'] == 'http://hl7.org/fhir/StructureDefinition/data-absent-reason'
+        
+        # Must use 'valueCode', not 'value'
+        assert 'valueCode' in ext
+        assert 'value' not in ext
+        assert ext['valueCode'] == 'unknown'
 
 
 class TestPatientRaceExtensionValueHandler:
@@ -65,6 +83,26 @@ class TestPatientRaceExtensionValueHandler:
         race_ext = final_struct['extension'][0]
         omb_ext = race_ext['extension'][0]
         assert omb_ext['valueCoding']['code'] == '2106-3'
+
+    def test_assign_value_other_race(self):
+        handler = PatientRaceExtensionValueHandler()
+        rd = ResourceDefinition("Patient", "Patient", [])
+        final_struct = {}
+        handler.assign_value("Patient.extension[Race].ombCategory", rd, "string", final_struct, "ombCategory", "Other Race")
+        assert 'extension' in final_struct
+        race_ext = None
+        for ext in final_struct['extension']:
+            if ext.get('url') == 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-race':
+                race_ext = ext
+                break
+        assert race_ext is not None
+        assert len(race_ext['extension']) == 2
+        omb_ext = race_ext['extension'][0]
+        assert omb_ext['url'] == 'ombCategory'
+        assert omb_ext['valueCoding']['code'] == '2131-1'
+        assert omb_ext['valueCoding']['display'] == 'Other Race'
+        text_ext = race_ext['extension'][1]
+        assert text_ext['valueString'] == 'other race'
 
     def test_assign_value_no_match(self):
         """When the race value does not match any known category the handler should return an empty dict."""

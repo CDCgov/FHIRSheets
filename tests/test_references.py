@@ -182,3 +182,40 @@ class TestNestedReferencePaths:
         assert isinstance(created_resources['Observation8']['performer'], list)
         assert len(created_resources['Observation8']['performer']) == 1
         assert created_resources['Observation8']['performer'][0]['reference'] == 'PractitionerRole/role-123'
+
+    def test_procedure_reason_reference_array_type(self):
+        """Test that Procedure.reasonReference to Condition creates an array automatically"""
+        created_resources = {
+            'Condition1': {'resourceType': 'Condition', 'id': 'condition-123'},
+            'Procedure1': {'resourceType': 'Procedure', 'id': 'procedure-456'}
+        }
+        link = ResourceLink('Procedure1', 'reasonReference', 'Condition1')
+        config = FhirSheetsConfiguration({})
+        
+        create_resource_link(created_resources, link, config)
+        
+        assert 'reasonReference' in created_resources['Procedure1']
+        assert isinstance(created_resources['Procedure1']['reasonReference'], list)
+        assert len(created_resources['Procedure1']['reasonReference']) == 1
+        assert created_resources['Procedure1']['reasonReference'][0]['reference'] == 'Condition/condition-123'
+
+    def test_procedure_reason_reference_multiple_conditions(self):
+        """Test that Procedure.reasonReference can reference multiple Conditions"""
+        created_resources = {
+            'Condition1': {'resourceType': 'Condition', 'id': 'condition-111'},
+            'Condition2': {'resourceType': 'Condition', 'id': 'condition-222'},
+            'Procedure2': {'resourceType': 'Procedure', 'id': 'procedure-789'}
+        }
+        config = FhirSheetsConfiguration({})
+        
+        link1 = ResourceLink('Procedure2', 'reasonReference', 'Condition1')
+        create_resource_link(created_resources, link1, config)
+        
+        link2 = ResourceLink('Procedure2', 'reasonReference', 'Condition2')
+        create_resource_link(created_resources, link2, config)
+        
+        assert 'reasonReference' in created_resources['Procedure2']
+        assert isinstance(created_resources['Procedure2']['reasonReference'], list)
+        assert len(created_resources['Procedure2']['reasonReference']) == 2
+        assert created_resources['Procedure2']['reasonReference'][0]['reference'] == 'Condition/condition-111'
+        assert created_resources['Procedure2']['reasonReference'][1]['reference'] == 'Condition/condition-222'

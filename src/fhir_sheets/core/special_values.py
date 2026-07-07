@@ -69,6 +69,14 @@ class PatientRaceExtensionValueHandler(AbstractStructureHandler):
           "display" : "White"
         }
       },
+      "other race" : {
+        "url" : "ombCategory",
+        "valueCoding" : {
+          "system" : "urn:oid:2.16.840.1.113883.6.238",
+          "code" : "2131-1",
+          "display" : "Other Race"
+        }
+      },
       "asked but unknown" : {
         "url" : "ombCategory",
         "valueCoding" : {
@@ -440,7 +448,7 @@ class DataAbsentReasonHandler(AbstractValueHandler):
         data_absent_reason_block = utilFindExtensionWithURL(final_struct['extension'], 'http://hl7.org/fhir/StructureDefinition/data-absent-reason')
         if data_absent_reason_block is None:
             data_absent_reason_block = self.data_absent_reason_block
-            data_absent_reason_block['value'] = value
+            data_absent_reason_block['valueCode'] = value
             final_struct['extension'].append(data_absent_reason_block)
         pass
       

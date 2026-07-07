@@ -47,6 +47,7 @@ class FhirSheetsConfiguration():
             ('observation', 'patient', 'performer'),
             ('observation', 'relatedperson', 'performer'),
             ('observation', 'specimen', 'specimen'),
+            ('procedure', 'condition', 'reasonReference'),
             ('procedure', 'device', 'usedReference'),
             ('procedure', 'location', 'location'),
             ('procedure', 'patient', 'subject'),
@@ -69,6 +70,7 @@ class FhirSheetsConfiguration():
             ('observation', 'careteam', 'performer'),
             ('observation', 'patient', 'performer'),
             ('observation', 'relatedperson', 'performer'),
+            ('procedure', 'condition', 'reasonReference'),
         ])
     
     def __repr__(self) -> str:

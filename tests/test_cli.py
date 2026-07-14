@@ -792,7 +792,7 @@ def test_data_absent_reason():
     assert primaryPatient["name"][0]["extension"]
     assert primaryPatient["name"][0]["extension"][0]
     assert primaryPatient["name"][0]["extension"][0]["url"] == 'http://hl7.org/fhir/StructureDefinition/data-absent-reason'
-    assert primaryPatient["name"][0]["extension"][0]["value"] == 'masked'
+    assert primaryPatient["name"][0]["extension"][0]["valueCode"] == 'masked'
     
 def test_address_creation_12112025():
     resource_definitions = [{'entity_name': 'PrimaryPatient', 'resource_type': 'Patient', 'profiles': ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient']}]

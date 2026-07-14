@@ -410,10 +410,16 @@ class ObservationComponentHandler(AbstractStructureHandler):
           target_component = findComponentWithCoding(components, '3150-0') or self.pulse_oximetry_oxygen_concentration
           if target_component is self.pulse_oximetry_oxygen_concentration:
             components.append(target_component)
-        #Recurse back down into 
-        # current_struct: Dict, json_path: str, resource_definition: ResourceDefinition, dataType: str, parts: List[str], value: Any, previous_parts: List[str]
-        return conversion.build_structure(target_component, '.'.join(parts[2:]), resource_definition, dataType, parts[2:], value, parts[:2])
-        pass
+        #Recurse back down into build_structure with BuildContext
+        buildCtx = conversion.BuildContext(
+            json_path='.'.join(parts[2:]),
+            resource_definition=resource_definition,
+            data_type=dataType,
+            value=value,
+            parts=parts[2:],
+            previous_parts=parts[:2]
+        )
+        return conversion.build_structure(target_component, buildCtx)
 
 #Special Handler just for $values. This one is data absent reason
 class AbstractValueHandler(ABC):

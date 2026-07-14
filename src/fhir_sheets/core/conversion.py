@@ -2,6 +2,7 @@ from typing import Any, Dict, List
 import uuid
 import random
 import logging
+from dataclasses import dataclass, field
 from jsonpath_ng.jsonpath import Fields, Slice, Where
 from jsonpath_ng.ext import parse as parse_ext
 
@@ -15,31 +16,108 @@ from . import special_values
 
 logger = logging.getLogger("fhirsheets.core.conversion")
 
+# ============================================================================
+# CONTEXT CLASSES FOR SIMPLIFIED FUNCTION SIGNATURES
+# ============================================================================
+
+@dataclass
+class ConversionContext:
+    """
+    Encapsulates common parameters used throughout the conversion process.
+    
+    This reduces function signatures from 5 parameters to 1, making the code
+    more maintainable and easier to extend with new configuration options.
+    """
+    resource_definitions: List[ResourceDefinition]
+    resource_links: List[ResourceLink]
+    cohort_data: CohortData
+    index: int = 0
+    config: FhirSheetsConfiguration = field(default_factory=lambda: FhirSheetsConfiguration({}))
+
+
+@dataclass
+class BuildContext:
+    """
+    Encapsulates parameters for JSON path structure building operations.
+    
+    This reduces the build_structure function signature from 7 parameters to 2,
+    making recursive calls cleaner and more maintainable.
+    """
+    json_path: str
+    resource_definition: ResourceDefinition
+    data_type: str
+    value: Any
+    parts: List[str] = field(default_factory=list)
+    previous_parts: List[str] = field(default_factory=list)
+
 # Use a lower‑case name for the random generator to avoid the "constant redefined" warning.
 _file_random = random.Random()
+
 #Main top level function
 #Creates a full transaction bundle for a patient at index
 def create_transaction_bundle(
-    resource_definition_entities: List[ResourceDefinition],
-    resource_link_entities: List[ResourceLink],
-    cohort_data: CohortData,
+    resource_definition_entities: List[ResourceDefinition] | ConversionContext,
+    resource_link_entities: List[ResourceLink] | None = None,
+    cohort_data: CohortData | None = None,
     index: int = 0,
     config: FhirSheetsConfiguration = FhirSheetsConfiguration({}),
 ) -> Dict[str, Any]:
+    """
+    Create a full transaction bundle for a patient at the specified index.
+    
+    This function supports two calling patterns:
+    
+    1. NEW: Using ConversionContext (simplified signature)
+       ctx = ConversionContext(resource_definitions=..., resource_links=..., cohort_data=...)
+       bundle = create_transaction_bundle(ctx)
+    
+    2. OLD: Using individual parameters (backward compatible)
+       bundle = create_transaction_bundle(definitions, links, data, index, config)
+    
+    Args:
+        resource_definition_entities: Either a ConversionContext object (new style) or 
+                                     List[ResourceDefinition] (old style)
+        resource_link_entities: List[ResourceLink] (only used in old style)
+        cohort_data: CohortData (only used in old style)
+        index: Patient index (used in both styles, defaults to 0)
+        config: FhirSheetsConfiguration (used in both styles)
+    
+    Returns:
+        Dict[str, Any]: A FHIR transaction bundle
+    """
+    # Detect which calling pattern is being used
+    if isinstance(resource_definition_entities, ConversionContext):
+        # NEW STYLE: Using ConversionContext
+        ctx = resource_definition_entities
+    else:
+        # OLD STYLE: Using individual parameters (backward compatible)
+        if resource_link_entities is None or cohort_data is None:
+            raise ValueError(
+                "When using the old-style signature, resource_link_entities and "
+                "cohort_data must be provided"
+            )
+        ctx = ConversionContext(
+            resource_definitions=resource_definition_entities,
+            resource_links=resource_link_entities,
+            cohort_data=cohort_data,
+            index=index,
+            config=config
+        )
+    
     global _file_random
-    _file_random = random.Random(config.random_seed)
-    root_bundle = initialize_bundle(config)
+    _file_random = random.Random(ctx.config.random_seed)
+    root_bundle = initialize_bundle(ctx.config)
     created_resources = create_resources(
-        resource_definition_entities,
-        resource_link_entities,
-        cohort_data,
-        index,
-        config
+        ctx.resource_definitions,
+        ctx.resource_links,
+        ctx.cohort_data,
+        ctx.index,
+        ctx.config
     )
     #Construct into fhir bundle
     for fhir_resource in created_resources.values():
         add_resource_to_transaction_bundle(root_bundle, fhir_resource)
-    if config.medications_as_reference:
+    if ctx.config.medications_as_reference:
         post_process_create_medication_references(root_bundle)
     return root_bundle
 
@@ -381,137 +459,268 @@ def create_structure_from_jsonpath(
     if value == None:
         logger.warning(f" Full jsonpath: {json_path} - Expected to find a value but found None instead")
         return root_struct
-    #Start of top-level function which calls the enclosed recursive function
-    parts = json_path.split('.')
-    return build_structure(root_struct, json_path, resource_definition, dataType, parts, value, [])
+    
+    #Create BuildContext and start recursive processing
+    buildCtx = BuildContext(
+        json_path=json_path,
+        resource_definition=resource_definition,
+        data_type=dataType,
+        value=value,
+        parts=json_path.split('.'),
+        previous_parts=[]
+    )
+    return build_structure(root_struct, buildCtx)
 
-# main recursive function to drill into the json structure, assign paths, and create structure where needed
-def build_structure(
+# ============================================================================
+# HELPER FUNCTIONS FOR build_structure
+# ============================================================================
+
+def _handle_final_assignment(
     current_struct: Any,
-    json_path: str,
-    resource_definition: ResourceDefinition,
-    dataType: str,
-    parts: List[str],
-    value: Any,
-    previous_parts: List[str],
+    buildCtx: BuildContext,
+    part: str
 ) -> Any:
-    if len(parts) == 0:
-        return current_struct
-    #Grab current part
-    part = parts[0]
-    #SPECIAL HANDLING CLAUSE
-    matching_handler = next((handler for handler in special_values.custom_structure_handlers if (json_path.startswith(handler) or json_path == handler)), None)
-    if matching_handler is not None:
-        return special_values.custom_structure_handlers[matching_handler].assign_value(json_path, resource_definition, dataType,  current_struct, parts[-1], value)
-    #Ignore dollar sign ($) and drill farther down
-    if part == '$' or part == resource_definition.resourceType.strip():
-        #Ignore the dollar sign and the resourcetype
-        return build_structure_recurse(current_struct, json_path, resource_definition, dataType, parts, value, previous_parts, part)
-    
-    # If parts length is one then this is the final key to access and pair
-    if len(parts) == 1:
-        #Check for numeric qualifier '[0]' and '[1]'
-        if '[' in part and ']' in part:
-        #Seperate the key from the qualifier
-            key_part = part[:part.index('[')]
-            qualifier = part[part.index('[')+1:part.index(']')]
-            qualifier_condition = qualifier.split('=')
-            
-            #If there is no key part, aka '[0]', '[1]' etc, then it's a simple accessor
-            if key_part is None or key_part == '':
-                if not qualifier.isdigit():
-                    raise TypeError(f"ERROR: Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + parts[:1])} - qualifier - {qualifier} - standalone qualifier expected to be a single index numeric ([0], [1], etc)")
-                qualifier = int(qualifier)
-                if current_struct == {}:
-                    current_struct = []
-                if not isinstance(current_struct, list):
-                    raise TypeError(f"ERROR: Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + parts[:1])} - Expected a list, but got {type(current_struct).__name__} instead.")
-                part = int(qualifier)
-                if part + 1 > len(current_struct):
-                    current_struct.extend({} for x in range (part + 1 - len(current_struct)))
-                #Assign the indexed part
-                fhir_formatting.assign_value(current_struct, part, value, dataType)
-                return current_struct
-        #Default case where there was no qualifier, simply assign here.
-        fhir_formatting.assign_value(current_struct, part, value, dataType)
-        return current_struct
-    
-    # If there is a simple qualifier with '['and ']'
-    elif '[' in part and ']' in part:
-        #Seperate the key from the qualifier
+    """
+    Handle the final assignment when we've reached the leaf node (len(parts) == 1).
+    This assigns the value directly to the structure.
+    """
+    # Check for numeric qualifier '[0]' and '[1]'
+    if '[' in part and ']' in part:
+        # Separate the key from the qualifier
         key_part = part[:part.index('[')]
         qualifier = part[part.index('[')+1:part.index(']')]
-        qualifier_condition = qualifier.split('=')
         
-        #If there is no key part, aka '[0]', '[1]' etc, then it's a simple accessor
+        # If there is no key part, aka '[0]', '[1]' etc, then it's a simple accessor
         if key_part is None or key_part == '':
             if not qualifier.isdigit():
-                raise TypeError(f"ERROR: Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + parts[:1])} - qualifier - {qualifier} - standalone qualifier expected to be a single index numeric ([0], [1], etc)")
+                raise TypeError(
+                    f"ERROR: Full jsonpath: {buildCtx.json_path} - "
+                    f"current path - {'.'.join(buildCtx.previous_parts + buildCtx.parts[:1])} - "
+                    f"qualifier - {qualifier} - standalone qualifier expected to be a single "
+                    f"index numeric ([0], [1], etc)"
+                )
+            qualifier_index = int(qualifier)
             if current_struct == {}:
                 current_struct = []
             if not isinstance(current_struct, list):
-                raise TypeError(f"ERROR: Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + parts[:1])} - Expected a list, but got {type(current_struct).__name__} instead.")
-            qualifier_as_number = int(qualifier)
-            if qualifier_as_number + 1 > len(current_struct):
-                current_struct.extend({} for x in range (qualifier_as_number + 1 - len(current_struct)))
-            inner_struct = current_struct[qualifier_as_number]
-            inner_struct = build_structure_recurse(inner_struct, json_path, resource_definition, dataType, parts, value, previous_parts, part)
-            current_struct[qualifier_as_number] = inner_struct
+                raise TypeError(
+                    f"ERROR: Full jsonpath: {buildCtx.json_path} - "
+                    f"current path - {'.'.join(buildCtx.previous_parts + buildCtx.parts[:1])} - "
+                    f"Expected a list, but got {type(current_struct).__name__} instead."
+                )
+            if qualifier_index + 1 > len(current_struct):
+                current_struct.extend({} for x in range(qualifier_index + 1 - len(current_struct)))
+            # Assign the indexed part
+            fhir_formatting.assign_value(current_struct, qualifier_index, buildCtx.value, buildCtx.data_type)
             return current_struct
-        # Create the key part in the structure
-        if (not key_part in current_struct) or (isinstance(current_struct[key_part], dict)):
-            current_struct[key_part] = []
-        #If there is a key_part and the If the qualifier condition is defined
-        if len(qualifier_condition) == 2:
-            #special handling for code
-            if key_part != "coding" and (qualifier_condition[0] in ('code', 'system')):
-                #Move into the coding section if a qualifier asks for 'code' or 'system'
-                if 'coding' not in current_struct:
-                    current_struct['coding'] = []
-                    current_struct = current_struct['coding']
-            qualifier_key, qualifier_value = qualifier_condition
-            # Retrieve an inner structure if it exists allready that matches the criteria
-            inner_struct = next((innerElement for innerElement in current_struct[key_part] if isinstance(innerElement, dict) and innerElement.get(qualifier_key) == qualifier_value), None)
-            #If no inner structure exists, create one instead
-            if inner_struct is None:
-                inner_struct = {qualifier_key: qualifier_value}
-                current_struct[key_part].append(inner_struct)
-            #Recurse into that innerstructure where the qualifier matched to continue the part traversal
-            inner_struct = build_structure_recurse(inner_struct, json_path, resource_definition, dataType, parts, value, previous_parts, part)
-            return current_struct
-        #If there's no qualifier condition, but an index aka '[0]', '[1]' etc, then it's a simple accessor
-        elif qualifier.isdigit():
-            if not isinstance(current_struct[key_part], list):
-                raise TypeError(f"ERROR: Full jsonpath: {json_path} - current path - {'.'.join(previous_parts + [parts[0]])} - Expected a list, but got {type(current_struct).__name__} instead.")
-            qualifier_as_number = int(qualifier)
-            if qualifier_as_number > len(current_struct):
-                current_struct[key_part].extend({} for x in range (qualifier_as_number - len(current_struct)))
-            inner_struct = current_struct[key_part][qualifier_as_number]
-            inner_struct = build_structure_recurse(inner_struct, json_path, resource_definition, dataType, parts, value, previous_parts, part)
-            current_struct[key_part][qualifier_as_number] = inner_struct
-            return current_struct
-    #None qualifier accessor
-    else:
-        if(part not in current_struct):
-            current_struct[part] = {}
-        inner_struct = build_structure_recurse(current_struct[part], json_path, resource_definition, dataType, parts, value, previous_parts, part)
-        current_struct[part] = inner_struct
+    
+    # Default case where there was no qualifier, simply assign here
+    fhir_formatting.assign_value(current_struct, part, buildCtx.value, buildCtx.data_type)
+    return current_struct
+
+
+def _handle_array_qualifier(
+    current_struct: Any,
+    buildCtx: BuildContext,
+    part: str
+) -> Any:
+    """
+    Handle array access and qualifiers like [0], [1], or [use=official].
+    This is for intermediate nodes in the path that need array/qualifier handling.
+    """
+    # Separate the key from the qualifier
+    key_part = part[:part.index('[')]
+    qualifier = part[part.index('[')+1:part.index(']')]
+    qualifier_condition = qualifier.split('=')
+    
+    # If there is no key part, aka '[0]', '[1]' etc, then it's a simple accessor
+    if key_part is None or key_part == '':
+        if not qualifier.isdigit():
+            raise TypeError(
+                f"ERROR: Full jsonpath: {buildCtx.json_path} - "
+                f"current path - {'.'.join(buildCtx.previous_parts + buildCtx.parts[:1])} - "
+                f"qualifier - {qualifier} - standalone qualifier expected to be a single "
+                f"index numeric ([0], [1], etc)"
+            )
+        if current_struct == {}:
+            current_struct = []
+        if not isinstance(current_struct, list):
+            raise TypeError(
+                f"ERROR: Full jsonpath: {buildCtx.json_path} - "
+                f"current path - {'.'.join(buildCtx.previous_parts + buildCtx.parts[:1])} - "
+                f"Expected a list, but got {type(current_struct).__name__} instead."
+            )
+        qualifier_as_number = int(qualifier)
+        if qualifier_as_number + 1 > len(current_struct):
+            current_struct.extend({} for x in range(qualifier_as_number + 1 - len(current_struct)))
+        
+        # Recurse with updated context
+        new_buildCtx = BuildContext(
+            json_path=buildCtx.json_path,
+            resource_definition=buildCtx.resource_definition,
+            data_type=buildCtx.data_type,
+            value=buildCtx.value,
+            parts=buildCtx.parts[1:],
+            previous_parts=buildCtx.previous_parts + [part]
+        )
+        inner_struct = build_structure(current_struct[qualifier_as_number], new_buildCtx)
+        current_struct[qualifier_as_number] = inner_struct
         return current_struct
     
-#Helper function to quickly recurse and return the next level of structure. Used by main recursive function
-def build_structure_recurse(
+    # Create the key part in the structure
+    if (not key_part in current_struct) or (isinstance(current_struct[key_part], dict)):
+        current_struct[key_part] = []
+    
+    # If there is a key_part and the qualifier condition is defined (e.g., [use=official])
+    if len(qualifier_condition) == 2:
+        # Special handling for code
+        if key_part != "coding" and (qualifier_condition[0] in ('code', 'system')):
+            # Move into the coding section if a qualifier asks for 'code' or 'system'
+            if 'coding' not in current_struct:
+                current_struct['coding'] = []
+                current_struct = current_struct['coding']
+        
+        qualifier_key, qualifier_value = qualifier_condition
+        # Retrieve an inner structure if it exists already that matches the criteria
+        inner_struct = next(
+            (innerElement for innerElement in current_struct[key_part] 
+             if isinstance(innerElement, dict) and innerElement.get(qualifier_key) == qualifier_value),
+            None
+        )
+        # If no inner structure exists, create one instead
+        if inner_struct is None:
+            inner_struct = {qualifier_key: qualifier_value}
+            current_struct[key_part].append(inner_struct)
+        
+        # Recurse with updated context
+        new_buildCtx = BuildContext(
+            json_path=buildCtx.json_path,
+            resource_definition=buildCtx.resource_definition,
+            data_type=buildCtx.data_type,
+            value=buildCtx.value,
+            parts=buildCtx.parts[1:],
+            previous_parts=buildCtx.previous_parts + [part]
+        )
+        inner_struct = build_structure(inner_struct, new_buildCtx)
+        return current_struct
+    
+    # If there's no qualifier condition, but an index aka '[0]', '[1]' etc, then it's a simple accessor
+    elif qualifier.isdigit():
+        if not isinstance(current_struct[key_part], list):
+            raise TypeError(
+                f"ERROR: Full jsonpath: {buildCtx.json_path} - "
+                f"current path - {'.'.join(buildCtx.previous_parts + [buildCtx.parts[0]])} - "
+                f"Expected a list, but got {type(current_struct).__name__} instead."
+            )
+        qualifier_as_number = int(qualifier)
+        if qualifier_as_number > len(current_struct):
+            current_struct[key_part].extend({} for x in range(qualifier_as_number - len(current_struct)))
+        
+        # Recurse with updated context
+        new_buildCtx = BuildContext(
+            json_path=buildCtx.json_path,
+            resource_definition=buildCtx.resource_definition,
+            data_type=buildCtx.data_type,
+            value=buildCtx.value,
+            parts=buildCtx.parts[1:],
+            previous_parts=buildCtx.previous_parts + [part]
+        )
+        inner_struct = build_structure(current_struct[key_part][qualifier_as_number], new_buildCtx)
+        current_struct[key_part][qualifier_as_number] = inner_struct
+        return current_struct
+    
+    return current_struct
+
+
+def _handle_simple_navigation(
     current_struct: Any,
-    json_path: str,
-    resource_definition: ResourceDefinition,
-    dataType: str,
-    parts: List[str],
-    value: Any,
-    previous_parts: List[str],
-    part: str,
+    buildCtx: BuildContext,
+    part: str
 ) -> Any:
-    previous_parts.append(part)
-    return_struct = build_structure(current_struct, json_path, resource_definition, dataType, parts[1:], value, previous_parts)
-    return return_struct
+    """
+    Handle simple object navigation without qualifiers.
+    Creates nested objects as needed and recurses deeper.
+    """
+    if part not in current_struct:
+        current_struct[part] = {}
+    
+    # Recurse with updated context
+    new_buildCtx = BuildContext(
+        json_path=buildCtx.json_path,
+        resource_definition=buildCtx.resource_definition,
+        data_type=buildCtx.data_type,
+        value=buildCtx.value,
+        parts=buildCtx.parts[1:],
+        previous_parts=buildCtx.previous_parts + [part]
+    )
+    inner_struct = build_structure(current_struct[part], new_buildCtx)
+    current_struct[part] = inner_struct
+    return current_struct
+
+
+# ============================================================================
+# MAIN RECURSIVE FUNCTION
+# ============================================================================
+
+def build_structure(
+    current_struct: Any,
+    buildCtx: BuildContext,
+) -> Any:
+    """
+    Main recursive function to drill into the JSON structure, assign paths, 
+    and create structure where needed.
+    
+    This function dispatches to specialized handlers based on the current path segment:
+    - Special value handlers (from special_values module)
+    - Final assignment (when at leaf node)
+    - Array/qualifier handling (for [0], [use=official], etc.)
+    - Simple navigation (for regular object properties)
+    """
+    # Base case: no more parts to process
+    if len(buildCtx.parts) == 0:
+        return current_struct
+    
+    # Grab current part
+    part = buildCtx.parts[0]
+    
+    # Check for special handling clause
+    matching_handler = next(
+        (handler for handler in special_values.custom_structure_handlers 
+         if (buildCtx.json_path.startswith(handler) or buildCtx.json_path == handler)),
+        None
+    )
+    if matching_handler is not None:
+        return special_values.custom_structure_handlers[matching_handler].assign_value(
+            buildCtx.json_path, 
+            buildCtx.resource_definition, 
+            buildCtx.data_type, 
+            current_struct, 
+            buildCtx.parts[-1], 
+            buildCtx.value
+        )
+    
+    # Ignore dollar sign ($) and resource type - drill farther down
+    if part == '$' or part == buildCtx.resource_definition.resourceType.strip():
+        new_buildCtx = BuildContext(
+            json_path=buildCtx.json_path,
+            resource_definition=buildCtx.resource_definition,
+            data_type=buildCtx.data_type,
+            value=buildCtx.value,
+            parts=buildCtx.parts[1:],
+            previous_parts=buildCtx.previous_parts + [part]
+        )
+        return build_structure(current_struct, new_buildCtx)
+    
+    # Dispatch to appropriate handler based on the current state
+    if len(buildCtx.parts) == 1:
+        # Final leaf node - assign the value
+        return _handle_final_assignment(current_struct, buildCtx, part)
+    elif '[' in part and ']' in part:
+        # Array or qualifier handling
+        return _handle_array_qualifier(current_struct, buildCtx, part)
+    else:
+        # Simple object navigation
+        return _handle_simple_navigation(current_struct, buildCtx, part)
 
 #Post-process function to add medication reference in specific references
 def post_process_create_medication_references(root_bundle: Dict[str, Any]) -> None:

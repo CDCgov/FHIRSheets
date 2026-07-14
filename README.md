@@ -115,11 +115,12 @@ See `config_example.json` for a complete example with all default values and ava
 
 ### Programmatic Usage
 
-When using FHIRSheets as a Python library:
+When using FHIRSheets as a Python library, use the simplified context-based API:
 
 ```python
 from fhir_sheets.core.config.FhirSheetsConfiguration import FhirSheetsConfiguration
-from fhir_sheets.core import conversion, read_input
+from fhir_sheets.core.conversion import create_transaction_bundle, ConversionContext
+from fhir_sheets.core import read_input
 import json
 
 # Load configuration from JSON file
@@ -127,15 +128,44 @@ with open('my_config.json', 'r') as f:
     config_dict = json.load(f)
 config = FhirSheetsConfiguration(config_dict)
 
-# Use the configuration
+# Read input data
 resource_defs, resource_links, cohort_data = read_input.read_xlsx_and_process("input.xlsx")
-bundle = conversion.create_transaction_bundle(
-    resource_defs, 
-    resource_links, 
-    cohort_data, 
-    index=0, 
+
+# Create context object (encapsulates all parameters)
+ctx = ConversionContext(
+    resource_definitions=resource_defs,
+    resource_links=resource_links,
+    cohort_data=cohort_data,
+    index=0,
     config=config
 )
+
+# Generate bundle with simplified signature
+bundle = create_transaction_bundle(ctx)
+```
+
+#### Processing Multiple Patients
+
+The context-based approach makes it easy to process multiple patients:
+
+```python
+from fhir_sheets.core.conversion import create_transaction_bundle, ConversionContext
+
+# Read input data once
+resource_defs, resource_links, cohort_data = read_input.read_xlsx_and_process("input.xlsx")
+
+# Process all patients
+bundles = []
+for patient_index in range(len(cohort_data.patients)):
+    ctx = ConversionContext(
+        resource_definitions=resource_defs,
+        resource_links=resource_links,
+        cohort_data=cohort_data,
+        index=patient_index,
+        config=config
+    )
+    bundle = create_transaction_bundle(ctx)
+    bundles.append(bundle)
 ```
 
 ## License

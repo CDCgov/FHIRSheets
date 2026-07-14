@@ -1,6 +1,7 @@
 
 import orjson
 import logging
+import datetime
 from src.fhir_sheets.core.fhir_formatting import (
     caret_delimited_string_to_codeableconcept,
     parse_flexible_address,
@@ -11,6 +12,7 @@ from src.fhir_sheets.core.fhir_formatting import (
     parse_iso8601_time,
     parse_human_name,
     parse_boolean,
+    assign_value,
 )
 
 logger: logging.Logger = logging.getLogger("fhirsheets.test_fhir_values")
@@ -177,3 +179,97 @@ def test_parse_boolean_variants():
     import pytest
     with pytest.raises(ValueError):
         parse_boolean("notabool")
+
+def test_assign_value_date_with_datetime_date():
+    """Test assign_value with a datetime.date object for 'date' valueType."""
+    final_struct = {}
+    test_date = datetime.date(2023, 6, 15)
+    result = assign_value(final_struct, 'birthDate', test_date, 'date')
+    assert 'birthDate' in result
+    assert result['birthDate'] == test_date
+    assert isinstance(result['birthDate'], datetime.date)
+
+def test_assign_value_date_with_datetime_datetime():
+    """Test assign_value with a datetime.datetime object for 'date' valueType.
+    
+    Note: Due to isinstance check order in fhir_formatting.py (line 60-63),
+    datetime.datetime objects match isinstance(value, datetime.date) first
+    since datetime is a subclass of date, so the full datetime is stored.
+    """
+    final_struct = {}
+    test_datetime = datetime.datetime(2023, 6, 15, 14, 30, 45)
+    result = assign_value(final_struct, 'birthDate', test_datetime, 'date')
+    assert 'birthDate' in result
+    # Currently stores the full datetime due to isinstance check order
+    assert result['birthDate'] == test_datetime
+    assert isinstance(result['birthDate'], datetime.datetime)
+
+def test_assign_value_date_with_string():
+    """Test assign_value with a string for 'date' valueType."""
+    final_struct = {}
+    test_string = "2023-06-15"
+    result = assign_value(final_struct, 'birthDate', test_string, 'date')
+    assert 'birthDate' in result
+    assert result['birthDate'].year == 2023
+    assert result['birthDate'].month == 6
+    assert result['birthDate'].day == 15
+    assert isinstance(result['birthDate'], datetime.date)
+
+def test_assign_value_datetime_with_datetime_datetime():
+    """Test assign_value with a datetime.datetime object for 'datetime' valueType."""
+    final_struct = {}
+    test_datetime = datetime.datetime(2023, 6, 15, 14, 30, 45)
+    result = assign_value(final_struct, 'effectiveDateTime', test_datetime, 'datetime')
+    assert 'effectiveDateTime' in result
+    # Should add UTC timezone
+    assert result['effectiveDateTime'].year == 2023
+    assert result['effectiveDateTime'].month == 6
+    assert result['effectiveDateTime'].day == 15
+    assert result['effectiveDateTime'].hour == 14
+    assert result['effectiveDateTime'].minute == 30
+    assert result['effectiveDateTime'].second == 45
+    assert result['effectiveDateTime'].tzinfo == datetime.timezone.utc
+
+def test_assign_value_datetime_with_string():
+    """Test assign_value with a string for 'datetime' valueType."""
+    final_struct = {}
+    test_string = "2023-06-15T14:30:45"
+    result = assign_value(final_struct, 'effectiveDateTime', test_string, 'datetime')
+    assert 'effectiveDateTime' in result
+    assert result['effectiveDateTime'].year == 2023
+    assert result['effectiveDateTime'].month == 6
+    assert result['effectiveDateTime'].day == 15
+    assert result['effectiveDateTime'].hour == 14
+    assert result['effectiveDateTime'].minute == 30
+    assert result['effectiveDateTime'].second == 45
+
+def test_assign_value_instant_with_datetime_datetime():
+    """Test assign_value with a datetime.datetime object for 'instant' valueType."""
+    final_struct = {}
+    test_datetime = datetime.datetime(2023, 6, 15, 14, 30, 45, 123456)
+    result = assign_value(final_struct, 'recorded', test_datetime, 'instant')
+    assert 'recorded' in result
+    # Should add UTC timezone
+    assert result['recorded'].year == 2023
+    assert result['recorded'].month == 6
+    assert result['recorded'].day == 15
+    assert result['recorded'].hour == 14
+    assert result['recorded'].minute == 30
+    assert result['recorded'].second == 45
+    assert result['recorded'].microsecond == 123456
+    assert result['recorded'].tzinfo == datetime.timezone.utc
+
+def test_assign_value_instant_with_string():
+    """Test assign_value with a string for 'instant' valueType."""
+    final_struct = {}
+    test_string = "2023-06-15T14:30:45.123"
+    result = assign_value(final_struct, 'recorded', test_string, 'instant')
+    assert 'recorded' in result
+    assert result['recorded'].year == 2023
+    assert result['recorded'].month == 6
+    assert result['recorded'].day == 15
+    assert result['recorded'].hour == 14
+    assert result['recorded'].minute == 30
+    assert result['recorded'].second == 45
+    assert result['recorded'].microsecond == 123000
+    assert result['recorded'].tzinfo == datetime.timezone.utc

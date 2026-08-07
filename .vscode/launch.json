@@ -99,6 +99,22 @@
             ]
         },
         {
+            "name": "Python Debugger: ASD, ndjson",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/samples/ASD/ASD_Fhir_Cohort_Import_Template.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/output",
+                "--format",
+                "ndjson"
+            ]
+        },
+        {
             "name": "Python Debugger: Tricuspid Valve Atresia Medication References",
             "type": "debugpy",
             "request": "launch",

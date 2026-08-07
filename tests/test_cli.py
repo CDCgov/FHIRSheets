@@ -37,7 +37,7 @@ def test_congential_hyperthyrodism_excel_conversion_preview_mode(tmp_path):
         TOP_DIR
         / "Congenital_Hyperthyrodism/Congenital_Hyperthyrodism_Fhir_Cohort_Import_Template.xlsx"
     ).__str__()
-    main(input_file, tmp_path, FhirSheetsConfiguration({"preview_mode": True}))
+    main(input_file, tmp_path, config=FhirSheetsConfiguration({"preview_mode": True}))
 
     json_files = list(tmp_path.glob("*.json"))
     json_file = json_files[0]
@@ -821,7 +821,7 @@ def test_no_default_links_via_config_object(tmp_path):
     config = FhirSheetsConfiguration({"enable_default_resource_links": False})
     
     # Run main function with config
-    main(input_file, tmp_path, config)
+    main(input_file, tmp_path, config=config)
     
     # Load the generated JSON file
     json_files = list(tmp_path.glob("*.json"))
@@ -858,7 +858,7 @@ def test_default_links_enabled_by_default(tmp_path):
     
     # Run main function with default config (links enabled)
     config = FhirSheetsConfiguration({})
-    main(input_file, tmp_path, config)
+    main(input_file, tmp_path, config=config)
     
     # Load the generated JSON file
     json_files = list(tmp_path.glob("*.json"))

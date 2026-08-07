@@ -1,3 +1,20 @@
+"""Core conversion module for transforming Excel cohort data into FHIR bundles.
+
+This module provides the main functionality for converting structured Excel data
+into FHIR-compliant JSON bundles. It handles resource creation, reference linking,
+and JSON path-based data structure building.
+
+Key Functions:
+    create_transaction_bundle: Main entry point for creating FHIR bundles
+    create_resources: Creates individual FHIR resources from definitions
+    create_structure_from_jsonpath: Builds nested JSON structures from paths
+    clean_empty: Removes empty structures from generated resources
+
+Classes:
+    ConversionContext: Encapsulates conversion parameters
+    BuildContext: Encapsulates JSON path building parameters
+"""
+
 from typing import Any, Dict, List
 import uuid
 import random
@@ -128,6 +145,30 @@ def create_resources(
     index: int = 0,
     config: FhirSheetsConfiguration = FhirSheetsConfiguration({}),
 ) -> Dict[str, Dict[str, Any]]:
+    """Create FHIR resources from resource definitions and cohort data.
+    
+    This function iterates through resource definitions, creates individual FHIR
+    resources populated with patient data, establishes resource links, and cleans
+    up empty structures.
+    
+    Args:
+        resource_definition_entities: List of resource definitions specifying
+            entity names, resource types, and profiles
+        resource_link_entities: List of resource links defining references
+            between resources
+        cohort_data: Cohort data containing headers and patient entries
+        index: Patient index in the cohort data (default: 0)
+        config: Configuration object controlling conversion behavior
+        
+    Returns:
+        Dictionary mapping entity names to their created FHIR resource dictionaries
+        
+    Example:
+        >>> resources = create_resources(definitions, links, cohort_data, 0, config)
+        >>> patient = resources['Patient']
+        >>> print(patient['resourceType'])
+        'Patient'
+    """
     # Mapping from entity name to the created FHIR resource dictionary
     created_resources: Dict[str, Dict[str, Any]] = {}
     for resource_definition in resource_definition_entities:
@@ -153,6 +194,29 @@ def create_singular_resource(
     index: int = 0,
     config: FhirSheetsConfiguration = FhirSheetsConfiguration({}),
 ) -> Dict[str, Any]:
+    """Create a single FHIR resource in preview mode with entity name references.
+    
+    This function creates all resources but returns only the specified singleton
+    resource. It uses preview mode configuration to generate references using
+    entity names instead of generated IDs, useful for displaying individual
+    resources.
+    
+    Args:
+        singleton_entityName: Name of the entity to return
+        resource_definition_entities: List of all resource definitions
+        resource_link_entities: List of resource links
+        cohort_data: Cohort data containing patient information
+        index: Patient index in the cohort data (default: 0)
+        config: Configuration object (preview_mode will be enabled)
+        
+    Returns:
+        Single FHIR resource dictionary for the specified entity
+        
+    Example:
+        >>> patient = create_singular_resource('Patient', definitions, links, cohort_data)
+        >>> print(patient['resourceType'])
+        'Patient'
+    """
     created_resources: Dict[str, Dict[str, Any]] = {}
     singleton_fhir_resource: Dict[str, Any] = {}
     # Create a preview mode config for singular resource
@@ -173,8 +237,25 @@ def create_singular_resource(
     create_resource_links(created_resources, resource_link_entities, preview_config)
     return singleton_fhir_resource
 
-#Initialize root bundle definition
 def initialize_bundle(config: FhirSheetsConfiguration) -> Dict[str, Any]:
+    """Initialize a FHIR transaction bundle with required metadata.
+    
+    Creates a minimal FHIR Bundle resource with type 'transaction', a unique ID,
+    and security metadata indicating test health data.
+    
+    Args:
+        config: Configuration object (currently unused but kept for consistency)
+        
+    Returns:
+        Dictionary representing a FHIR Bundle resource with empty entry list
+        
+    Example:
+        >>> bundle = initialize_bundle(config)
+        >>> print(bundle['resourceType'])
+        'Bundle'
+        >>> print(bundle['type'])
+        'transaction'
+    """
     root_bundle: Dict[str, Any] = {}
     root_bundle['resourceType'] = 'Bundle'
     root_bundle['id'] = str(generate_UUID()).strip()
@@ -214,13 +295,33 @@ def initialize_resource(resource_definition: ResourceDefinition) -> Dict[str, An
         }
     return initial_resource
 
-# Creates a fhir-json structure from a resource definition entity and the patient_data_sheet
 def create_fhir_resource(
     resource_definition: ResourceDefinition,
     cohort_data: CohortData,
     index: int = 0,
     config: FhirSheetsConfiguration = FhirSheetsConfiguration({}),
 ) -> Dict[str, Any]:
+    """Create a FHIR resource from a resource definition and patient data.
+    
+    This function initializes a resource, retrieves relevant field entries from
+    cohort data, and populates the resource structure using JSON paths and values.
+    
+    Args:
+        resource_definition: Definition specifying entity name, resource type,
+            and profiles
+        cohort_data: Cohort data containing headers and patient entries
+        index: Patient index in the cohort data (default: 0)
+        config: Configuration object controlling conversion behavior
+        
+    Returns:
+        Dictionary representing a populated FHIR resource
+        
+    Example:
+        >>> patient_def = ResourceDefinition('Patient', 'Patient', [])
+        >>> resource = create_fhir_resource(patient_def, cohort_data, 0)
+        >>> print(resource['resourceType'])
+        'Patient'
+    """
     resource_dict = initialize_resource(resource_definition)
     #Get field entries for this entity
     header_entries_for_resourcename = [
@@ -254,12 +355,29 @@ def create_fhir_resource(
         create_structure_from_jsonpath(resource_dict, jsonPath, resource_definition, valueType, value)
     return resource_dict
 
-#Create a resource_link for default references in the cases where only 1 resourceType of the source and destination exist
 def add_default_resource_links(
     created_resources: Dict[str, Dict[str, Any]],
     resource_link_entities: List[ResourceLink],
     config: FhirSheetsConfiguration = FhirSheetsConfiguration({}),
 ) -> None:
+    """Add default resource references when only one instance of each type exists.
+    
+    This function automatically creates resource links based on default reference
+    patterns when there is exactly one resource of the source and destination types.
+    For example, if there's one Patient and one Observation, it will automatically
+    link Observation.subject to the Patient.
+    
+    Args:
+        created_resources: Dictionary of created resources keyed by entity name
+        resource_link_entities: List to append new resource links to (modified in place)
+        config: Configuration object with default_resource_references list
+        
+    Returns:
+        None (modifies resource_link_entities in place)
+        
+    Note:
+        Only creates links if enable_default_resource_links is True in config
+    """
     # Check if default resource links are enabled
     if not config.enable_default_resource_links:
         return
@@ -296,23 +414,54 @@ def add_default_resource_links(
     return
         
             
-#List function to create resource references/links with created entities
 def create_resource_links(
     created_resources: Dict[str, Dict[str, Any]],
     resource_link_entites: List[ResourceLink],
     config: FhirSheetsConfiguration = FhirSheetsConfiguration({}),
 ) -> None:
+    """Create all resource references between FHIR resources.
+    
+    Iterates through resource link entities and creates references between
+    resources according to the specified paths.
+    
+    Args:
+        created_resources: Dictionary of created resources keyed by entity name
+        resource_link_entites: List of resource links to create
+        config: Configuration object controlling reference behavior
+        
+    Returns:
+        None (modifies created_resources in place)
+    """
     logger.info("Building resource links")
     for resource_link_entity in resource_link_entites:
         create_resource_link(created_resources, resource_link_entity, config)
     return
     
-#Singular function to create a resource link.
 def create_resource_link(
     created_resources: Dict[str, Dict[str, Any]],
     resource_link_entity: ResourceLink,
     config: FhirSheetsConfiguration = FhirSheetsConfiguration({}),
 ) -> None:
+    """Create a single resource reference between two FHIR resources.
+    
+    This function establishes a reference from an origin resource to a destination
+    resource at the specified reference path. It handles both single references
+    and array-type references based on configuration.
+    
+    Args:
+        created_resources: Dictionary of created resources keyed by entity name
+        resource_link_entity: Resource link specifying origin, destination, and path
+        config: Configuration object with array_type_references and preview_mode
+        
+    Returns:
+        None (modifies origin resource in created_resources in place)
+        
+    Example:
+        >>> link = ResourceLink('Observation', 'subject', 'Patient')
+        >>> create_resource_link(resources, link, config)
+        >>> print(resources['Observation']['subject']['reference'])
+        'Patient/patient-id-123'
+    """
     # template scaffolding
     reference_json_block = {
         "reference" : "$value"
@@ -426,6 +575,25 @@ def create_resource_link(
     return
 
 def add_resource_to_transaction_bundle(root_bundle: Dict[str, Any], fhir_resource: Dict[str, Any]) -> Dict[str, Any]:
+    """Add a FHIR resource to a transaction bundle as an entry.
+    
+    Creates a bundle entry with fullUrl, resource, and request fields following
+    FHIR transaction bundle specifications.
+    
+    Args:
+        root_bundle: FHIR Bundle resource to add entry to
+        fhir_resource: FHIR resource to add to the bundle
+        
+    Returns:
+        Modified bundle with new entry added
+        
+    Example:
+        >>> bundle = initialize_bundle(config)
+        >>> patient = {'resourceType': 'Patient', 'id': '123'}
+        >>> bundle = add_resource_to_transaction_bundle(bundle, patient)
+        >>> print(len(bundle['entry']))
+        1
+    """
     entry = {}
     entry['fullUrl'] = "urn:uuid:"+fhir_resource['id']
     entry['resource'] = fhir_resource
@@ -436,15 +604,6 @@ def add_resource_to_transaction_bundle(root_bundle: Dict[str, Any], fhir_resourc
     root_bundle['entry'].append(entry)
     return root_bundle
 
-#Drill down and create a structure from a json path with a simple recurisve process
-# Supports 2 major features:
-# 1) dot notation such as $.codeableconcept.coding[0].value = 1234
-# 2) simple qualifiers such as $.name[use=official].family = Dickerson
-# rootStruct: top level structure to drill into
-# json_path: dotnotation path to follow
-# resource_definition: resource description model from import
-# entity_definition: specific field entry information for this function
-# value: Actual value to assign
 def create_structure_from_jsonpath(
     root_struct: Dict[str, Any],
     json_path: str,
@@ -452,6 +611,35 @@ def create_structure_from_jsonpath(
     dataType: str,
     value: Any,
 ) -> Any:
+    """Build nested JSON structure from a JSON path and assign a value.
+    
+    This function parses a JSON path string and recursively creates the necessary
+    nested structure in the root dictionary, then assigns the value at the final
+    location. Supports dot notation, array indices, and conditional qualifiers.
+    
+    Supported path features:
+        - Dot notation: Patient.name.family
+        - Array indices: Patient.name.[0].family
+        - Conditional qualifiers: Patient.identifier[type=MRN].value
+        - Special handlers: Patient.extension[Race].ombCategory.value
+    
+    Args:
+        root_struct: Root dictionary to build structure in
+        json_path: JSON path string (e.g., 'Patient.name.family')
+        resource_definition: Resource definition for context
+        dataType: FHIR data type for value formatting
+        value: Value to assign at the path location
+        
+    Returns:
+        Modified root structure with value assigned at path
+        
+    Example:
+        >>> resource = {}
+        >>> create_structure_from_jsonpath(resource, 'Patient.name.family', 
+        ...                                patient_def, 'string', 'Smith')
+        >>> print(resource['name']['family'])
+        'Smith'
+    """
     #Get all dot notation components as seperate 
     if dataType is not None and dataType.strip().lower() == 'string':
         value = str(value)
@@ -722,8 +910,22 @@ def build_structure(
         # Simple object navigation
         return _handle_simple_navigation(current_struct, buildCtx, part)
 
-#Post-process function to add medication reference in specific references
 def post_process_create_medication_references(root_bundle: Dict[str, Any]) -> None:
+    """Convert MedicationRequest.medicationCodeableConcept to Medication references.
+    
+    This post-processing function finds all MedicationRequest resources in the bundle,
+    creates or reuses Medication resources for their medicationCodeableConcept values,
+    and replaces the CodeableConcept with a reference to the Medication resource.
+    
+    Args:
+        root_bundle: FHIR Bundle containing MedicationRequest resources
+        
+    Returns:
+        None (modifies bundle in place)
+        
+    Note:
+        Only runs when config.medications_as_reference is True
+    """
     medication_resources = [resource['resource'] for resource in root_bundle['entry'] if resource['resource']['resourceType'] == "Medication"]
     medication_request_resources = [resource['resource'] for resource in root_bundle['entry'] if resource['resource']['resourceType'] == "MedicationRequest"]
     for medication_request_resource in medication_request_resources:
@@ -740,6 +942,15 @@ def post_process_create_medication_references(root_bundle: Dict[str, Any]) -> No
     return
 
 def createMedicationResource(root_bundle: Dict[str, Any], medicationCodeableConcept: Any) -> Dict[str, Any]:
+    """Create a Medication resource from a CodeableConcept and add to bundle.
+    
+    Args:
+        root_bundle: FHIR Bundle to add the Medication resource to
+        medicationCodeableConcept: CodeableConcept to use as Medication.code
+        
+    Returns:
+        Created Medication resource dictionary
+    """
     # ``ResourceDefinition.from_dict`` returns a ``ResourceDefinition``; we cast the result
     # of ``initialize_resource`` to the expected dict type for clarity.
     target_medication: Dict[str, Any] = initialize_resource(

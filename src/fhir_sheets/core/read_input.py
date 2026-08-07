@@ -1,3 +1,18 @@
+"""Excel input reading and processing module.
+
+This module handles reading Excel files in the FHIR cohort format and converting
+them into structured data models. It processes three main sheets:
+    - ResourceDefinitions: Entity definitions with resource types and profiles
+    - ResourceLinks: Reference relationships between resources
+    - PatientData: Actual patient data with headers and values
+
+Functions:
+    read_xlsx_and_process: Main entry point for reading Excel files
+    process_sheet_resource_definitions: Parse ResourceDefinitions sheet
+    process_sheet_resource_links: Parse ResourceLinks sheet
+    process_sheet_patient_data_revised: Parse PatientData sheet
+"""
+
 from typing import List
 import openpyxl
 import logging
@@ -9,8 +24,28 @@ from .model.resource_link_entity import ResourceLink
 
 logger: logging.Logger = logging.getLogger("fhirsheets.core.read_input")
 
-# Function to read the xlsx file and access specific sheets
 def read_xlsx_and_process(file_path):
+    """Read and process an Excel file in FHIR cohort format.
+    
+    This is the main entry point for reading Excel input. It loads the workbook
+    and processes three sheets: ResourceDefinitions, ResourceLinks, and PatientData.
+    
+    Args:
+        file_path: Path to the Excel file (.xlsx)
+        
+    Returns:
+        Tuple of (resource_definitions, resource_links, cohort_data):
+            - resource_definitions: List of ResourceDefinition objects
+            - resource_links: List of ResourceLink objects
+            - cohort_data: CohortData object with headers and patient entries
+            
+    Example:
+        >>> defs, links, data = read_xlsx_and_process('input.xlsx')
+        >>> print(len(defs))
+        5
+        >>> print(data.get_num_patients())
+        10
+    """
     # Load the workbook
     workbook = openpyxl.load_workbook(file_path)
     resource_definition_entities = []
@@ -32,8 +67,28 @@ def read_xlsx_and_process(file_path):
     return resource_definition_entities, resource_link_entities, cohort_data
 
 
-# Function to process the specific sheet with 'Entity Name', 'ResourceType', and 'Profile(s)'
 def process_sheet_resource_definitions(sheet) -> List[ResourceDefinition]:
+    """Process the ResourceDefinitions sheet into ResourceDefinition objects.
+    
+    Parses the ResourceDefinitions sheet which defines entities with their
+    resource types and optional FHIR profiles. The sheet should have columns:
+        - Entity Name: Unique identifier for the entity
+        - ResourceType: FHIR resource type (e.g., 'Patient', 'Observation')
+        - Profile(s): Comma-separated list of FHIR profile URLs (optional)
+    
+    Args:
+        sheet: openpyxl worksheet object for ResourceDefinitions sheet
+        
+    Returns:
+        List of ResourceDefinition objects
+        
+    Example:
+        >>> definitions = process_sheet_resource_definitions(sheet)
+        >>> print(definitions[0].entityName)
+        'Patient'
+        >>> print(definitions[0].resourceType)
+        'Patient'
+    """
     resource_definitions = []
     resource_definition_entities = []
     headers = [cell.value for cell in next(sheet.iter_rows(min_row=1, max_row=1))]  # Get headers
@@ -50,8 +105,30 @@ def process_sheet_resource_definitions(sheet) -> List[ResourceDefinition]:
     logger.info(f"Resource Definitions\n----------{resource_definitions}")
     return resource_definition_entities
 
-# Function to process the specific sheet with 'OriginResource', 'ReferencePath', and 'DestinationResource'
 def process_sheet_resource_links(sheet) -> List[ResourceLink]:
+    """Process the ResourceLinks sheet into ResourceLink objects.
+    
+    Parses the ResourceLinks sheet which defines reference relationships between
+    resources. The sheet should have columns:
+        - OriginResource: Entity name of the source resource
+        - ReferencePath: JSON path where the reference should be created
+        - DestinationResource: Entity name of the target resource
+    
+    Args:
+        sheet: openpyxl worksheet object for ResourceLinks sheet
+        
+    Returns:
+        List of ResourceLink objects
+        
+    Example:
+        >>> links = process_sheet_resource_links(sheet)
+        >>> print(links[0].originResource)
+        'Observation'
+        >>> print(links[0].referencePath)
+        'subject'
+        >>> print(links[0].destinationResource)
+        'Patient'
+    """
     resource_links = []
     resource_link_entities = []
     headers = [cell.value for cell in next(sheet.iter_rows(min_row=1, max_row=1))]  # Get headers
@@ -64,8 +141,33 @@ def process_sheet_resource_links(sheet) -> List[ResourceLink]:
     logger.info(f"Resource Links\n----------{resource_links}")
     return resource_link_entities
 
-# Function to process the "PatientData" sheet for the Revised CohortData
 def process_sheet_patient_data_revised(sheet, resource_definition_entities):
+    """Process the PatientData sheet into CohortData object.
+    
+    Parses the PatientData sheet which contains field definitions in the first
+    6 rows and patient data in subsequent rows. The sheet structure:
+        Row 1: Entity To Query (entity name)
+        Row 2: JsonPath (path in FHIR resource)
+        Row 3: Value Type (FHIR data type)
+        Row 4: Value Set (FHIR value set URL)
+        Row 5: (unused)
+        Row 6: Data Element (field name)
+        Row 7+: Patient data values
+    
+    Args:
+        sheet: openpyxl worksheet object for PatientData sheet
+        resource_definition_entities: List of ResourceDefinition objects for validation
+        
+    Returns:
+        CohortData object containing headers and patient entries
+        
+    Example:
+        >>> cohort = process_sheet_patient_data_revised(sheet, definitions)
+        >>> print(cohort.get_num_patients())
+        10
+        >>> print(len(cohort.headers))
+        25
+    """
     headers = []
     patients = []
     # Initialize the dictionary to store the processed data

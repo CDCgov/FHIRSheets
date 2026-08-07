@@ -33,23 +33,38 @@ FhirSheets is a command-line tool that reads an Excel file in FHIR cohort format
    poetry build
    ```
 ## Usage
+
+### After Installation
+
+Once installed (via `pip install fhir-sheets` or `poetry install`), you can use the `fhir-sheets` command directly:
+
 1. **Fill Out the Template:**
    - Open the template file `src/resources/Fhir_Cohort_Import_Template.xlsx`.
    - Fill out each row with the relevant data.
 
 2. **Run the Tool:**
-   - Use the `python -m src.cli.fhirsheets` module script with the required arguments:
-     - `--input-file`: The path to the input Excel file.
-     - `--output-folder`: The path to the output folder where the JSON files will be saved.
+   - Use the `fhir-sheets` command with the required arguments:
+     - `--input_file`: The path to the input Excel file.
+     - `--output_folder`: The path to the output folder where the JSON files will be saved.
 
    ```bash
-   python -m src.fhir_sheets.cli.main --input_file src/resources/Fhir_Cohort_Import_Template.xlsx --output_folder /path/to/output/folder
+   fhir-sheets --input_file src/resources/Fhir_Cohort_Import_Template.xlsx --output_folder /path/to/output/folder
+   ```
+
 3. The tool will generate one FHIR bundle JSON file for each row defined in the template.
+
+### Development Usage (Without Installation)
+
+If you're developing and haven't installed the package, you can still run it using Python's module syntax:
+
+```bash
+python -m fhir_sheets.cli.main --input_file src/resources/Fhir_Cohort_Import_Template.xlsx --output_folder /path/to/output/folder
+```
 
 ## Example
 
 ```bash
-python -m src.fhir_sheets.cli.main --input_file src/resources/Fhir_Cohort_Import_Template.xlsx --output_folder ./output_bundles
+fhir-sheets --input_file src/resources/Fhir_Cohort_Import_Template.xlsx --output_folder ./output_bundles
 ```
 In this example, each row in the `Fhir_Cohort_Import_Template.xlsx` file will be processed, and a corresponding JSON file will be generated in the `output_bundles` folder.
 
@@ -74,24 +89,24 @@ Create a JSON configuration file (e.g., `my_config.json`):
 Then use it with the CLI:
 
 ```bash
-python -m src.fhir_sheets.cli.main --input_file input.xlsx --output_folder output/ --config_file my_config.json
+fhir-sheets --input_file input.xlsx --output_folder output/ --config_file my_config.json
 ```
 
-### Configuration Options
+### Advanced Configuration Options
 
 - **`enable_default_resource_links`** (boolean, default: `true`): Enable/disable automatic default resource linking
 - **`default_resource_references`** (array): Customize which default resource references to create automatically
 - **`array_type_references`** (array): Specify which references should be arrays
-- **`preview_mode`** (boolean, default: `false`): Generate resources in preview mode
+- **`preview_mode`** (boolean, default: `false`): generate resources as "preview mode" references within the FHIR Resouces will reference the entity name, rather than a generated id. Is primarily used to render a singular resource for preview.
 - **`medications_as_reference`** (boolean, default: `false`): Convert medicationCodeableConcept to medication resources
-- **`build_empty_resources`** (boolean, default: `false`): Build resources even when no data exists
+- **`build_empty_resources`** (boolean, default: `false`): Build entities resources even when no data exists
 
 ### Command-Line Arguments
 
 You can also pass configuration options directly:
 
 ```bash
-python -m src.fhir_sheets.cli.main \
+fhir-sheets \
   --input_file input.xlsx \
   --output_folder output/ \
   --enable_default_resource_links true \
@@ -101,7 +116,7 @@ python -m src.fhir_sheets.cli.main \
 Or use the convenient flag to disable default resource links:
 
 ```bash
-python -m src.fhir_sheets.cli.main \
+fhir-sheets \
   --input_file input.xlsx \
   --output_folder output/ \
   --no-default-links

@@ -15,6 +15,7 @@ Functions:
 
 from typing import List
 import openpyxl
+from openpyxl.utils import get_column_letter
 import logging
 
 from .model.cohort_data_entity import CohortData, CohortData
@@ -23,6 +24,9 @@ from .model.resource_definition_entity import ResourceDefinition
 from .model.resource_link_entity import ResourceLink
 
 logger: logging.Logger = logging.getLogger("fhirsheets.core.read_input")
+
+# Rows 1 through 6 of the PatientData tab are headers, read by position.
+HEADER_ROW_COUNT = 6
 
 def read_xlsx_and_process(file_path):
     """Read and process an Excel file in FHIR cohort format.
@@ -172,9 +176,16 @@ def process_sheet_patient_data_revised(sheet, resource_definition_entities):
     patients = []
     # Initialize the dictionary to store the processed data
     # Process the Header Entries from the first 6 rows (Entity To Query, JsonPath, etc.) and the data from the rest.
-    for col in sheet.iter_cols(min_row=1, min_col=3, values_only=True):  # Start from 3rd column
+    for column_index, col in enumerate(sheet.iter_cols(min_row=1, min_col=3, values_only=True), start=3):  # Start from 3rd column
         if all(entry is None for entry in col):
             continue
+        # The header rows are read by position, so a sheet that stops before
+        # row 6 gives a column too short to index. Pad it out and let the
+        # checks below report what is missing.
+        if len(col) < HEADER_ROW_COUNT:
+            column_label = get_column_letter(column_index)
+            logger.warning(f"Reading Patient Data Issue - column {column_label} - only {len(col)} of the {HEADER_ROW_COUNT} header rows are present, please fill in the header rows on the PatientData tab.")
+            col = col + (None,) * (HEADER_ROW_COUNT - len(col))
         entity_name = col[0]  # The entity name comes from the first row (Entity To Query)
         field_name = col[5]  #The "Data Element" comes from the fifth row
         if (entity_name is None or entity_name == "") and (field_name is not None and field_name != ""):

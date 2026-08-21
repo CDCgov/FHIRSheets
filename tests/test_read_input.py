@@ -38,7 +38,7 @@ def test_patient_data_short_column_warning(caplog):
     with caplog.at_level("WARNING"):
         process_sheet_patient_data_revised(sheet, [])
 
-    assert "only 2 of the 6 header rows" in caplog.text
+    assert "the sheet ends at row 2, above the 6 header rows" in caplog.text
     assert "column C" in caplog.text
 
 

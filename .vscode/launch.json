@@ -129,6 +129,477 @@
                 "--medications_as_reference",
                 "True"
             ]
-        }
+        },
+        {
+            "name": "Python Debugger: HCS ED case",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/HCS_Emergency_Import_Template.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/output",
+            ]
+        },
+        {
+            "name": "Python Debugger: HCS Outbound case",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/HCS_Outbound_Import_Template.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/output",
+            ]
+        },
+        {
+            "name": "Python Debugger: HCS Outbound case as ndjson",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/HCS_Outbound_Import_Template.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/output",
+                "--format",
+                "ndjson"
+            ]
+        },
+        {
+            "name": "Python Debugger: AI Mode",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--ai_mode",
+            ]
+        },
+        {
+            "name": "Python Debugger: AI Batch Mode - Sample",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--ai_mode",
+                "--batch_mode",
+                "--prompts_file",
+                "samples/ai_batch_prompts/sample_batch.jsonl",
+                "--prompts_format",
+                "jsonl"
+            ]
+        },
+        {
+            "name": "Python Debugger: AI Batch Mode - Hypertension one patient",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--ai_mode",
+                "--batch_mode",
+                "--prompts_file",
+                "samples/ai_batch_prompts/Hypertension_onepatient_example.jsonl",
+                "--prompts_format",
+                "jsonl"
+            ]
+        },
+        {
+            "name": "Python Debugger: AI Batch Mode - Simple Patient",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--ai_mode",
+                "--batch_mode",
+                "--prompts_file",
+                "samples/ai_batch_prompts/simple_patient_example.jsonl",
+                "--prompts_format",
+                "jsonl"
+            ]
+        },
+        {
+            "name": "Python Debugger: AI Batch Mode - Hypertension Cohort Prod",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--ai_mode",
+                "--batch_mode",
+                "--prompts_file",
+                "samples/ai_batch_prompts/hypertension_cohort_prompts.jsonl",
+                "--prompts_format",
+                "jsonl"
+            ]
+        },
+        {
+            "name": "Python Debugger: AI Batch Mode - GAD Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--ai_mode",
+                "--batch_mode",
+                "--prompts_file",
+                "samples/ai_batch_prompts/gad_cohort_prompts.jsonl",
+                "--prompts_format",
+                "jsonl"
+            ]
+        },
+        {
+            "name": "Python Debugger: AI Batch Mode - Hypothyroidism Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--ai_mode",
+                "--batch_mode",
+                "--prompts_file",
+                "samples/ai_batch_prompts/hypothyroidism_cohort_prompts.jsonl",
+                "--prompts_format",
+                "jsonl"
+            ]
+        },
+        {
+            "name": "Python Debugger: Hypertension Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/hypertension_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/output"
+            ]
+        },
+        {
+            "name": "Python Debugger: Hypertension Cohort, ndjson",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/hypertension_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/output",
+                "--format",
+                "ndjson"
+            ]
+        },
+        {
+            "name": "Python Debugger: GAD Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/gad_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/output"
+            ]
+        },
+        {
+            "name": "Python Debugger: GAD Cohort, ndjson",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/gad_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/output",
+                "--format",
+                "ndjson"
+            ]
+        },
+        {
+            "name": "Python Debugger: Hypothyroidism Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/hypothyroidism_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/output"
+            ]
+        },
+        {
+            "name": "Python Debugger: Hypothyroidism Cohort, ndjson",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/hypothyroidism_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/output",
+                "--format",
+                "ndjson"
+            ]
+        },
+        {
+            "name": "Python Debugger: AI Batch Mode - Diabetes Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--ai_mode",
+                "--batch_mode",
+                "--prompts_file",
+                "diabetes_package_v01/diabetes_cohort_prompts.jsonl",
+                "--prompts_format",
+                "jsonl"
+            ]
+        },
+        {
+            "name": "Python Debugger: AI Batch Mode - GERD Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--ai_mode",
+                "--batch_mode",
+                "--prompts_file",
+                "HCS_Cohort_set_v02/gerd_package_v01/gerd_cohort_prompts.jsonl",
+                "--prompts_format",
+                "jsonl"
+            ]
+        },
+        {
+            "name": "Python Debugger: AI Batch Mode - Hyperlipidemia Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--ai_mode",
+                "--batch_mode",
+                "--prompts_file",
+                "HCS_Cohort_set_v02/hyperlipidemia_package_v01/hyperlipidemia_cohort_prompts.jsonl",
+                "--prompts_format",
+                "jsonl"
+            ]
+        },
+        {
+            "name": "Python Debugger: AI Batch Mode - Low Back Pain Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--ai_mode",
+                "--batch_mode",
+                "--prompts_file",
+                "lowbackpain_package_v01/lowbackpain_cohort_prompts.jsonl",
+                "--prompts_format",
+                "jsonl"
+            ]
+        },
+        {
+            "name": "Python Debugger: AI Batch Mode - Obesity Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--ai_mode",
+                "--batch_mode",
+                "--prompts_file",
+                "HCS_Cohort_set_v02/obesity_package_v01/obesity_cohort_prompts.jsonl",
+                "--prompts_format",
+                "jsonl"
+            ]
+        },
+        {
+            "name": "Python Debugger: Diabetes Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/diabetes_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/diabetes_package_v01/json"
+            ]
+        },
+        {
+            "name": "Python Debugger: Diabetes Cohort, ndjson",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/diabetes_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/diabetes_package_v01/ndjson",
+                "--format",
+                "ndjson"
+            ]
+        },
+        {
+            "name": "Python Debugger: GERD Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/gerd_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/gerd_package_v01/json"
+            ]
+        },
+        {
+            "name": "Python Debugger: GERD Cohort, ndjson",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/gerd_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/gerd_package_v01/ndjson",
+                "--format",
+                "ndjson"
+            ]
+        },
+        {
+            "name": "Python Debugger: Hyperlipidemia Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/hyperlipidemia_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/hyperlipidemia_package_v01/json"
+            ]
+        },
+        {
+            "name": "Python Debugger: Hyperlipidemia Cohort, ndjson",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/hyperlipidemia_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/hyperlipidemia_package_v01/ndjson",
+                "--format",
+                "ndjson"
+            ]
+        },
+        {
+            "name": "Python Debugger: Low Back Pain Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/low_back_pain_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/lowbackpain_package_v01/json"
+            ]
+        },
+        {
+            "name": "Python Debugger: Low Back Pain Cohort, ndjson",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/low_back_pain_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/lowbackpain_package_v01/ndjson",
+                "--format",
+                "ndjson"
+            ]
+        },
+        {
+            "name": "Python Debugger: Obesity Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/obesity_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/obesity_package_v01/json"
+            ]
+        },
+        {
+            "name": "Python Debugger: Obesity Cohort, ndjson",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "/Users/mriley7/workspace/FHIRSheets/output_ai/obesity_cohort.xlsx",
+                "--output_folder",
+                "/Users/mriley7/workspace/FHIRSheets/obesity_package_v01/ndjson",
+                "--format",
+                "ndjson"
+            ]
+        },
     ]
 }

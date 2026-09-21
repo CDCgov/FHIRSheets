@@ -183,5 +183,103 @@ for patient_index in range(len(cohort_data.patients)):
     bundles.append(bundle)
 ```
 
+## AI Mode - Interactive FHIR Resource Generation
+
+FHIRSheets includes an AI-powered interactive mode that uses natural language to generate FHIR resources.
+
+### Setup
+
+1. **Install dependencies:**
+   ```bash
+   poetry install
+   ```
+
+2. **Configure environment:**
+   ```bash
+   cp src/langgraph_dev/.env.example src/langgraph_dev/.env
+   ```
+
+3. **Edit `.env` with your API key:**
+   ```bash
+   OPENAI_API_KEY=sk-your-key-here
+   OPENAI_MODEL_NAME=gpt-4
+   ```
+
+### Using AI Mode
+
+Start the interactive AI assistant:
+
+```bash
+fhir-sheets --ai-mode --output_folder ./output
+```
+
+The AI agent will guide you through creating FHIR resources using natural language:
+
+```
+You: Create a new FHIR file called patient_data.xlsx
+
+AI: I'll create a new FHIR Excel file for you...
+[Creates file and confirms]
+
+You: Add a patient named John Doe, born on 1990-05-15
+
+AI: I'll add that patient to the file...
+[Creates Patient resource with the specified data]
+
+You: Add a diabetes diagnosis for this patient
+
+AI: I'll create a Condition resource for diabetes...
+[Creates linked Condition resource]
+
+You: Generate the FHIR bundles
+
+AI: Generating FHIR bundles from the Excel file...
+[Generates JSON output files]
+```
+
+Type `exit`, `quit`, or `q` to leave AI mode.
+
+### Available Tools
+
+#### Low-Level XLSX Tools (`FHIRSheetsXLSXTool`)
+
+- **`create_new_file`** - Create new FHIR Excel files from template
+- **`create_resource_definition`** - Add/update resource definitions (auto-copies reference columns)
+- **`create_resource_link`** - Add resource links between entities
+- **`set_patient_data_value`** - Set patient data values (0-based row indexing)
+- **`generate_fhir_bundles`** - Generate FHIR bundles from Excel file
+- And more...
+
+#### High-Level Resource Builders (`FHIRSheetsResourceBuilderTool`)
+
+Simplified tools for creating complete FHIR resources:
+
+- **`create_patient`** - Patient demographics
+- **`create_practitioner`** - Healthcare providers
+- **`create_encounter`** - Patient encounters
+- **`create_condition`** - Diagnoses/conditions
+- **`create_medication_request`** - Medication orders
+- **`create_vital_sign`** - Vital signs observations
+- And 11 more resource types...
+
+### Usage Example
+
+```python
+from langgraph_dev.tools.fhirsheets_xlsx_tool import FHIRSheetsXLSXTool
+from langgraph_dev.tools.fhirsheets_resource_builder_tool import FHIRSheetsResourceBuilderTool
+
+# Initialize tools
+xlsx_tool = FHIRSheetsXLSXTool()
+builder = FHIRSheetsResourceBuilderTool(xlsx_tool)
+
+# Create a patient
+builder.create_patient.invoke({
+    "entity_name": "PrimaryPatient",
+    "row_index": 0,
+    "given_name": "John",
+    "family_name": "Doe"
+})
+```
+
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for more information.

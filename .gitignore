@@ -4,17 +4,36 @@
 
 # Ignore the output folder
 output/
+out/
+output_ai/
 
 # Ignore JSON templates in src/resources/json_template
 src/resources/json_templates
 
 # Ignore the virtual environment folder
 venv/
-
+.DS_Store
 src/__pycache__
 
 # Ignore dist
 dist/
 
+# Ignore .coverage file
+.coverage
+
 #Ignore pyc build files.
 *.pyc
+
+# Ignore environment files
+.env
+.env.local
+.env.*.local
+
+# Ignore some specific project files
+HCS_Cohort_set_v02/*
+HCS*
+(CDC)*
+hypertension_package*
+
+#Ignore some jsonl files
+*.jsonl

@@ -156,37 +156,172 @@ def cli():
         --build_empty_resources: Build resources even with no data
         --enable_default_resource_links: Enable automatic reference linking
         --no-default-links: Disable automatic reference linking (shorthand)
+        --ai-mode: Enable AI-powered interactive mode for FHIR resource generation
     """
     # Create the argparse CLI
-    parser = argparse.ArgumentParser(description="Process input, convert data, and write output.")
+    parser = argparse.ArgumentParser(
+        description="Process input, convert data, and write output.",
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     
-    # Define the input file argument
-    parser.add_argument('--input_file', type=str, help="Path to the input xlsx ", default="src/resources/FHIR_Cohort_Import_template.xlsx")
+    # AI Mode arguments group
+    ai_group = parser.add_argument_group('AI Mode Options', 'Options for AI-powered interactive and batch processing modes')
+    ai_group.add_argument('--ai_mode', action='store_true', 
+                         help="Enable AI-powered interactive mode for FHIR resource generation")
+    ai_group.add_argument('--ai_mode_output_folder', type=str, 
+                         help="[AI Mode] Path to save the output files (default: output_ai/)", 
+                         default="output_ai/")
     
-    # Define the output file argument
-    parser.add_argument('--output_folder', type=str, help="Path to save the output files", default="output/")
+    # Batch Mode arguments group (subset of AI mode)
+    batch_group = parser.add_argument_group('Batch Processing Options', 
+                                           'Options for automated sequential prompting (requires --ai_mode and --batch_mode)')
+    batch_group.add_argument('--batch_mode', action='store_true', 
+                            help="[AI Mode] Enable batch processing mode for automated sequential prompting")
+    batch_group.add_argument('--prompts_file', type=str, 
+                            help="[Batch Mode] Path to file containing prompts (required for batch mode)")
+    batch_group.add_argument('--prompts_format', type=str, choices=['txt', 'json', 'jsonl'], default='txt',
+                            help="[Batch Mode] Format of prompts file: 'txt' (one per line), 'json' (array), 'jsonl' (one JSON per line)")
+    batch_group.add_argument('--batch_results_dir', type=str, 
+                            help="[Batch Mode] Directory to save batch processing results")
+    batch_group.add_argument('--batch_stop_on_error', action='store_true', 
+                            help="[Batch Mode] Stop batch processing on first error")
+    batch_group.add_argument('--batch_no_stream', action='store_true', 
+                            help="[Batch Mode] Disable streaming in batch mode")
     
-    # Define the format argument
-    parser.add_argument('--format', type=str, choices=['bundle', 'ndjson'], default='bundle', 
-                        help="Output format: 'bundle' for transaction bundles (one per patient), 'ndjson' for newline-delimited JSON (one file per resource type)")
+    # Standard conversion arguments group
+    conversion_group = parser.add_argument_group('Standard Conversion Options', 
+                                                 'Options for Excel to FHIR conversion')
+    conversion_group.add_argument('--input_file', type=str, 
+                                 help="Path to the input xlsx", 
+                                 default="src/resources/FHIR_Cohort_Import_template.xlsx")
+    conversion_group.add_argument('--output_folder', type=str, 
+                                 help="Path to save the output files", 
+                                 default="output/")
+    conversion_group.add_argument('--format', type=str, choices=['bundle', 'ndjson'], default='bundle', 
+                                 help="Output format: 'bundle' for transaction bundles (one per patient), 'ndjson' for newline-delimited JSON (one file per resource type)")
     
-    # Config file argument
-    parser.add_argument('--config_file', type=str, help="Path to a JSON configuration file. If provided, this will be used instead of individual config arguments.", default=None)
-    
-    # Config object arguments (used if --config_file is not provided)
-    parser.add_argument('--preview_mode', type=str, help="Configuration option to generate resources as 'preview mode' references will reference the entity name. Is primarily used to render a singular resource for preview.", default=False)
-    
-    parser.add_argument('--medications_as_reference', type=str, help="Configuration option to create medication references. You may still provide medicationCodeableConcept, but a post process will convert the codeableconcepts to medication resources", default=False)
-    
-    parser.add_argument('--build_empty_resources', type=str, help="Configuration option to build resources even when no data entries exist for that entity.", default=False)
-    
-    parser.add_argument('--enable_default_resource_links', type=str, help="Configuration option to enable/disable automatic default resource linking.", default=True)
-    
-    # Flag to disable default resource links (overrides --enable_default_resource_links)
-    parser.add_argument('--no-default-links', action='store_true', help="Disable automatic default resource linking (shorthand for --enable_default_resource_links false)")
+    # Configuration arguments group
+    config_group = parser.add_argument_group('Configuration Options', 
+                                            'Options for controlling FHIR resource generation behavior')
+    config_group.add_argument('--config_file', type=str, 
+                             help="Path to a JSON configuration file. If provided, this will be used instead of individual config arguments.", 
+                             default=None)
+    config_group.add_argument('--preview_mode', type=str, 
+                             help="Configuration option to generate resources as 'preview mode' references will reference the entity name. Is primarily used to render a singular resource for preview.", 
+                             default=False)
+    config_group.add_argument('--medications_as_reference', type=str, 
+                             help="Configuration option to create medication references. You may still provide medicationCodeableConcept, but a post process will convert the codeableconcepts to medication resources", 
+                             default=False)
+    config_group.add_argument('--build_empty_resources', type=str, 
+                             help="Configuration option to build resources even when no data entries exist for that entity.", 
+                             default=False)
+    config_group.add_argument('--enable_default_resource_links', type=str, 
+                             help="Configuration option to enable/disable automatic default resource linking.", 
+                             default=True)
+    config_group.add_argument('--no-default-links', action='store_true', 
+                             help="Disable automatic default resource linking (shorthand for --enable_default_resource_links false)")
     
     # Parse the arguments
     args = parser.parse_args()
+    
+    # Handle Batch mode (requires AI mode)
+    if args.batch_mode:
+        if not args.ai_mode:
+            logger.error("Batch mode requires --ai_mode to be enabled")
+            exit(1)
+        
+        if not args.prompts_file:
+            logger.error("Batch mode requires --prompts_file argument")
+            exit(1)
+        
+        try:
+            from langgraph_dev.batch import create_batch_processor, BatchProcessorConfig
+            
+            print("\n" + "="*60)
+            print("FHIRSheets Batch Processing Mode")
+            print("="*60)
+            print("Initializing batch processor...\n")
+            
+            # Create batch configuration
+            batch_config = BatchProcessorConfig(
+                verbose=True,
+                auto_save_results=True,
+                results_dir=args.batch_results_dir,
+                stop_on_error=args.batch_stop_on_error,
+                stream=not args.batch_no_stream
+            )
+            
+            # Create batch processor
+            processor = create_batch_processor(
+                working_dir=args.ai_mode_output_folder,
+                batch_config=batch_config
+            )
+            
+            # Load prompts from file
+            print(f"Loading prompts from: {args.prompts_file}")
+            processor.load_prompts_from_file(args.prompts_file, format=args.prompts_format)
+            print(f"Loaded {len(processor.prompts)} prompts\n")
+            
+            # Process all prompts
+            results = processor.process_all()
+            
+            # Display summary
+            summary = processor.get_summary()
+            print("\n" + "="*60)
+            print("Batch Processing Summary")
+            print("="*60)
+            print(f"Total Prompts: {summary['total_prompts']}")
+            print(f"Successful: {summary['successful']}")
+            print(f"Failed: {summary['failed']}")
+            print(f"Success Rate: {summary['success_rate']:.1f}%")
+            print("="*60 + "\n")
+            
+            return
+        except ImportError as e:
+            logger.error(f"Batch mode requires additional dependencies. Please ensure langchain packages are installed.")
+            logger.error(f"Error: {e}")
+            exit(1)
+        except ValueError as e:
+            logger.error(f"Configuration error: {e}")
+            logger.error("Please ensure your .env file is configured with API credentials.")
+            exit(1)
+        except FileNotFoundError as e:
+            logger.error(f"File not found: {e}")
+            exit(1)
+        except Exception as e:
+            logger.error(f"Error in batch mode: {e}")
+            import traceback
+            traceback.print_exc()
+            exit(1)
+    
+    # Handle AI mode (interactive)
+    if args.ai_mode:
+        try:
+            from langgraph_dev.agent import create_agent
+            
+            print("\n" + "="*60)
+            print("FHIRSheets AI Mode")
+            print("="*60)
+            print("Initializing AI agent...\n")
+            
+            # Create agent with output folder as working directory
+            agent = create_agent(working_dir=args.ai_mode_output_folder, verbose=True)
+            
+            # Start interactive chat
+            agent.chat()
+            
+            return
+        except ImportError as e:
+            logger.error(f"AI mode requires additional dependencies. Please ensure langchain packages are installed.")
+            logger.error(f"Error: {e}")
+            exit(1)
+        except ValueError as e:
+            logger.error(f"Configuration error: {e}")
+            logger.error("Please ensure your .env file is configured with API credentials.")
+            exit(1)
+        except Exception as e:
+            logger.error(f"Error starting AI mode: {e}")
+            exit(1)
 
     # Load configuration
     if args.config_file:

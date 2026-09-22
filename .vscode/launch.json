@@ -23,9 +23,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/samples/Congenital_Hyperthyrodism/Congenital_Hyperthyrodism_Fhir_Cohort_Import_Template.xlsx",
+                "samples/Congenital_Hyperthyrodism/Congenital_Hyperthyrodism_Fhir_Cohort_Import_Template.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output"
+                "output"
             ]
         },
         {
@@ -37,9 +37,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/samples/Downs_Syndrome/Downs_Syndrome_Fhir_Cohort_Import_Template.xlsx",
+                "samples/Downs_Syndrome/Downs_Syndrome_Fhir_Cohort_Import_Template.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output"
+                "output"
             ]
         },
         {
@@ -51,9 +51,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/samples/Tricuspid_Valve_Atresia/Tricuspid_Valve_Atresia_Fhir_Cohort_Import_Template.xlsx",
+                "samples/Tricuspid_Valve_Atresia/Tricuspid_Valve_Atresia_Fhir_Cohort_Import_Template.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output"
+                "output"
             ]
         },
         {
@@ -65,9 +65,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/samples/CMV/CMV_Fhir_Cohort_Import_Template.xlsx",
+                "samples/CMV/CMV_Fhir_Cohort_Import_Template.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output"
+                "output"
             ]
         },
         {
@@ -79,9 +79,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/samples/Spina_Bifida/Spina_Bifida_Fhir_Cohort_Import_Template.xlsx",
+                "samples/Spina_Bifida/Spina_Bifida_Fhir_Cohort_Import_Template.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output"
+                "output"
             ]
         },
         {
@@ -93,9 +93,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/samples/ASD/ASD_Fhir_Cohort_Import_Template.xlsx",
+                "samples/ASD/ASD_Fhir_Cohort_Import_Template.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output"
+                "output"
             ]
         },
         {
@@ -107,9 +107,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/samples/ASD/ASD_Fhir_Cohort_Import_Template.xlsx",
+                "samples/ASD/ASD_Fhir_Cohort_Import_Template.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output",
+                "output",
                 "--format",
                 "ndjson"
             ]
@@ -123,9 +123,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/samples/Tricuspid_Valve_Atresia/Tricuspid_Valve_Atresia_Fhir_Cohort_Import_Template.xlsx",
+                "samples/Tricuspid_Valve_Atresia/Tricuspid_Valve_Atresia_Fhir_Cohort_Import_Template.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output",
+                "output",
                 "--medications_as_reference",
                 "True"
             ]
@@ -139,9 +139,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/HCS_Emergency_Import_Template.xlsx",
+                "HCS_Emergency_Import_Template.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output",
+                "output",
             ]
         },
         {
@@ -153,9 +153,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/HCS_Outbound_Import_Template.xlsx",
+                "HCS_Outbound_Import_Template.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output",
+                "output",
             ]
         },
         {
@@ -167,9 +167,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/HCS_Outbound_Import_Template.xlsx",
+                "HCS_Outbound_Import_Template.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output",
+                "output",
                 "--format",
                 "ndjson"
             ]
@@ -282,96 +282,6 @@
             ]
         },
         {
-            "name": "Python Debugger: Hypertension Cohort",
-            "type": "debugpy",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "module": "src.fhir_sheets.cli.main",
-            "console": "integratedTerminal",
-            "args": [
-                "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/hypertension_cohort.xlsx",
-                "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output"
-            ]
-        },
-        {
-            "name": "Python Debugger: Hypertension Cohort, ndjson",
-            "type": "debugpy",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "module": "src.fhir_sheets.cli.main",
-            "console": "integratedTerminal",
-            "args": [
-                "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/hypertension_cohort.xlsx",
-                "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output",
-                "--format",
-                "ndjson"
-            ]
-        },
-        {
-            "name": "Python Debugger: GAD Cohort",
-            "type": "debugpy",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "module": "src.fhir_sheets.cli.main",
-            "console": "integratedTerminal",
-            "args": [
-                "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/gad_cohort.xlsx",
-                "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output"
-            ]
-        },
-        {
-            "name": "Python Debugger: GAD Cohort, ndjson",
-            "type": "debugpy",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "module": "src.fhir_sheets.cli.main",
-            "console": "integratedTerminal",
-            "args": [
-                "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/gad_cohort.xlsx",
-                "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output",
-                "--format",
-                "ndjson"
-            ]
-        },
-        {
-            "name": "Python Debugger: Hypothyroidism Cohort",
-            "type": "debugpy",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "module": "src.fhir_sheets.cli.main",
-            "console": "integratedTerminal",
-            "args": [
-                "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/hypothyroidism_cohort.xlsx",
-                "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output"
-            ]
-        },
-        {
-            "name": "Python Debugger: Hypothyroidism Cohort, ndjson",
-            "type": "debugpy",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "module": "src.fhir_sheets.cli.main",
-            "console": "integratedTerminal",
-            "args": [
-                "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/hypothyroidism_cohort.xlsx",
-                "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/output",
-                "--format",
-                "ndjson"
-            ]
-        },
-        {
             "name": "Python Debugger: AI Batch Mode - Diabetes Cohort",
             "type": "debugpy",
             "request": "launch",
@@ -446,9 +356,99 @@
                 "--ai_mode",
                 "--batch_mode",
                 "--prompts_file",
-                "HCS_Cohort_set_v02/obesity_package_v01/obesity_cohort_prompts.jsonl",
+                "HCS_Cohort_set_v03/obesity_package_v01/obesity_cohort_prompts.jsonl",
                 "--prompts_format",
                 "jsonl"
+            ]
+        },
+        {
+            "name": "Python Debugger: Hypertension Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "HCS_Cohort_set_v03/hypertension_package_v03/hypertension_cohort.xlsx",
+                "--output_folder",
+                "HCS_Cohort_set_v03/hypertension_package_v03/json"
+            ]
+        },
+        {
+            "name": "Python Debugger: Hypertension Cohort, ndjson",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "HCS_Cohort_set_v03/hypertension_package_v03/hypertension_cohort.xlsx",
+                "--output_folder",
+                "HCS_Cohort_set_v03/hypertension_package_v03/ndjson",
+                "--format",
+                "ndjson"
+            ]
+        },
+        {
+            "name": "Python Debugger: GAD Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "HCS_Cohort_set_v03/gad_package_v02/gad_cohort.xlsx",
+                "--output_folder",
+                "HCS_Cohort_set_v03/gad_package_v02/json"
+            ]
+        },
+        {
+            "name": "Python Debugger: GAD Cohort, ndjson",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "HCS_Cohort_set_v03/gad_package_v02/gad_cohort.xlsx",
+                "--output_folder",
+                "HCS_Cohort_set_v03/gad_package_v02/ndjson",
+                "--format",
+                "ndjson"
+            ]
+        },
+        {
+            "name": "Python Debugger: Hypothyroidism Cohort",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "HCS_Cohort_set_v03/hypothyroidism_package_v02/hypothyroidism_cohort.xlsx",
+                "--output_folder",
+                "HCS_Cohort_set_v03/hypothyroidism_package_v02/json"
+            ]
+        },
+        {
+            "name": "Python Debugger: Hypothyroidism Cohort, ndjson",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "src.fhir_sheets.cli.main",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_file",
+                "HCS_Cohort_set_v03/hypothyroidism_package_v02/hypothyroidism_cohort.xlsx",
+                "--output_folder",
+                "HCS_Cohort_set_v03/hypothyroidism_package_v02/ndjson",
+                "--format",
+                "ndjson"
             ]
         },
         {
@@ -460,9 +460,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/diabetes_cohort.xlsx",
+                "HCS_Cohort_set_v03/diabetes_package_v02/diabetes_cohort.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/diabetes_package_v01/json"
+                "HCS_Cohort_set_v03/diabetes_package_v02/json"
             ]
         },
         {
@@ -474,9 +474,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/diabetes_cohort.xlsx",
+                "HCS_Cohort_set_v03/diabetes_package_v02/diabetes_cohort.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/diabetes_package_v01/ndjson",
+                "HCS_Cohort_set_v03/diabetes_package_v02/ndjson",
                 "--format",
                 "ndjson"
             ]
@@ -490,9 +490,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/gerd_cohort.xlsx",
+                "HCS_Cohort_set_v03/gerd_package_v02/gerd_cohort.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/gerd_package_v01/json"
+                "HCS_Cohort_set_v03/gerd_package_v02/json"
             ]
         },
         {
@@ -504,9 +504,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/gerd_cohort.xlsx",
+                "HCS_Cohort_set_v03/gerd_package_v02/gerd_cohort.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/gerd_package_v01/ndjson",
+                "HCS_Cohort_set_v03/gerd_package_v02/ndjson",
                 "--format",
                 "ndjson"
             ]
@@ -520,9 +520,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/hyperlipidemia_cohort.xlsx",
+                "HCS_Cohort_set_v03/hyperlipidemia_package_v02/hyperlipidemia_cohort.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/hyperlipidemia_package_v01/json"
+                "HCS_Cohort_set_v03/hyperlipidemia_package_v02/json"
             ]
         },
         {
@@ -534,9 +534,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/hyperlipidemia_cohort.xlsx",
+                "HCS_Cohort_set_v03/hyperlipidemia_package_v02/hyperlipidemia_cohort.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/hyperlipidemia_package_v01/ndjson",
+                "HCS_Cohort_set_v03/hyperlipidemia_package_v02/ndjson",
                 "--format",
                 "ndjson"
             ]
@@ -550,9 +550,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/low_back_pain_cohort.xlsx",
+                "HCS_Cohort_set_v03/lowbackpain_package_v02/low_back_pain_cohort.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/lowbackpain_package_v01/json"
+                "HCS_Cohort_set_v03/lowbackpain_package_v02/json"
             ]
         },
         {
@@ -564,9 +564,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/low_back_pain_cohort.xlsx",
+                "HCS_Cohort_set_v03/lowbackpain_package_v02/low_back_pain_cohort.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/lowbackpain_package_v01/ndjson",
+                "HCS_Cohort_set_v03/lowbackpain_package_v02/ndjson",
                 "--format",
                 "ndjson"
             ]
@@ -580,9 +580,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/obesity_cohort.xlsx",
+                "HCS_Cohort_set_v03/obesity_package_v02/obesity_cohort.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/obesity_package_v01/json"
+                "HCS_Cohort_set_v03/obesity_package_v02/json"
             ]
         },
         {
@@ -594,12 +594,36 @@
             "console": "integratedTerminal",
             "args": [
                 "--input_file",
-                "/Users/mriley7/workspace/FHIRSheets/output_ai/obesity_cohort.xlsx",
+                "HCS_Cohort_set_v03/obesity_package_v02/obesity_cohort.xlsx",
                 "--output_folder",
-                "/Users/mriley7/workspace/FHIRSheets/obesity_package_v01/ndjson",
+                "HCS_Cohort_set_v03/obesity_package_v02/ndjson",
                 "--format",
                 "ndjson"
             ]
+        }
+    ],
+    "compounds": [
+        {
+            "name": "HCS Cohort Set v03: All Cohorts",
+            "configurations": [
+                "Python Debugger: Hypertension Cohort",
+                "Python Debugger: Hypertension Cohort, ndjson",
+                "Python Debugger: GAD Cohort",
+                "Python Debugger: GAD Cohort, ndjson",
+                "Python Debugger: Hypothyroidism Cohort",
+                "Python Debugger: Hypothyroidism Cohort, ndjson",
+                "Python Debugger: Diabetes Cohort",
+                "Python Debugger: Diabetes Cohort, ndjson",
+                "Python Debugger: GERD Cohort",
+                "Python Debugger: GERD Cohort, ndjson",
+                "Python Debugger: Hyperlipidemia Cohort",
+                "Python Debugger: Hyperlipidemia Cohort, ndjson",
+                "Python Debugger: Low Back Pain Cohort",
+                "Python Debugger: Low Back Pain Cohort, ndjson",
+                "Python Debugger: Obesity Cohort",
+                "Python Debugger: Obesity Cohort, ndjson"
+            ],
+            "stopAll": true
         },
     ]
 }

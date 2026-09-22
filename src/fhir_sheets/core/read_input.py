@@ -198,7 +198,9 @@ def process_sheet_patient_data_revised(sheet, resource_definition_entities):
         #Expand the patient dictionary set if needed
         if len(values) > len(patients):
             needed_count = len(values) - len(patients)
-            patients.extend([{}] * needed_count)
+            # Allocate one dictionary per row. Using [{}] * needed_count would
+            # make every new patient share the same mutable dictionary.
+            patients.extend({} for _ in range(needed_count))
         for patient_dict, value in zip(patients, values):
             patient_dict[(entity_name, field_name)] = value
     logger.info(f"Headers\n----------{headers}")

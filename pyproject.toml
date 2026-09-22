@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fhir-sheets"
-version = "3.0.0"
+version = "3.0.1"
 description = "FhirSheets is a command-line tool that reads an Excel file in FHIR cohort format and generates FHIR bundle JSON files from it. Each row in the template Excel file is used to create an individual JSON file, outputting them to a specified folder."
 authors = ["Kate Riley <Kate.Riley@gtri.gatech.edu>"]
 packages = [

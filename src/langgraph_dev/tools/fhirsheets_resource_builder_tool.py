@@ -259,8 +259,10 @@ class CreateBloodPressureInput(ResourceBuilderInputBase):
 
 class CreatePulseOximetryInput(ResourceBuilderInputBase):
     """Input for creating a Pulse Oximetry Observation resource."""
-    value: Optional[str] = Field(default=None, description="Oxygen saturation value (%)")
+    status: Optional[str] = Field(default=None, description="Observation status")
     effective_date: Optional[str] = Field(default=None, description="Effective date/time")
+    flow_rate: Optional[Quantity] = Field(default=None, description="Inhaled oxygen flow rate")
+    concentration: Optional[Quantity] = Field(default=None, description="Inhaled oxygen concentration")
 
 
 class CreatePediatricBmiForAgeInput(ResourceBuilderInputBase):
@@ -1087,8 +1089,9 @@ class SetPulseOximetryTool(ResourceBuilderBaseTool):
     description: str = "Set a Pulse Oximetry Observation resource for a specific row_index (patient)"
     args_schema: Type[BaseModel] = CreatePulseOximetryInput
     
-    def _run(self, entity_name: str, row_index: int, value: Optional[str] = None,
-             effective_date: Optional[str] = None, xlsx_path: Optional[str] = None) -> str:
+    def _run(self, entity_name: str, row_index: int, status: Optional[str] = None,
+             effective_date: Optional[str] = None, flow_rate: Optional[Quantity] = None,
+             concentration: Optional[Quantity] = None, xlsx_path: Optional[str] = None) -> str:
         def_result = self._ensure_resource_definition(
             entity_name, "Observation", "http://hl7.org/fhir/StructureDefinition/oxygensat", xlsx_path
         )
@@ -1096,10 +1099,16 @@ class SetPulseOximetryTool(ResourceBuilderBaseTool):
             return json.dumps(def_result)
         
         results = []
-        if value:
-            results.append(self._set_data_value(entity_name, "Value", row_index, value, xlsx_path))
+        if status:
+            results.append(self._set_data_value(entity_name, "Pulse Oximetry Status", row_index, status, xlsx_path))
+        results.append(self._set_data_value(entity_name, "Pulse Oximetry Code 0", row_index, "http://loinc.org^59408-5", xlsx_path))
+        results.append(self._set_data_value(entity_name, "Pulse Oximetry Code 1", row_index, "http://loinc.org^2708-6", xlsx_path))
         if effective_date:
-            results.append(self._set_data_value(entity_name, "Effective Date", row_index, effective_date, xlsx_path))
+            results.append(self._set_data_value(entity_name, "Pulse Oximetry Effective Date", row_index, effective_date, xlsx_path))
+        if flow_rate:
+            results.append(self._set_data_value(entity_name, "Pulse Oximetry FlowRate", row_index, flow_rate.sheet_string(), xlsx_path))
+        if concentration:
+            results.append(self._set_data_value(entity_name, "Pulse Oximetry Concentration", row_index, concentration.sheet_string(), xlsx_path))
         
         return json.dumps({"success": True, "entity_name": entity_name, "resource_type": "Observation", "values_set": len(results)})
 

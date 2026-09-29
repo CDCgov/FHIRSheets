@@ -389,26 +389,66 @@ class ObservationComponentHandler(AbstractStructureHandler):
         "text" : "Inhaled oxygen concentration"
       }
     }
+    odh_usual_industry = {
+      "code" : {
+        "coding" : [
+          {
+            "system" : "http:loinc.org",
+            "code" : "21844-6",
+            "display" : "History of Usual industry"
+          }
+        ],
+        "text" : "History of Usual industry"
+      }
+    }
     #Find the appropriate component for the observaiton; then call build_structure again to continue the drill down
     def assign_value(self, json_path, resource_definition, dataType, final_struct, key, value):
         #Check to make sure the component part exists
         if 'component' not in final_struct:
           final_struct['component'] = []
         components = final_struct['component']
-        #Look through the qualifier parts.
+        # Look through the qualifier parts.  Component definitions are kept as
+        # class attributes above, so derive the available codes from those
+        # definitions instead of maintaining a second, hard-coded dispatch list.
         parts = json_path.split('.')
-        key_part = parts[1][:parts[1].index('[')]
-        qualifier = parts[1][parts[1].index('[')+1:parts[1].index(']')]
-        qualifier_condition = qualifier.split('=')
-        
-        target_component: dict = {}
-        if qualifier_condition[0] == 'code' and qualifier_condition[1] == '3151-8':
-          target_component = findComponentWithCoding(components, '3151-8') or self.pulse_oximetry_oxygen_flow_rate
-          if target_component is self.pulse_oximetry_oxygen_flow_rate:
-            components.append(target_component)
-        if qualifier_condition[0] == 'code' and qualifier_condition[1] == '3150-0':
-          target_component = findComponentWithCoding(components, '3150-0') or self.pulse_oximetry_oxygen_concentration
-          if target_component is self.pulse_oximetry_oxygen_concentration:
+        component_part = next(
+            (part for part in parts if part.startswith('component[')),
+            None,
+        )
+        if component_part is None:
+            raise ValueError(f"Observation component path is missing a code qualifier: {json_path}")
+
+        qualifier = component_part[component_part.index('[') + 1:component_part.index(']')]
+        qualifier_condition = qualifier.split('=', 1)
+        if len(qualifier_condition) != 2 or qualifier_condition[0] != 'code':
+            raise ValueError(f"Unsupported Observation component qualifier: {qualifier}")
+        requested_code = qualifier_condition[1].strip().strip('"\'')
+
+        component_definitions = (
+            value for name, value in vars(type(self)).items()
+            if name != 'component_definitions'
+            and isinstance(value, dict)
+            and 'code' in value
+            and isinstance(value['code'], dict)
+        )
+        component_definition = next(
+            (
+                definition for definition in component_definitions
+                if any(
+                    coding.get('code') == requested_code
+                    for coding in definition['code'].get('coding', [])
+                )
+            ),
+            None,
+        )
+        if component_definition is None:
+            raise ValueError(f"Unsupported Observation component code: {requested_code}")
+
+        target_component = findComponentWithCoding(components, requested_code)
+        if target_component is None:
+            # Never append a class-level template directly: recursive assignment
+            # mutates the component and would leak values into later resources.
+            target_component = copy.deepcopy(component_definition)
             components.append(target_component)
         #Recurse back down into build_structure with BuildContext
         buildCtx = conversion.BuildContext(

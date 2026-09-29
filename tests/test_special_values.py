@@ -3,6 +3,7 @@ from src.fhir_sheets.core.special_values import (
     DataAbsentReasonHandler, PatientRaceExtensionValueHandler,
     PatientEthnicityExtensionValueHandler, PatientBirthSexExtensionValueHandler,
     PatientMRNIdentifierValueHandler, PatientSSNIdentifierValueHandler,
+    ObservationComponentHandler,
     utilFindExtensionWithURL, findComponentWithCoding
 )
 from src.fhir_sheets.core.model.resource_definition_entity import ResourceDefinition
@@ -274,3 +275,44 @@ class TestFindComponentWithCoding:
         ]
         result = findComponentWithCoding(components, "9999-9")
         assert result is None
+
+
+class TestObservationComponentHandler:
+    @pytest.mark.parametrize(
+        "code, expected_text",
+        [
+            ("3151-8", "Inhaled oxygen flow rate"),
+            ("3150-0", "Inhaled oxygen concentration"),
+            ("21844-6", "History of Usual industry"),
+        ],
+    )
+    def test_assign_value_supports_each_declared_component_code(self, code, expected_text):
+        handler = ObservationComponentHandler()
+        rd = ResourceDefinition("Observation", "Observation", [])
+        final_struct = {}
+
+        handler.assign_value(
+            f"Observation.component[code={code}].valueQuantity.value",
+            rd,
+            "decimal",
+            final_struct,
+            "value",
+            2.5,
+        )
+
+        component = final_struct["component"][0]
+        assert component["code"]["coding"][0]["code"] == code
+        assert component["code"]["text"] == expected_text
+        assert component["valueQuantity"]["value"] == 2.5
+
+    def test_assign_value_reuses_matching_component(self):
+        handler = ObservationComponentHandler()
+        rd = ResourceDefinition("Observation", "Observation", [])
+        final_struct = {}
+        path = "Observation.component[code=21844-6].valueString"
+
+        handler.assign_value(path, rd, "string", final_struct, "value", "first")
+        handler.assign_value(path, rd, "string", final_struct, "value", "second")
+
+        assert len(final_struct["component"]) == 1
+        assert final_struct["component"][0]["valueString"] == "second"

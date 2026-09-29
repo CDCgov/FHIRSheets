@@ -299,6 +299,12 @@ class CreateServiceRequestInput(ResourceBuilderInputBase):
     occurrence_date_time: Optional[str] = Field(default=None, description="Service Request Occurrence Date")
 
 
+class CreateODHUsualWorkInput(ResourceBuilderInputBase):
+    """Input for creating an ODH Usual Work Observation resource."""
+    industry: Optional[CodeableConcept] = Field(default=None, description="Usual work industry as a CodeableConcept")
+    occupation: Optional[CodeableConcept] = Field(default=None, description="Usual work occupation as a CodeableConcept")
+
+
 # Base Tool Class with Helper Methods
 class ResourceBuilderBaseTool(BaseTool):
     """Base class for resource builder tools with helper methods."""
@@ -1235,6 +1241,38 @@ class SetServiceRequestTool(ResourceBuilderBaseTool):
         return json.dumps({"success": True, "entity_name": entity_name, "resource_type": "ServiceRequest", "values_set": len(results)})
 
 
+class ODHUsualWorkTool(ResourceBuilderBaseTool):
+    """Tool for setting an ODH Usual Work Observation resource."""
+
+    name: str = "set_odh_usual_work"
+    description: str = "Set an ODH Usual Work Observation resource with industry and occupation CodeableConcept values for a specific row_index (patient)"
+    args_schema: Type[BaseModel] = CreateODHUsualWorkInput
+
+    def _run(self, entity_name: str, row_index: int, industry: Optional[CodeableConcept] = None,
+             occupation: Optional[CodeableConcept] = None, xlsx_path: Optional[str] = None) -> str:
+        def_result = self._ensure_resource_definition(
+            entity_name, "Observation", "http://hl7.org/fhir/us/odh/StructureDefinition/odh-UsualWork", xlsx_path
+        )
+        if not def_result.get("success"):
+            return json.dumps(def_result)
+
+        results = []
+        results.append(self._set_data_value(entity_name, "ODH Usual Work Category", row_index, "http://terminology.hl7.org/CodeSystem/observation-category^social-history^", xlsx_path))
+        results.append(self._set_data_value(entity_name, "ODH Ususal Work Code", row_index, "http://loinc.org^21843-8^History of Usual occupation", xlsx_path))
+        if industry:
+            results.append(self._set_data_value(entity_name, "ODH Usual Work Industry", row_index, industry.sheet_string(), xlsx_path))
+        if occupation:
+            results.append(self._set_data_value(entity_name, "ODH Usual Work Occupation", row_index, occupation.sheet_string(), xlsx_path))
+
+        return json.dumps({
+            "success": True,
+            "entity_name": entity_name,
+            "resource_type": "Observation",
+            "profile": "http://hl7.org/fhir/us/odh/StructureDefinition/odh-UsualWork",
+            "values_set": len(results)
+        })
+
+
 # Toolkit Class
 class FhirSheetsResourceBuilderToolkit(BaseToolkit):
     """Toolkit for high-level FHIR resource creation."""
@@ -1280,6 +1318,7 @@ class FhirSheetsResourceBuilderToolkit(BaseToolkit):
             SetDeviceTool(xlsx_toolkit=self.xlsx_toolkit),
             SetSmokingStatusTool(xlsx_toolkit=self.xlsx_toolkit),
             SetServiceRequestTool(xlsx_toolkit=self.xlsx_toolkit),
+            ODHUsualWorkTool(xlsx_toolkit=self.xlsx_toolkit),
         ]
         
         # Return combined list: XLSX tools first, then resource builder tools

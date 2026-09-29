@@ -289,6 +289,13 @@ class CreateSmokingStatusInput(ResourceBuilderInputBase):
     value: Optional[CodeableConcept] = Field(default=None, description="Smoking status value as CodeableConcept")
 
 
+class CreatePregnancyStatusInput(ResourceBuilderInputBase):
+    """Input for creating a Pregnancy Status Observation resource."""
+    status: Optional[str] = Field(default=None, description="Observation status")
+    effective_date: Optional[str] = Field(default=None, description="Effective date/time")
+    value: Optional[CodeableConcept] = Field(default=None, description="Pregnancy status value as CodeableConcept")
+
+
 class CreateServiceRequestInput(ResourceBuilderInputBase):
     """Input for creating a ServiceRequest resource."""
     status: Optional[str] = Field(default=None, description="Service Request Status")
@@ -1219,6 +1226,47 @@ class SetSmokingStatusTool(ResourceBuilderBaseTool):
         return json.dumps({"success": True, "entity_name": entity_name, "resource_type": "Observation", "values_set": len(results)})
 
 
+class SetPregnancyStatusTool(ResourceBuilderBaseTool):
+    """Tool for setting Pregnancy Status Observation resource data."""
+
+    name: str = "set_pregnancy_status"
+    description: str = "Set a Pregnancy Status Observation resource for a specific row_index (patient)"
+    args_schema: Type[BaseModel] = CreatePregnancyStatusInput
+
+    def _run(self, entity_name: str, row_index: int, status: Optional[str] = None,
+             effective_date: Optional[str] = None, value: Optional[CodeableConcept] = None,
+             xlsx_path: Optional[str] = None) -> str:
+        def_result = self._ensure_resource_definition(
+            entity_name, "Observation", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-pregnancy-status", xlsx_path
+        )
+        if not def_result.get("success"):
+            return json.dumps(def_result)
+
+        results = []
+        if status:
+            results.append(self._set_data_value(entity_name, "PregnancyStatus status", row_index, status, xlsx_path))
+        results.append(self._set_data_value(
+            entity_name,
+            "PregnancyStatus Code",
+            row_index,
+            "http://loinc.org^82810-3^Pregnancy status",
+            xlsx_path,
+        ))
+        results.append(self._set_data_value(
+            entity_name,
+            "PregnancyStatus Category",
+            row_index,
+            "http://terminology.hl7.org/CodeSystem/observation-category^social-history",
+            xlsx_path,
+        ))
+        if effective_date:
+            results.append(self._set_data_value(entity_name, "Pulse Oximetry Effective Date", row_index, effective_date, xlsx_path))
+        if value:
+            results.append(self._set_data_value(entity_name, "Pregnancy Status Value", row_index, value.sheet_string(), xlsx_path))
+
+        return json.dumps({"success": True, "entity_name": entity_name, "resource_type": "Observation", "values_set": len(results)})
+
+
 class SetServiceRequestTool(ResourceBuilderBaseTool):
     """Tool for setting ServiceRequest resource data."""
     
@@ -1324,6 +1372,7 @@ class FhirSheetsResourceBuilderToolkit(BaseToolkit):
             SetPediatricBmiForAgeTool(xlsx_toolkit=self.xlsx_toolkit),
             SetDeviceTool(xlsx_toolkit=self.xlsx_toolkit),
             SetSmokingStatusTool(xlsx_toolkit=self.xlsx_toolkit),
+            SetPregnancyStatusTool(xlsx_toolkit=self.xlsx_toolkit),
             SetServiceRequestTool(xlsx_toolkit=self.xlsx_toolkit),
             ODHUsualWorkTool(xlsx_toolkit=self.xlsx_toolkit),
         ]

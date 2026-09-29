@@ -285,8 +285,6 @@ class CreateDeviceInput(ResourceBuilderInputBase):
 class CreateSmokingStatusInput(ResourceBuilderInputBase):
     """Input for creating a Smoking Status Observation resource."""
     status: Optional[str] = Field(default=None, description="Observation status")
-    code: Optional[CodeableConcept] = Field(default=None, description="Smoking status code as CodeableConcept")
-    category: Optional[CodeableConcept] = Field(default=None, description="Observation category as CodeableConcept")
     effective_date: Optional[str] = Field(default=None, description="Effective date/time")
     value: Optional[CodeableConcept] = Field(default=None, description="Smoking status value as CodeableConcept")
 
@@ -1188,7 +1186,6 @@ class SetSmokingStatusTool(ResourceBuilderBaseTool):
     args_schema: Type[BaseModel] = CreateSmokingStatusInput
     
     def _run(self, entity_name: str, row_index: int, status: Optional[str] = None,
-             code: Optional[CodeableConcept] = None, category: Optional[CodeableConcept] = None,
              effective_date: Optional[str] = None, value: Optional[CodeableConcept] = None,
              xlsx_path: Optional[str] = None) -> str:
         def_result = self._ensure_resource_definition(
@@ -1200,10 +1197,20 @@ class SetSmokingStatusTool(ResourceBuilderBaseTool):
         results = []
         if status:
             results.append(self._set_data_value(entity_name, "SmokingStatus status", row_index, status, xlsx_path))
-        if code:
-            results.append(self._set_data_value(entity_name, "SmokingStatus Code", row_index, code.sheet_string(), xlsx_path))
-        if category:
-            results.append(self._set_data_value(entity_name, "SmokingStatus Category", row_index, category.sheet_string(), xlsx_path))
+        results.append(self._set_data_value(
+            entity_name,
+            "SmokingStatus Code",
+            row_index,
+            "http://loinc.org^72166-2^Tobacco smoking status NHIS",
+            xlsx_path,
+        ))
+        results.append(self._set_data_value(
+            entity_name,
+            "SmokingStatus Category",
+            row_index,
+            "http://terminology.hl7.org/CodeSystem/observation-category^social-history",
+            xlsx_path,
+        ))
         if effective_date:
             results.append(self._set_data_value(entity_name, "Pulse Oximetry Effective Date", row_index, effective_date, xlsx_path))
         if value:

@@ -149,8 +149,7 @@ class CreateAllergyIntoleranceInput(ResourceBuilderInputBase):
     code: Optional[CodeableConcept] = Field(default=None, description="Allergy/intolerance code as CodeableConcept")
     clinical_status: Optional[CodeableConcept] = Field(default=None, description="Clinical status as CodeableConcept")
     verification_status: Optional[CodeableConcept] = Field(default=None, description="Verification status as CodeableConcept")
-    category: Optional[str] = Field(default=None, description="Category")
-    criticality: Optional[str] = Field(default=None, description="Criticality")
+    reaction: Optional[CodeableConcept] = Field(default=None, description="Reaction as CodebaleConcept")
 
 
 class CreateProcedureInput(ResourceBuilderInputBase):
@@ -182,10 +181,9 @@ class CreateMedicationRequestInput(ResourceBuilderInputBase):
     medication_code: Optional[CodeableConcept] = Field(default=None, description="Medication code (RxNorm)")
     status: Optional[str] = Field(default=None, description="Status")
     intent: Optional[str] = Field(default=None, description="Intent")
+    reported: Optional[bool] = Field(default=None, description="Whether the medication was reported by the patient")
     authored_on: Optional[str] = Field(default=None, description="Date/time request was authored")
     dosage_instruction: Optional[str] = Field(default=None, description="Dosage instructions")
-    medication_route: Optional[CodeableConcept] = Field(default=None, description="Medication route as CodeableConcept")
-    medication_dosage: Optional[Quantity] = Field(default=None, description="Medication dosage as Quantity")
 
 
 class CreateDiagnosticReportInput(ResourceBuilderInputBase):
@@ -269,6 +267,18 @@ class CreatePediatricBmiForAgeInput(ResourceBuilderInputBase):
     """Input for creating a Pediatric BMI for Age Observation resource."""
     value: Optional[str] = Field(default=None, description="BMI value")
     effective_date: Optional[str] = Field(default=None, description="Effective date/time")
+
+
+class CreatePediatricBMIInput(ResourceBuilderInputBase):
+    """Input for setting a Pediatric BMI Observation resource."""
+    effective_datetime: Optional[str] = Field(default=None, description="Effective date/time")
+    value: Optional[Quantity] = Field(default=None, description="BMI value as Quantity")
+
+
+class CreatePediatricHeadOccipitalFrontalCircumferenceInput(ResourceBuilderInputBase):
+    """Input for setting a Pediatric head occipital-frontal circumference Observation resource."""
+    effective_datetime: Optional[str] = Field(default=None, description="Effective date/time")
+    value: Optional[Quantity] = Field(default=None, description="Head circumference value as Quantity")
 
 
 class CreateDeviceInput(ResourceBuilderInputBase):
@@ -695,7 +705,7 @@ class SetAllergyIntoleranceTool(ResourceBuilderBaseTool):
     
     def _run(self, entity_name: str, row_index: int, code: Optional[CodeableConcept] = None,
              clinical_status: Optional[CodeableConcept] = None, verification_status: Optional[CodeableConcept] = None,
-             category: Optional[str] = None, criticality: Optional[str] = None, xlsx_path: Optional[str] = None) -> str:
+             category: Optional[str] = None, reaction: Optional[CodeableConcept] = None, xlsx_path: Optional[str] = None) -> str:
         def_result = self._ensure_resource_definition(
             entity_name, "AllergyIntolerance", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance", xlsx_path
         )
@@ -704,15 +714,13 @@ class SetAllergyIntoleranceTool(ResourceBuilderBaseTool):
         
         results = []
         if code:
-            results.append(self._set_data_value(entity_name, "Code", row_index, code.sheet_string(), xlsx_path))
+            results.append(self._set_data_value(entity_name, "Allergy Substance Code", row_index, code.sheet_string(), xlsx_path))
         if clinical_status:
-            results.append(self._set_data_value(entity_name, "Clinical Status", row_index, clinical_status.sheet_string(), xlsx_path))
+            results.append(self._set_data_value(entity_name, "Allergy Active or Inactive", row_index, clinical_status.sheet_string(), xlsx_path))
         if verification_status:
-            results.append(self._set_data_value(entity_name, "Verification Status", row_index, verification_status.sheet_string(), xlsx_path))
-        if category:
-            results.append(self._set_data_value(entity_name, "Category", row_index, category, xlsx_path))
-        if criticality:
-            results.append(self._set_data_value(entity_name, "Criticality", row_index, criticality, xlsx_path))
+            results.append(self._set_data_value(entity_name, "Allergy Verification Status", row_index, verification_status.sheet_string(), xlsx_path))
+        if reaction:
+            results.append(self._set_data_value(entity_name, "Allergy Reaction", row_index, reaction, xlsx_path))
         
         return json.dumps({"success": True, "entity_name": entity_name, "resource_type": "AllergyIntolerance", "values_set": len(results)})
 
@@ -827,8 +835,8 @@ class SetMedicationRequestTool(ResourceBuilderBaseTool):
     
     def _run(self, entity_name: str, row_index: int, medication_code: Optional[CodeableConcept ] = None,
              status: Optional[str] = None, intent: Optional[str] = None,
+             reported: Optional[bool] = None,
              authored_on: Optional[str] = None, dosage_instruction: Optional[str] = None,
-             medication_route: Optional[CodeableConcept] = None, medication_dosage: Optional[Quantity] = None,
              xlsx_path: Optional[str] = None) -> str:
         def_result = self._ensure_resource_definition(
             entity_name, "MedicationRequest", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest", xlsx_path
@@ -839,18 +847,16 @@ class SetMedicationRequestTool(ResourceBuilderBaseTool):
         results = []
         if status:
             results.append(self._set_data_value(entity_name, "Medication Request Status", row_index, status, xlsx_path))
+        if intent:
+            results.append(self._set_data_value(entity_name, "Medication Request Intent", row_index, intent, xlsx_path))
+        if reported is not None:
+            results.append(self._set_data_value(entity_name, "Medication Reported", row_index, str(reported).lower(), xlsx_path))
         if medication_code:
             results.append(self._set_data_value(entity_name, "Medication Code", row_index, medication_code.sheet_string(), xlsx_path))
-        if status:
-            results.append(self._set_data_value(entity_name, "Medication Request Status", row_index, status, xlsx_path))
         if authored_on:
             results.append(self._set_data_value(entity_name, "Medication Date", row_index, authored_on, xlsx_path))
         if dosage_instruction:
             results.append(self._set_data_value(entity_name, "Medication Dosage Instructions", row_index, dosage_instruction, xlsx_path))
-        if medication_route:
-            results.append(self._set_data_value(entity_name, "Medication Route", row_index, medication_route.sheet_string(), xlsx_path))
-        if medication_dosage:
-            results.append(self._set_data_value(entity_name, "Medication Dosage", row_index, medication_dosage.sheet_string(), xlsx_path))
         
         return json.dumps({"success": True, "entity_name": entity_name, "resource_type": "MedicationRequest", "values_set": len(results)})
 
@@ -1148,6 +1154,84 @@ class SetPediatricBmiForAgeTool(ResourceBuilderBaseTool):
         return json.dumps({"success": True, "entity_name": entity_name, "resource_type": "Observation", "values_set": len(results)})
 
 
+class SetPediatricBMITool(ResourceBuilderBaseTool):
+    """Tool for setting Pediatric BMI Observation resource data."""
+
+    name: str = "set_pediatric_bmi"
+    description: str = "Set a Pediatric BMI Observation resource for a specific row_index (patient)"
+    args_schema: Type[BaseModel] = CreatePediatricBMIInput
+
+    def _run(self, entity_name: str, row_index: int, effective_datetime: Optional[str] = None,
+             value: Optional[Quantity] = None, xlsx_path: Optional[str] = None) -> str:
+        def_result = self._ensure_resource_definition(
+            entity_name, "Observation", "http://hl7.org/fhir/us/core/StructureDefinition/pediatric-bmi-for-age", xlsx_path
+        )
+        if not def_result.get("success"):
+            return json.dumps(def_result)
+
+        results = [
+            self._set_data_value(
+                entity_name, "Pediatric BMI Category", row_index,
+                "http://terminology.hl7.org/CodeSystem/observation-category^vital-signs^Vital Signs", xlsx_path
+            ),
+            self._set_data_value(entity_name, "Pediatric BMI Status", row_index, "final", xlsx_path),
+            self._set_data_value(
+                entity_name, "Pediatric BMI Code", row_index,
+                "http://loinc.org^59574-4^BMI (body mass index) percentile", xlsx_path
+            ),
+        ]
+        if effective_datetime:
+            results.append(self._set_data_value(
+                entity_name, "Pediatric BMI EffectiveDateTIme", row_index, effective_datetime, xlsx_path
+            ))
+        if value:
+            results.append(self._set_data_value(
+                entity_name, "Pediatric BMI Value", row_index, value.sheet_string(), xlsx_path
+            ))
+
+        return json.dumps({"success": True, "entity_name": entity_name, "resource_type": "Observation", "values_set": len(results)})
+
+
+class SetPediatricHeadOccipitalFrontalCircumferenceTool(ResourceBuilderBaseTool):
+    """Tool for setting Pediatric head occipital-frontal circumference Observation data."""
+
+    name: str = "set_pediatric_head_occipital_frontal_circumference"
+    description: str = "Set a Pediatric head occipital-frontal circumference Observation resource for a specific row_index (patient)"
+    args_schema: Type[BaseModel] = CreatePediatricHeadOccipitalFrontalCircumferenceInput
+
+    def _run(self, entity_name: str, row_index: int, effective_datetime: Optional[str] = None,
+             value: Optional[Quantity] = None, xlsx_path: Optional[str] = None) -> str:
+        def_result = self._ensure_resource_definition(
+            entity_name, "Observation", "http://hl7.org/fhir/us/core/StructureDefinition/head-occipital-frontal-circumference-percentile", xlsx_path
+        )
+        if not def_result.get("success"):
+            return json.dumps(def_result)
+
+        results = [
+            self._set_data_value(
+                entity_name, "Pediatric Head Occipital Frontal Circumference Category", row_index,
+                "http://terminology.hl7.org/CodeSystem/observation-category^vital-signs^Vital Signs", xlsx_path
+            ),
+            self._set_data_value(entity_name, "Pediatric Head Occipital Frontal Circumference Status", row_index, "final", xlsx_path),
+            self._set_data_value(
+                entity_name, "Pediatric Head Occipital Frontal Circumference Code", row_index,
+                "http://loinc.org^8287-5^Head Occipital-frontal circumference by Tape measure", xlsx_path
+            ),
+        ]
+        if effective_datetime:
+            results.append(self._set_data_value(
+                entity_name, "Pediatric Head Occipital Frontal Circumference Effective Date", row_index,
+                effective_datetime, xlsx_path
+            ))
+        if value:
+            results.append(self._set_data_value(
+                entity_name, "Pediatric Head Occipital Frontal Circumference Value", row_index,
+                value.sheet_string(), xlsx_path
+            ))
+
+        return json.dumps({"success": True, "entity_name": entity_name, "resource_type": "Observation", "values_set": len(results)})
+
+
 class SetDeviceTool(ResourceBuilderBaseTool):
     """Tool for setting Device resource data."""
     
@@ -1204,24 +1288,12 @@ class SetSmokingStatusTool(ResourceBuilderBaseTool):
         results = []
         if status:
             results.append(self._set_data_value(entity_name, "SmokingStatus status", row_index, status, xlsx_path))
-        results.append(self._set_data_value(
-            entity_name,
-            "SmokingStatus Code",
-            row_index,
-            "http://loinc.org^72166-2^Tobacco smoking status NHIS",
-            xlsx_path,
-        ))
-        results.append(self._set_data_value(
-            entity_name,
-            "SmokingStatus Category",
-            row_index,
-            "http://terminology.hl7.org/CodeSystem/observation-category^social-history",
-            xlsx_path,
-        ))
+        results.append(self._set_data_value(entity_name, "SmokingStatus Code", row_index, "http://loinc.org^72166-2^Tobacco smoking status NHIS", xlsx_path))
+        results.append(self._set_data_value(entity_name, "SmokingStatus Category", row_index, "http://terminology.hl7.org/CodeSystem/observation-category^social-history", xlsx_path))
         if effective_date:
-            results.append(self._set_data_value(entity_name, "Pulse Oximetry Effective Date", row_index, effective_date, xlsx_path))
+            results.append(self._set_data_value(entity_name, "SmokingStatus Effective Date", row_index, effective_date, xlsx_path))
         if value:
-            results.append(self._set_data_value(entity_name, "Smoking Status Value", row_index, value.sheet_string(), xlsx_path))
+            results.append(self._set_data_value(entity_name, "SmokingStatus Value", row_index, value.sheet_string(), xlsx_path))
         
         return json.dumps({"success": True, "entity_name": entity_name, "resource_type": "Observation", "values_set": len(results)})
 
@@ -1237,7 +1309,7 @@ class SetPregnancyStatusTool(ResourceBuilderBaseTool):
              effective_date: Optional[str] = None, value: Optional[CodeableConcept] = None,
              xlsx_path: Optional[str] = None) -> str:
         def_result = self._ensure_resource_definition(
-            entity_name, "Observation", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-pregnancy-status", xlsx_path
+            entity_name, "Observation", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-pregnancystatus", xlsx_path
         )
         if not def_result.get("success"):
             return json.dumps(def_result)
@@ -1296,7 +1368,7 @@ class SetServiceRequestTool(ResourceBuilderBaseTool):
         return json.dumps({"success": True, "entity_name": entity_name, "resource_type": "ServiceRequest", "values_set": len(results)})
 
 
-class ODHUsualWorkTool(ResourceBuilderBaseTool):
+class SetODHUsualWorkTool(ResourceBuilderBaseTool):
     """Tool for setting an ODH Usual Work Observation resource."""
 
     name: str = "set_odh_usual_work"
@@ -1370,11 +1442,13 @@ class FhirSheetsResourceBuilderToolkit(BaseToolkit):
             SetBloodPressureTool(xlsx_toolkit=self.xlsx_toolkit),
             SetPulseOximetryTool(xlsx_toolkit=self.xlsx_toolkit),
             SetPediatricBmiForAgeTool(xlsx_toolkit=self.xlsx_toolkit),
+            SetPediatricBMITool(xlsx_toolkit=self.xlsx_toolkit),
+            SetPediatricHeadOccipitalFrontalCircumferenceTool(xlsx_toolkit=self.xlsx_toolkit),
             SetDeviceTool(xlsx_toolkit=self.xlsx_toolkit),
             SetSmokingStatusTool(xlsx_toolkit=self.xlsx_toolkit),
             SetPregnancyStatusTool(xlsx_toolkit=self.xlsx_toolkit),
             SetServiceRequestTool(xlsx_toolkit=self.xlsx_toolkit),
-            ODHUsualWorkTool(xlsx_toolkit=self.xlsx_toolkit),
+            SetODHUsualWorkTool(xlsx_toolkit=self.xlsx_toolkit),
         ]
         
         # Return combined list: XLSX tools first, then resource builder tools
